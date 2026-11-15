@@ -84,7 +84,7 @@
 
 ## 4. Creative direction
 
-**Format.** Responsive single page, three language versions. Breakpoints checked at 390, 768 and 1440 px. Link-preview image 1200×630 JPEG, one per language.
+**Format.** Responsive single page, three language versions. Checked at 320, 390, 768 and 1440 px in the three languages and both themes (the header at every width from 320 to 1400 px). Link-preview image 1200×630 JPEG, one per language.
 
 **Visual style**
 
@@ -94,7 +94,7 @@
 | Mood | Confident, optimistic, calm |
 | Energy | Medium: motion has a job (explain, guide), and stops when asked (`prefers-reduced-motion`) |
 | Density | Minimal to medium: one idea per screen |
-| Dark ↔ bright | Dark canvas, bright growth accents |
+| Dark ↔ bright | Dark canvas, bright growth accents. Since 15 Nov 2026 a light theme exists as a visitor's choice (button in the header); dark stays the default |
 | Corporate ↔ casual | Friendly-professional |
 
 **Signature idea: growth as architecture.** The bars and arrow of the logo become the page's structure. Hero bars are the seven services, each a link. The "compose your system" map grows as modules are chosen. The method timeline draws itself with the scroll. Coins stack in the simulator.
@@ -113,7 +113,7 @@
 
 **Visual must-haves**
 
-- [x] Logo emblem in the header and share images, always on the dark background
+- [x] Logo emblem in the header and share images. The emblem is a dark disc that carries its own background, so it is shown unchanged in both themes; the share images stay on the dark canvas
 - [x] A hero that shows growth within three seconds (bars + arrow + coin)
 - [x] Each service reachable in one click and linked to the composer
 - [x] A visible contact path in every section's reach (header button, hero, composer, footer)
@@ -164,9 +164,9 @@
 
 **Things to avoid:** invented proof, a pricing table, jargon in headlines, auto-playing sound, any pop-up.
 
-**Brand guidelines.** Emblem circle on the dark background only; never recoloured or stretched. Wordmark "Grow" in white and "Dev" in green. Colours and type as in §4.
+**Brand guidelines.** The emblem disc is used as drawn, on either theme; never recoloured or stretched. Wordmark: "Grow" in the text colour (white on dark, dark ink on light) and "Dev" in green (the bright green on dark, the deeper text green on light, so it stays readable). Colours and type as in §4 and `docs/ARCHITECTURE.md` §5.1.
 
-**Compliance.** The site sets no cookies and collects nothing. The only storage is the chosen language (`localStorage`, key `gd-lang`). The project brief is composed in the visitor's own mail client and only leaves their device when they press send. If forms, analytics or newsletters are added later, review Tunisian personal-data rules (organic law 2004-63) and get legal advice first.
+**Compliance.** The site sets no cookies and collects nothing. The only storage is the visitor's two choices, language and theme (`localStorage`, keys `gd-lang` and `gd-theme`, written only when they press the matching control). The project brief is composed in the visitor's own mail client and only leaves their device when they press send. If forms, analytics or newsletters are added later, review Tunisian personal-data rules (organic law 2004-63) and get legal advice first.
 
 ---
 
@@ -178,8 +178,8 @@
 |---|---|---|
 | Qualified enquiries per month | 3+ within 90 days of launch | none (new site) |
 | Search Console impressions, by language | growing every month; all three languages present | none |
-| Share of visitors on mobile whose page loads under 2.5 s (LCP) | 75%+ (Google's "good" threshold) | to be measured |
-| Accessibility | no serious or critical issues in an automated scan | measured before launch |
+| Share of visitors on mobile whose page loads under 2.5 s (LCP) | 75%+ (Google's "good" threshold) | lab: 1.3 to 1.4 s on a slowed phone, local server, 15 Nov 2026; real-visitor data will come from Search Console |
+| Accessibility | no serious or critical issues in an automated scan | 0 violations of any level on 18 page states (axe-core, 15 Nov 2026) |
 
 **How we evaluate.** Count the briefs received (each has a recognisable subject line), read Search Console monthly, and run the checker (`npm run check`) before every change. Because the site has no analytics on purpose, the e-mails themselves are the conversion data.
 

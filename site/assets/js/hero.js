@@ -51,10 +51,19 @@
     var ctx = cv.getContext("2d"), hero = cv.parentElement;
     var W = 0, H = 0, dpr = 1, bars = [], sparks = [], grid = null;
     var px = -1, sx = -1, t = 0, last = 0, running = false;
-    var COLORS = ["47,229,106", "0,186,252", "242,178,48"];
+    var COLORS = ["47,229,106", "0,186,252", "242,178,48"], GRID = "120,170,220", GRID_A = ".08";
+
+    // The palette follows the theme: styles.css gives these tokens a value for dark and another for light.
+    function readColors() {
+      var cs = getComputedStyle(document.documentElement);
+      var v = function (name, fallback) { return (cs.getPropertyValue(name) || "").trim() || fallback; };
+      COLORS = [v("--g-rgb", COLORS[0]), v("--s-rgb", COLORS[1]), v("--au-rgb", COLORS[2])];
+      GRID = v("--fx-grid-rgb", GRID); GRID_A = v("--fx-grid-a", GRID_A);
+    }
 
     function build() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      readColors();
+      dpr =Math.min(window.devicePixelRatio || 1, 2);
       W = hero.clientWidth; H = hero.clientHeight;
       cv.width = W * dpr; cv.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -67,7 +76,7 @@
       grid = document.createElement("canvas");
       grid.width = W * dpr; grid.height = H * dpr;
       var g = grid.getContext("2d"); g.scale(dpr, dpr);
-      g.strokeStyle = "rgba(120,170,220,.08)"; g.lineWidth = 1;
+      g.strokeStyle = "rgba(" + GRID + "," + GRID_A + ")"; g.lineWidth = 1;
       for (var x = 0; x < W; x += 72) { g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, H); g.stroke(); }
       for (var y = H; y > 0; y -= 72) { g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(W, y + 0.5); g.stroke(); }
       var m = g.createLinearGradient(0, 0, 0, H);
@@ -83,9 +92,9 @@
         var b = bars[i];
         var boost = px < 0 ? 0 : Math.max(0, 1 - Math.abs(b.x - sx) / (W * 0.16));
         var h = b.h * (1 + 0.035 * Math.sin(t * 0.9 + b.ph) + 0.22 * boost);
-        ctx.fillStyle = "rgba(47,229,106," + (0.05 + 0.07 * boost) + ")";
+        ctx.fillStyle = "rgba(" + COLORS[0] + "," + (0.05 + 0.07 * boost) + ")";
         ctx.fillRect(b.x - b.w / 2, H - h, b.w, h);
-        ctx.fillStyle = "rgba(47,229,106," + (0.22 + 0.3 * boost) + ")";
+        ctx.fillStyle = "rgba(" + COLORS[0] + "," + (0.22 + 0.3 * boost) + ")";
         ctx.fillRect(b.x - b.w / 2, H - h, b.w, 2);
       }
       if (dt > 0 && sparks.length < 26 && Math.random() < dt * 7) {
@@ -110,6 +119,8 @@
     function stop() { running = false; }
 
     build(); draw(0);
+    // theme.js announces a theme change: redraw with the new palette (also when motion is reduced)
+    document.addEventListener("gd:theme", function () { sparks = []; build(); draw(0); });
     if (reduce) return;
     hero.addEventListener("pointermove", function (e) {
       var b = hero.getBoundingClientRect(); px = e.clientX - b.left; if (sx < 0) sx = px;

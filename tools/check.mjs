@@ -6,6 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
+import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { FAQ_COUNT, SERVICES, pageUrl, AI_SEARCH, AI_TRAINING } from "./seo.mjs";
 
@@ -366,6 +367,207 @@ if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
   const rate = (cfgJs.match(/TND\s*:\s*(\d+)/) || [])[1];
   check(/defaultCurrency\s*:\s*"TND"/.test(cfgJs), "config.js: defaultCurrency should be TND (DT first)");
   check(rate && read("index.html").includes(`id="s-rate" min="1" step="1" value="${rate}"`), `the default hourly cost in the page should equal config.js hourlyCost.TND (${rate})`);
+}
+
+// ---------- theme: light / dark ----------
+// The site has two themes: "dark" (the GrowDev look, defined in :root) and "light" (:root[data-theme="light"], same names, other values).
+// A visitor switches with the toggle in the header; the wave that plays on the switch is drawn by assets/js/theme.js.
+// These checks keep the two themes in step, so that a colour added later cannot silently be unreadable in one of them.
+{
+  const DEFAULT_THEME = cfg.defaultTheme || "dark";
+  const THEME_COLOR = { dark: "#020b18", light: "#eef3f8", ...(cfg.themeColor || {}) };
+  check(["dark", "light", "system"].includes(DEFAULT_THEME), `src/site.json: "defaultTheme" must be "dark", "light" or "system" (got "${DEFAULT_THEME}")`);
+
+  // --- colour helpers (WCAG 2 relative luminance) ---
+  const hexRGB = (h) => { h = h.replace("#", ""); if (h.length === 3) h = [...h].map((c) => c + c).join(""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); };
+  const lin = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+  const lum = (h) => { const [r, g, b] = hexRGB(h); return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b); };
+  const ratio = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); };
+  const isHex = (v) => /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v || "");
+
+  // --- the two token blocks of styles.css ---
+  const css = has("assets/css/styles.css") ? read("assets/css/styles.css") : "";
+  const darkBlock = (css.match(/(?:^|\n)(:root\{[\s\S]*?\n\})/) || [])[1] || "";
+  const lightBlock = (css.match(/(?:^|\n)(:root\[data-theme="light"\]\{[\s\S]*?\n\})/) || [])[1] || "";
+  const tokensOf = (b) => Object.fromEntries([...b.matchAll(/(--[\w-]+)\s*:\s*([^;}]+)[;}]/g)].map((m) => [m[1], m[2].trim()]));
+  const dark = tokensOf(darkBlock), light = tokensOf(lightBlock);
+  const L = { ...dark, ...light };                       // what the light theme really sees: its own values, the rest inherited
+  check(Object.keys(dark).length > 20 && Object.keys(light).length > 20, "styles.css: could not read the theme tokens (:root and :root[data-theme=\"light\"] blocks)");
+
+  // Tokens that are the same in both themes on purpose (typography, geometry, and values built from other tokens). Everything else needs a light value.
+  const SHARED = new Set(["--ease", "--font-body", "--font-display", "--font-mono", "--grad", "--gut", "--header-h", "--line", "--line-2", "--on-grow", "--r-card", "--r-chip", "--wrap"]);
+  const missing = Object.keys(dark).filter((k) => !(k in light) && !SHARED.has(k));
+  check(missing.length === 0, `styles.css: ${missing.join(", ")} defined for the dark theme only. Give each a value in :root[data-theme="light"] (or list it as shared in tools/check.mjs if it is the same in both)`);
+  const stray = Object.keys(light).filter((k) => !(k in dark));
+  check(stray.length === 0, `styles.css: ${stray.join(", ")} defined for the light theme only; the dark theme (:root) needs it too`);
+
+  // --- the colour of the phone's address bar equals the page background, in each theme ---
+  for (const th of ["dark", "light"]) {
+    const bg = (th === "dark" ? dark : L)["--bg"];
+    check(isHex(bg) && bg.toLowerCase() === THEME_COLOR[th].toLowerCase(), `styles.css --bg (${th}) is ${bg} but the ${th} theme-color is ${THEME_COLOR[th]} (src/site.json "themeColor"): the browser bar would not match the page`);
+  }
+
+  // --- contrast: text 4.5:1, graphics and large gradient text 3:1, on every surface of the theme ---
+  const resolve = (T, name, depth = 0) => {
+    const v = T[name]; if (v === undefined) return null;
+    const m = v.match(/^var\((--[\w-]+)\)$/);
+    if (m && depth < 4) return resolve(T, m[1], depth + 1);
+    return v;
+  };
+  const stopsOf = (T, name) => [...String(resolve(T, name) || "").matchAll(/#[0-9a-fA-F]{6}\b/g)].map((m) => m[0]);
+  const SURF = ["--bg", "--bg-2", "--panel", "--panel-2"];
+  for (const [th, T] of [["dark", dark], ["light", L]]) {
+    const surf = SURF.map((n) => [n, resolve(T, n)]);
+    check(surf.every(([, v]) => isHex(v)), `styles.css (${th}): the surface colours ${SURF.join(", ")} must be plain #rrggbb values (the contrast check needs them)`);
+    if (!surf.every(([, v]) => isHex(v))) continue;
+    const need = (names, min, what) => {
+      for (const n of names) {
+        const fg = resolve(T, n);
+        if (!check(isHex(fg), `styles.css (${th}): ${n} must be a plain #rrggbb value so that its contrast can be checked`)) continue;
+        for (const [sn, sv] of surf) check(ratio(fg, sv) >= min, `styles.css (${th}): ${what} ${n} (${fg}) on ${sn} (${sv}) has contrast ${ratio(fg, sv).toFixed(2)}:1, below ${min}:1`);
+      }
+    };
+    need(["--ink", "--ink-2", "--muted", "--grow-ink", "--sky-ink", "--gold-ink"], 4.5, "text colour");
+    need(["--grow", "--grow-2", "--sky", "--gold", "--violet"], 3, "graphic colour");
+    const gi = stopsOf(T, "--grad-ink");
+    check(gi.length >= 2, `styles.css (${th}): --grad-ink should be a gradient of #rrggbb stops`);
+    for (const c of gi) for (const [sn, sv] of surf) check(ratio(c, sv) >= 3, `styles.css (${th}): gradient-text stop ${c} on ${sn} (${sv}) has contrast ${ratio(c, sv).toFixed(2)}:1, below 3:1 (large text)`);
+    // text on the gradient buttons
+    const onGrow = resolve(T, "--on-grow");
+    for (const c of [resolve(T, "--grow"), resolve(T, "--grow-2"), resolve(T, "--sky")]) check(isHex(onGrow) && isHex(c) && ratio(onGrow, c) >= 4.5, `styles.css (${th}): button text ${onGrow} on ${c} has contrast ${isHex(c) && isHex(onGrow) ? ratio(onGrow, c).toFixed(2) : "?"}:1, below 4.5:1`);
+  }
+
+  // --- no colour written directly in a rule: it would look the same in both themes ---
+  // Colours built from tokens (rgba(var(--g-rgb), .3)) are fine. These few are drawn the same in both themes on purpose.
+  const ALLOWED_RAW = new Set(["#ffeaa9", "#f2b230", "#b9760d", "#8a5608", "#7a4a05", "rgba(255,255,255,.2)", "#000"]); // gold coins, a highlight, a mask cut
+  const rules = css.replace(darkBlock, "").replace(lightBlock, "");
+  const raw = [...rules.matchAll(/#[0-9a-fA-F]{3,8}\b|rgba?\(\s*(?!var\()[^)]*\)|hsla?\([^)]*\)/g)].map((m) => m[0].replace(/\s+/g, "").toLowerCase());
+  const bad = [...new Set(raw.filter((c) => !ALLOWED_RAW.has(c)))];
+  check(bad.length === 0, `styles.css: colour(s) written directly in a rule: ${bad.join(", ")}. Use a token from the theme blocks (or, if it must be the same in both themes, add it to ALLOWED_RAW in tools/check.mjs)`);
+  const lightOnly = (css.match(/:root\[data-theme="light"\][^{]*\{/g) || []).length;
+  check(lightOnly >= 1, "styles.css: no light-theme override rules found");
+
+  // --- SVG art in the page: every gradient has a light-theme colour, and no stray colours ---
+  const tpl = fs.readFileSync(path.join(ROOT, "src/index.template.html"), "utf8");
+  for (const g of tpl.matchAll(/<linearGradient id="([^"]+)"[^>]*>([\s\S]*?)<\/linearGradient>/g)) {
+    const stops = (g[2].match(/<stop\b/g) || []).length;
+    for (let i = 1; i <= stops; i++) check(css.includes(`[data-theme="light"] #${g[1]} stop:nth-child(${i})`), `styles.css: stop ${i} of the SVG gradient #${g[1]} has no light-theme colour ("…[data-theme=\\"light\\"] #${g[1]} stop:nth-child(${i}) {stop-color: …}")`);
+  }
+  check(css.includes('[data-theme="light"] .mcore'), "styles.css: the system-map core icon (.mcore) has no light-theme override");
+  const MARKUP_OK = new Set(["#fff", "#2fe56a", "#10ce97", "#00bafc", "#7dffa5"]); // the mask, and the neon art that the light theme recolours with CSS
+  const strayMarkup = [...new Set([...tpl.replace(/<style[\s\S]*?<\/style>/g, "").matchAll(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g)].map((m) => m[0].toLowerCase()))].filter((c) => !MARKUP_OK.has(c));
+  check(strayMarkup.length === 0, `src/index.template.html: colour(s) written in the markup: ${strayMarkup.join(", ")}. Colours belong in styles.css, where each theme can change them`);
+
+  // --- every page: default theme, browser-bar colours, toggle, scripts in the right order ---
+  for (const Lg of cfg.langs) {
+    const rel = Lg.path === "/" ? "index.html" : Lg.path.slice(1) + "index.html";
+    if (!has(rel)) continue;
+    const html = read(rel), tag = `[${Lg.code}]`;
+    const root = parseAttrs((html.match(/<html\b[^>]*>/) || [""])[0]);
+    check(root["data-theme-default"] === DEFAULT_THEME, `${tag} <html data-theme-default> is "${root["data-theme-default"]}" but src/site.json says "${DEFAULT_THEME}"`);
+    const bar = parseAttrs((html.match(/<meta\b[^>]*name="theme-color"[^>]*>/) || [""])[0]);
+    check(bar["data-dark"] === THEME_COLOR.dark && bar["data-light"] === THEME_COLOR.light, `${tag} theme-color needs data-dark="${THEME_COLOR.dark}" data-light="${THEME_COLOR.light}" (the script swaps them with the theme)`);
+    check(bar.content === THEME_COLOR[DEFAULT_THEME === "light" ? "light" : "dark"], `${tag} theme-color content is ${bar.content}, expected the ${DEFAULT_THEME === "light" ? "light" : "dark"} colour for the first paint`);
+    // boot.js applies the theme before the first paint, so it must run from <head>, without defer or async
+    const head = (html.match(/<head>([\s\S]*?)<\/head>/) || [])[1] || "";
+    const boot = (head.match(/<script\b[^>]*boot\.js[^>]*>/) || [])[0] || "";
+    check(!!boot && !/\b(defer|async)\b/.test(boot), `${tag} boot.js must be a plain <script> in <head> (no defer/async): it sets the theme before the first paint, so the page never flashes`);
+    const iTheme = html.search(/<script\b[^>]*assets\/js\/theme\.js/), iMain = html.search(/<script\b[^>]*assets\/js\/main\.js/);
+    check(iTheme > -1 && iMain > -1 && iTheme < iMain, `${tag} theme.js must load before main.js`);
+    // the toggle
+    const btnHtml = (html.match(/<button\b[^>]*id="theme-toggle"[\s\S]*?<\/button>/) || [""])[0];
+    const ba = parseAttrs((btnHtml.match(/^<button\b[^>]*>/) || [""])[0]);
+    check(!!btnHtml && ba.type === "button", `${tag} the theme toggle (<button id="theme-toggle" type="button">) is missing`);
+    const toLight = textOf((btnHtml.match(/class="to-light"[^>]*>([\s\S]*?)<\/span>/) || [])[1] || ""), toDark = textOf((btnHtml.match(/class="to-dark"[^>]*>([\s\S]*?)<\/span>/) || [])[1] || "");
+    check(toLight.length > 3 && toDark.length > 3 && toLight !== toDark, `${tag} the toggle needs two different visible labels (to-light / to-dark): that text is its accessible name`);
+    check(/<svg\b[^>]*aria-hidden="true"/.test(btnHtml), `${tag} the toggle's icon must be aria-hidden (the label names the button)`);
+    const st = parseAttrs((html.match(/<[a-z]+\b[^>]*id="theme-status"[^>]*>/) || [""])[0]);
+    check(st.role === "status" && /sr-only/.test(st.class || ""), `${tag} #theme-status must be a visually hidden role="status" (it announces the change to screen readers)`);
+    const dict = has(`assets/js/dict-${Lg.code}.js`) ? read(`assets/js/dict-${Lg.code}.js`) : "";
+    for (const k of ["theme.nowLight", "theme.nowDark"]) check(new RegExp(`"${k.replace(".", "\\.")}":"[^"]{3,}"`).test(dict), `${tag} dict-${Lg.code}.js is missing "${k}" (spoken when the theme changes)`);
+  }
+
+  // --- 404.html follows the same settings (written by hand, kept in step by tools/build.mjs) ---
+  if (has("404.html")) {
+    const h = read("404.html");
+    const root = parseAttrs((h.match(/<html\b[^>]*>/) || [""])[0]);
+    const bar = parseAttrs((h.match(/<meta\b[^>]*name="theme-color"[^>]*>/) || [""])[0]);
+    check(root["data-theme-default"] === DEFAULT_THEME, `404.html: data-theme-default is "${root["data-theme-default"]}", expected "${DEFAULT_THEME}" (run node tools/build.mjs)`);
+    check(bar["data-dark"] === THEME_COLOR.dark && bar["data-light"] === THEME_COLOR.light, "404.html: theme-color data-dark / data-light do not match src/site.json (run node tools/build.mjs)");
+    const hd = (h.match(/<head>([\s\S]*?)<\/head>/) || [])[1] || "";
+    check(/<script\b[^>]*boot\.js/.test(hd), "404.html: boot.js must be loaded from <head> so the 404 page uses the visitor's theme");
+    const inlineCss = (h.match(/<style>([\s\S]*?)<\/style>/) || [])[1] || "";
+    const rawIn404 = [...inlineCss.matchAll(/#[0-9a-fA-F]{3,8}\b|rgba?\(\s*(?!var\()[^)]*\)/g)].map((m) => m[0]);
+    check(rawIn404.length === 0, `404.html: colour(s) written directly in its <style>: ${rawIn404.join(", ")}. Use the tokens (var(--…)), so it works in both themes`);
+  }
+
+  // --- privacy: the site sets no cookie and sends nothing anywhere. The only things kept on the visitor's device are the language and theme choices. ---
+  const jsFiles = fs.readdirSync(path.join(SITE, "assets/js")).filter((f) => f.endsWith(".js") && !f.startsWith("dict-"));
+  const KEYS_OK = new Set(["gd-lang", "gd-theme"]);
+  for (const f of jsFiles) {
+    const code = read(`assets/js/${f}`);
+    check(!/document\.cookie/.test(code), `assets/js/${f}: uses document.cookie (the site promises no cookies)`);
+    check(!/\b(fetch|XMLHttpRequest|sendBeacon|WebSocket|EventSource)\b/.test(code.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")), `assets/js/${f}: makes a network request (the site promises no tracking and no third-party calls)`);
+    check(!/\b(sessionStorage|indexedDB)\b/.test(code.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")), `assets/js/${f}: uses sessionStorage/indexedDB, which the privacy wording does not cover`);
+    for (const m of code.matchAll(/["'](gd-[a-z-]+)["']/g)) check(KEYS_OK.has(m[1]), `assets/js/${f}: stores "${m[1]}" on the visitor's device. Only ${[...KEYS_OK].join(" and ")} are covered by the privacy wording; update the docs and KEYS_OK in tools/check.mjs together`);
+  }
+
+  // --- header menu: the width where the links move into the Menu button is written twice (a CSS media query and ui.js). The two numbers must be equal,
+  //     otherwise the Menu button could be shown with no menu behind it, or the open menu would stay open after the window grows. ---
+  {
+    const ui = has("assets/js/ui.js") ? read("assets/js/ui.js") : "";
+    const jsBp = (ui.match(/MENU_BREAKPOINT\s*=\s*(\d+)/) || [])[1];
+    const cssBp = (css.match(/@media\s*\(max-width:\s*(\d+)px\)\s*\{\s*\.menu-btn\s*\{\s*display:\s*block/) || [])[1];
+    check(!!jsBp && !!cssBp, "the menu breakpoint could not be read: expected `MENU_BREAKPOINT = <px>` in assets/js/ui.js and `@media (max-width:<px>px){ .menu-btn{display:block` in styles.css");
+    if (jsBp && cssBp) check(jsBp === cssBp, `the Menu button appears below ${cssBp}px in styles.css but ui.js closes the menu above ${jsBp}px. Make the two numbers equal`);
+  }
+
+  // --- the wave: theme.js is run here, in Node, and the shape it draws is checked for every screen size ---
+  // The wave is an outline that grows from the toggle until the whole viewport is inside it. If this ever stops being true, part of the page would be left in the old theme.
+  if (has("assets/js/theme.js")) {
+    const sandbox = { window: {}, document: { documentElement: {} }, Math, Date, Array, Object, Number, String, setTimeout, clearTimeout };
+    sandbox.window = sandbox;
+    let W = null;
+    try { vm.runInNewContext(read("assets/js/theme.js"), sandbox, { filename: "theme.js", timeout: 2000 }); W = sandbox.GD && sandbox.GD.theme && sandbox.GD.theme.wave; } catch (e) { check(false, `assets/js/theme.js does not load: ${e.message}`); }
+    if (check(!!W && typeof W.build === "function", "assets/js/theme.js: GD.theme.wave.build is missing")) {
+      const inside = (pt, poly) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < ((xj - xi) * (pt[1] - yi)) / (yj - yi) + xi) c = !c; } return c; };
+      const segDist = (px, py, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], t = Math.max(0, Math.min(1, ((px - a[0]) * dx + (py - a[1]) * dy) / (dx * dx + dy * dy))); return Math.hypot(px - (a[0] + t * dx), py - (a[1] + t * dy)); };
+      const inscribed = (poly, cx, cy) => Math.min(...poly.map((a, i) => segDist(cx, cy, a, poly[(i + 1) % poly.length])));
+      let rng = 12345; const rand = () => { rng = (rng * 1664525 + 1013904223) >>> 0; return rng / 4294967296; };   // fixed seed: the same screens and shapes every run
+      const screens = [[320, 568], [360, 640], [390, 844], [412, 915], [768, 1024], [1024, 768], [1280, 720], [1440, 900], [1920, 1080], [2560, 1440], [390, 14000], [1440, 11000]];
+      let worst = { gap: Infinity, where: "" }, uncovered = 0, nonFinite = 0, bigStart = 0, shrink = 0, wrongCount = 0, badDuration = 0, runs = 0, badCss = 0;
+      for (const [w, h] of screens) {
+        const spots = [[w - 44, 36], [44, 36], [w / 2, 36], [w / 2, h / 2], [w - 2, 2], [2, h - 2]];     // the toggle, mirrored (Arabic), centred, and extreme places
+        for (const [cx, cy] of spots) for (let n = 0; n < 12; n++) {
+          runs++;
+          const r = W.build(cx, cy, w, h, W.newSeed(rand)), sh = r.shapes;
+          if (sh.length !== W.STEPS + 1 || r.css.length !== W.STEPS + 1) wrongCount++;
+          if (sh.some((poly) => poly.length !== W.POINTS || poly.some((q) => !Number.isFinite(q[0]) || !Number.isFinite(q[1])))) { nonFinite++; continue; }
+          if (r.css.some((c) => !/^polygon\((-?[\d.]+px -?[\d.]+px,?){96}\)$/.test(c))) badCss++;
+          const far = Math.hypot(Math.max(cx, w - cx), Math.max(cy, h - cy));
+          const last = sh[sh.length - 1], gap = inscribed(last, cx, cy) - far;                // how far past the farthest corner the closest part of the outline is
+          if (gap < worst.gap) worst = { gap, where: `${w}x${h} at ${Math.round(cx)},${Math.round(cy)}` };
+          if (!(gap >= 0) || ![[0, 0], [w, 0], [0, h], [w, h]].every((c) => inside(c, last))) uncovered++;
+          if (!inside([cx, cy], sh[0]) || Math.max(...sh[0].map((q) => Math.hypot(q[0] - cx, q[1] - cy))) > W.START_R * 1.3) bigStart++;
+          for (let i = 1; i < sh.length; i++) if (inscribed(sh[i], cx, cy) < inscribed(sh[i - 1], cx, cy) * 0.97 - 1) { shrink++; break; }   // the wave never falls back
+          const d = W.duration(cx, cy, w, h); if (!(d >= 700 && d <= 1400)) badDuration++;
+        }
+      }
+      check(wrongCount === 0, `theme.js: a wave does not have ${W.STEPS + 1} keyframes of ${W.POINTS} points`);
+      check(nonFinite === 0, `theme.js: the wave outline contains invalid numbers in ${nonFinite} of ${runs} test waves`);
+      check(badCss === 0, `theme.js: ${badCss} keyframes are not valid CSS polygon() strings`);
+      check(uncovered === 0, `theme.js: the wave does not cover the whole screen at the end in ${uncovered} of ${runs} test waves (worst: ${worst.where}, ${worst.gap.toFixed(1)}px short). Part of the page would stay in the old theme`);
+      check(bigStart === 0, `theme.js: the wave does not start as a small shape around the toggle in ${bigStart} of ${runs} test waves`);
+      check(shrink === 0, `theme.js: the wave falls back (shrinks by more than 3%) in ${shrink} of ${runs} test waves`);
+      check(badDuration === 0, `theme.js: wave duration outside 0.7–1.4 s in ${badDuration} test waves`);
+      check(worst.gap >= 8, `theme.js: the outline clears the farthest corner by only ${worst.gap.toFixed(1)}px at ${worst.where}; keep a margin of at least 8px`, "warn");
+    }
+    // reduced motion and old browsers
+    const js = read("assets/js/theme.js");
+    check(/prefers-reduced-motion:\s*reduce/.test(js), "theme.js: must respect prefers-reduced-motion (switch at once, no wave)");
+    check(/startViewTransition/.test(js) && /theme-fade/.test(js), "theme.js: needs the fallback for browsers without View Transitions (the .theme-fade class)");
+    check(css.includes("::view-transition-new(root)") && css.includes(".theme-fade"), "styles.css: needs the ::view-transition rules and the .theme-fade fallback");
+  }
 }
 
 // ---------- report ----------

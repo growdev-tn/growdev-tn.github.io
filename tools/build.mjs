@@ -34,6 +34,14 @@ const fail = (m) => problems.push(m);
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const used = new Set();
 
+// Theme: "dark" is the GrowDev look. "defaultTheme" is what a first-time visitor sees ("dark", "light", or "system" = follow the device);
+// a choice made with the toggle always wins (boot.js, theme.js). The two colours feed <meta name="theme-color"> (the browser bar on phones)
+// and tools/check.mjs checks that they equal --bg in each theme of styles.css.
+const THEME_DEFAULT = cfg.defaultTheme || "dark";
+if (!["dark", "light", "system"].includes(THEME_DEFAULT)) fail(`"defaultTheme" in src/site.json must be "dark", "light" or "system" (got "${THEME_DEFAULT}")`);
+const THEME_COLOR = { dark: "#020b18", light: "#eef3f8", ...(cfg.themeColor || {}) };
+for (const [k, v] of Object.entries(THEME_COLOR)) if (!/^#[0-9a-f]{6}$/i.test(v)) fail(`"themeColor.${k}" in src/site.json must be a #rrggbb colour (got "${v}")`);
+
 function lastmod() {
   try {
     const d = execSync("git log -1 --format=%cs -- src site/assets", { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
@@ -90,6 +98,8 @@ function render(L) {
   const entry = L.path === "/";
   const vals = {
     lang: L.code, dir: L.dir, base,
+    themeDefault: THEME_DEFAULT,
+    themeColorInit: THEME_COLOR[THEME_DEFAULT === "light" ? "light" : "dark"], themeColorDark: THEME_COLOR.dark, themeColorLight: THEME_COLOR.light,
     title: esc(tr("meta.title")), description: esc(tr("meta.desc")),
     canonical: pageUrl(cfg, L.code), ogImage, ogAlt: esc(tr("meta.og.alt")), ogLocale: L.ogLocale,
     ogAlternates: others.map((o) => `<meta property="og:locale:alternate" content="${o.ogLocale}">`).join("\n"),
@@ -131,6 +141,18 @@ put("sitemap.xml", sitemap(cfg, LASTMOD));
 put("robots.txt", robots(cfg));
 put("llms.txt", llms(cfg, D));
 put("llms-full.txt", llmsFull(cfg, D));
+
+// 404.html is written by hand (it needs absolute paths), but its theme settings come from src/site.json like every other page.
+{
+  const f = path.join(OUT, "404.html");
+  if (fs.existsSync(f)) {
+    const before = fs.readFileSync(f, "utf8");
+    const after = before
+      .replace(/(<html\b[^>]*?\sdata-theme-default=")[^"]*(")/, `$1${THEME_DEFAULT}$2`)
+      .replace(/<meta name="theme-color"[^>]*>/, `<meta name="theme-color" content="${THEME_COLOR[THEME_DEFAULT === "light" ? "light" : "dark"]}" data-dark="${THEME_COLOR.dark}" data-light="${THEME_COLOR.light}">`);
+    if (after !== before) fs.writeFileSync(f, after);
+  }
+}
 
 // CNAME is for custom domains only. A *.github.io address must not ship one; a custom domain must.
 // So moving to your own domain later is a one-line change of "url" in src/site.json.

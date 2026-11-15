@@ -1,6 +1,8 @@
 {
   "url": "https://growdev-tn.github.io",
   "allowAiTraining": false,
+  "defaultTheme": "dark",
+  "themeColor": { "dark": "#020b18", "light": "#eef3f8" },
   "name": "GrowDev",
   "email": "contact@werchti.tn",
   "founder": "Aziz Chaibi",
@@ -17,7 +19,7 @@
     "ar": ["sora-latin-wght", "plex-arabic-400", "plex-arabic-700"]
   },
   "runtimeKeys": {
-    "prefixes": ["mod.", "hint.", "sum.", "phase.", "brief.", "curfmt."],
+    "prefixes": ["mod.", "hint.", "sum.", "phase.", "brief.", "curfmt.", "theme."],
     "exact": ["comp.hint", "sim.pct", "sim.h", "sim.list"]
   }
 }

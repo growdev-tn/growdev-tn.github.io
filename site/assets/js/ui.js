@@ -27,6 +27,7 @@
   }
 
   /* ---------- mobile menu ---------- */
+  var MENU_BREAKPOINT = 1140; // px: the same width as the "Header menu" media query in styles.css
   function menu() {
     var btn = $(".menu-btn"), nav = $("#menu");
     function set(open) {
@@ -37,7 +38,7 @@
     btn.addEventListener("click", function () { set(btn.getAttribute("aria-expanded") !== "true"); });
     nav.addEventListener("click", function (e) { if (e.target.closest("a")) set(false); });
     document.addEventListener("keydown", function (e) { if (e.key === "Escape" && nav.classList.contains("is-open")) { set(false); btn.focus(); } });
-    window.addEventListener("resize", function () { if (window.innerWidth > 900) set(false); });
+    window.addEventListener("resize", function () { if (window.innerWidth > MENU_BREAKPOINT) set(false); });
   }
 
   /* ---------- reveal on scroll ---------- */

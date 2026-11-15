@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{lang}}" dir="{{dir}}"{{entryAttrs}}>
+<html lang="{{lang}}" dir="{{dir}}" data-theme-default="{{themeDefault}}"{{entryAttrs}}>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,8 +11,8 @@
 <meta name="author" content="GrowDev">
 <meta name="geo.region" content="TN">
 <meta name="geo.placename" content="Tunisia">
-<meta name="theme-color" content="#020b18">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="{{themeColorInit}}" data-dark="{{themeColorDark}}" data-light="{{themeColorLight}}">
+<meta name="color-scheme" content="dark light">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'self'; form-action 'self'; object-src 'none'">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="GrowDev">
@@ -60,11 +60,20 @@
     </nav>
     <div class="header-tools">
       <div class="lang" role="group" aria-label="" data-i18n-attr="aria-label:lang.aria" translate="no">{{langLinks}}</div>
+      <button class="theme-toggle" type="button" id="theme-toggle">
+        <svg class="theme-toggle__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <defs><mask id="gd-moon-mask" maskUnits="userSpaceOnUse" x="-4" y="-4" width="32" height="32"><rect x="-4" y="-4" width="32" height="32" fill="#fff"/><circle class="cut" cx="16" cy="8" r="6.4"/></mask></defs>
+          <g mask="url(#gd-moon-mask)"><circle class="disc" cx="12" cy="12" r="5.4"/></g>
+          <path class="rays" d="M12 1.8v2.6M12 19.6v2.6M1.8 12h2.6M19.6 12h2.6M4.8 4.8l1.8 1.8M17.4 17.4l1.8 1.8M4.8 19.2l1.8-1.8M17.4 6.6l1.8-1.8"/>
+        </svg>
+        <span class="theme-toggle__label"><span class="to-light" data-i18n="theme.toLight"></span><span class="to-dark" data-i18n="theme.toDark"></span></span>
+      </button>
       <a class="btn btn-primary btn-sm" href="#contact" data-i18n="nav.cta"></a>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu" data-i18n-attr="aria-label:menu.aria"><span></span><span></span><span></span></button>
     </div>
   </div>
   <div class="progress" aria-hidden="true"></div>
+  <p class="sr-only" id="theme-status" role="status"></p>
 </header>
 
 <main id="main">
@@ -503,6 +512,7 @@
 <script src="{{base}}assets/js/i18n.js"></script>
 <script src="{{base}}assets/js/hero.js"></script>
 <script src="{{base}}assets/js/ui.js"></script>
+<script src="{{base}}assets/js/theme.js"></script>
 <script src="{{base}}assets/js/composer.js"></script>
 <script src="{{base}}assets/js/calculator.js"></script>
 <script src="{{base}}assets/js/main.js"></script>

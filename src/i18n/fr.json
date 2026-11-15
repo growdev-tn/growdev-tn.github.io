@@ -163,6 +163,7 @@
   "foot.where": "Tunisie · Afrique · International", "foot.langs": "Français · العربية · English",
   "foot.rights": "Tous droits réservés.", "foot.priv": "Aucun cookie, aucun traceur.",
   "brand.aria": "GrowDev, haut de page", "nav.aria": "Navigation principale", "lang.aria": "Langue", "menu.aria": "Menu",
+  "theme.toLight": "Passer en mode clair", "theme.toDark": "Passer en mode sombre", "theme.nowLight": "Mode clair activé", "theme.nowDark": "Mode sombre activé",
   "hero.chart.aria": "Nos services sous forme de graphique de croissance", "tech.aria": "Technologies que nous utilisons",
   "map.aria": "Schéma de votre système", "tags.aria": "Technologies",
 

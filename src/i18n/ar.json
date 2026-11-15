@@ -163,6 +163,7 @@
   "foot.where": "تونس · إفريقيا · العالم", "foot.langs": "Français · العربية · English",
   "foot.rights": "جميع الحقوق محفوظة.", "foot.priv": "لا ملفات تعريف ارتباط، ولا أدوات تتبّع.",
   "brand.aria": "GrowDev، أعلى الصفحة", "nav.aria": "التنقل الرئيسي", "lang.aria": "اللغة", "menu.aria": "القائمة",
+  "theme.toLight": "التبديل إلى الوضع الفاتح", "theme.toDark": "التبديل إلى الوضع الداكن", "theme.nowLight": "تم تفعيل الوضع الفاتح", "theme.nowDark": "تم تفعيل الوضع الداكن",
   "hero.chart.aria": "خدماتنا على شكل مخطط نمو", "tech.aria": "التقنيات التي نستخدمها",
   "map.aria": "مخطط نظامك", "tags.aria": "التقنيات",
 

@@ -6,6 +6,8 @@ Live address: **https://growdev-tn.github.io/** · French `/` · Arabic `/ar/` (
 
 No framework, no runtime dependencies, no cookies, no third-party requests. A zero-dependency Node script turns one template and three dictionaries into three real HTML pages.
 
+Two looks: **dark** (the default) and **light**, switched with the sun/moon button in the header. The change plays as an organic wave that starts at the button and reveals the new theme, so text and cards stay readable throughout; with reduced motion it switches at once. The visitor's choice is remembered on their device (`localStorage`, no cookie).
+
 ## ⚠️ The one rule
 
 **Edit `src/`. Never edit the generated files.** They are overwritten by every build (locally and in CI):
@@ -38,8 +40,10 @@ docker run --rm -v "${PWD}:/app" -w /app node:22-alpine node tools/check.mjs
 | Any text (all three languages) | `src/i18n/fr.json`, `src/i18n/ar.json`, `src/i18n/en.json`. Keep the same keys in all three; the build tells you what is missing |
 | Page structure, sections, order | `src/index.template.html` (`data-i18n="key"` marks translated text) |
 | E-mail, founder, **site address (`url`)**, social profiles (`sameAs`), languages, whether AI training crawlers are allowed (`allowAiTraining`) | `src/site.json` |
+| **Which theme a first-time visitor sees** (`"defaultTheme"`: `"dark"` now, `"light"`, or `"system"` to follow the visitor's phone or computer) and the browser-bar colours (`"themeColor"`) | `src/site.json`, then build |
+| Colours of either theme | The two token blocks at the top of `site/assets/css/styles.css` (`:root` = dark, `:root[data-theme="light"]` = light). Give every colour a value in both; the checker tells you if you forget one or if a text colour is too pale |
 | Structured data, sitemap, robots, llms.txt | `tools/seo.mjs` |
-| Look and animation | `site/assets/css/styles.css`, `site/assets/js/*.js` |
+| Look and animation | `site/assets/css/styles.css`, `site/assets/js/*.js` (the theme button and wave: `theme.js`; the wave's duration and shape: the `wave` object at the top of that file) |
 | Simulator hourly costs, default currency | `site/assets/js/config.js` |
 | Share images (WhatsApp, LinkedIn…) | `tools/og.html`, then `npm i -D playwright && npx playwright install chromium && npm run og` |
 
@@ -66,7 +70,7 @@ Push to `main`. GitHub Actions builds, runs the checks and deploys in about a mi
 | [docs/SEO-GEO-AEO.md](docs/SEO-GEO-AEO.md) | What is built in for search engines and AI assistants, keyword map, launch checklist |
 | [docs/CREATIVE-BRIEF.md](docs/CREATIVE-BRIEF.md) | Audience, messaging, tone, visual direction, open questions |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Principles, stack decisions, security, performance, design system, roadmap |
-| [docs/UX-AUDIT.md](docs/UX-AUDIT.md) | Independent UX/UI audit and what was fixed |
+| [docs/UX-AUDIT.md](docs/UX-AUDIT.md) | UX/UI audit of 15 Nov 2026: scores, evidence (accessibility scan, contrast, layout, speed), what was fixed, what is left |
 
 ## Credits and licence
 
