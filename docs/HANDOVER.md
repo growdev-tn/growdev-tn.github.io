@@ -5,7 +5,7 @@ Read this first in a new session. Then `README.md`, then the other files in `doc
 ## State
 
 - Trilingual static site (fr `/`, ar `/ar/` RTL, en `/en/`), generated from `src/` by `tools/build.mjs`. DT is the first currency. SEO, GEO and AEO layer built in.
-- `node tools/build.mjs && node tools/check.mjs` ends with **All checks passed** (1,287 checks; the checker was tested against deliberate breakages, including the robots and CNAME rules and, since 15 Nov, the theme rules: missing light colour, low contrast, a wave that stops short, mismatched menu breakpoint).
+- `node tools/build.mjs && node tools/check.mjs` ends with **All checks passed** (1,290 checks; the checker was tested against deliberate breakages, including the robots and CNAME rules and, since 15 Nov, the theme rules: missing light colour, low contrast, a wave that stops short, mismatched menu breakpoint).
 - **Dark and light theme** with a wave transition (added 15 Nov 2026). Default is dark: `"defaultTheme"` in `src/site.json` (`dark`, `light` or `system`). Visitors' choice is kept in `localStorage["gd-theme"]`; the only other stored key is `gd-lang`. See `docs/ARCHITECTURE.md` §5.5.
 - **Header:** the five links move into the Menu button below 1140 px (before: 900 px), because the theme button made the bar too tight. The number is in two places (`styles.css` and `MENU_BREAKPOINT` in `ui.js`); the checker fails if they differ.
 - Address: `https://growdev-tn.github.io/`. It is the single `url` setting in `src/site.json`; the sitemap, canonical tags, `hreflang`, JSON-LD, share-image links, `llms.txt`, `robots.txt` and the launch script all follow it. There is no `site/CNAME` (the build removes it for a `github.io` address and writes it for a custom domain).
@@ -44,3 +44,6 @@ Read this first in a new session. Then `README.md`, then the other files in `doc
 - **Do not add a colour straight into a rule** (`#abc`, `rgba(…)`): the checker fails the build. Add a token to both theme blocks of `styles.css` and use `var(--name)`.
 - **Theme and the first paint:** `boot.js` must stay a plain script in `<head>` (no `defer`). If it moves, the page flashes the wrong theme before settling.
 - **`defaultTheme` `system`** makes the default follow the visitor's device; a visitor's own click always wins over it.
+- **Never put `backdrop-filter`, `filter` or `transform` on `.site-header`.** It hosts the fixed mobile menu; any of them makes the header the menu's container and the menu shrinks to a 48 px strip once the page is scrolled (this happened in the original version; found on an iPhone 15 Nov 2026). The frosted bar is `.site-header::before`. The checker enforces it.
+- **Images:** an `<img>` with `width` and `height` attributes needs `height:auto` in any CSS rule that sets its width, or it is stretched (the About emblem was). The checker enforces it.
+- Open the finished site on a real phone after every layout change, scrolled and not scrolled, with the menu open and closed. A desktop browser did not show the two defects above.

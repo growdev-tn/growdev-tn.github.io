@@ -33,6 +33,7 @@
     function set(open) {
       btn.setAttribute("aria-expanded", String(open));
       nav.classList.toggle("is-open", open);
+      var bar = nav.closest(".site-header"); if (bar) bar.classList.toggle("is-menu-open", open);   // the bar turns opaque with the menu: one solid panel
       document.body.style.overflow = open ? "hidden" : "";
     }
     btn.addEventListener("click", function () { set(btn.getAttribute("aria-expanded") !== "true"); });

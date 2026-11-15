@@ -91,8 +91,15 @@ fieldset{border:0;min-width:0}
 .js [data-reveal].is-in{opacity:1;transform:none}
 
 /* Header */
-.site-header{position:fixed;inset:0 0 auto 0;z-index:50;height:var(--header-h);border-bottom:1px solid transparent;transition:background .3s,border-color .3s,backdrop-filter .3s}
-.site-header.is-scrolled{background:rgba(var(--bg-rgb),.8);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);border-color:var(--line)}
+.site-header{position:fixed;inset:0 0 auto 0;z-index:50;height:var(--header-h);border-bottom:1px solid transparent;transition:border-color .3s}
+/* The frosted bar is a layer of its own. A blur on the header itself would make the header the container of the fixed mobile menu, and the menu would
+   shrink to a 48px strip as soon as the page is scrolled. Never put backdrop-filter, filter or transform on .site-header (the checker enforces it).
+   The layer reaches 1px below the header so it also sits under the border line, as the header's own background did before. */
+.site-header::before{content:"";position:absolute;inset:0 0 -1px 0;z-index:-1;pointer-events:none;background:rgba(var(--bg-rgb),0);transition:background .3s,-webkit-backdrop-filter .3s,backdrop-filter .3s}
+.site-header.is-scrolled{border-color:var(--line)}
+.site-header.is-scrolled::before{background:rgba(var(--bg-rgb),.8);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3)}
+.site-header.is-menu-open::before{background:rgba(var(--bg-rgb),.97);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.site-header.is-menu-open{border-color:var(--line)}
 .bar-row{display:flex;align-items:center;gap:20px;height:100%}
 .brand{display:inline-flex;align-items:center;gap:12px;font:700 1.22rem var(--font-display);letter-spacing:-.02em}
 .brand img{border-radius:50%;box-shadow:0 0 0 1px var(--line-2)}
@@ -133,7 +140,7 @@ html:not([lang="ar"]) .lang a[lang="ar"]{font-family:system-ui,"Segoe UI",Tahoma
 @media (max-width:1140px){
   .menu-btn{display:block}
   .header-tools .btn{display:none}
-  .nav{position:fixed;inset:var(--header-h) 0 0 0;flex-direction:column;align-items:stretch;gap:4px;margin:0;padding:24px var(--gut);background:rgba(var(--bg-rgb),.97);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .25s,transform .25s var(--ease),visibility .25s}
+  .nav{position:fixed;inset:var(--header-h) 0 0 0;flex-direction:column;align-items:stretch;gap:4px;margin:0;padding:24px var(--gut);background:rgba(var(--bg-rgb),.97);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);overflow-y:auto;overscroll-behavior:contain;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .25s,transform .25s var(--ease),visibility .25s}
   .nav.is-open{opacity:1;visibility:visible;transform:none}
   .nav a{padding:16px 6px;font:600 1.4rem var(--font-display);border-bottom:1px solid var(--line);border-radius:0}
   .bar-row{gap:12px}
@@ -360,7 +367,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 
 /* About / commitments */
 .about{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(28px,5vw,88px);align-items:start}
-.about__badge{width:clamp(140px,16vw,200px);aspect-ratio:1;border-radius:50%;box-shadow:0 0 0 1px var(--line-2),0 30px 80px -30px rgba(var(--g-rgb),.45);margin-bottom:28px}
+.about__badge{width:clamp(140px,16vw,200px);height:auto;aspect-ratio:1;border-radius:50%;box-shadow:0 0 0 1px var(--line-2),0 30px 80px -30px rgba(var(--g-rgb),.45);margin-bottom:28px}
 .about p:not(.eyebrow){color:var(--ink-2);margin-top:16px;max-width:52ch}
 .about .who{margin-top:24px;padding-inline-start:16px;border-inline-start:2px solid var(--gold);color:var(--ink)}
 .pledge{display:grid;grid-template-columns:auto 1fr;gap:4px 22px;padding:22px 0;border-top:1px solid var(--line)}
@@ -380,6 +387,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 
 @media (max-width:1000px){
   .composer,.sim,.about{grid-template-columns:1fr}
+  .about__badge{display:block;width:clamp(88px,27vw,116px);margin-inline:auto;margin-bottom:22px}
   .picker{position:static}
 }
 @media (max-width:900px){

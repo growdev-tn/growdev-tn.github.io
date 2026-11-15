@@ -522,6 +522,45 @@ if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
     if (jsBp && cssBp) check(jsBp === cssBp, `the Menu button appears below ${cssBp}px in styles.css but ui.js closes the menu above ${jsBp}px. Make the two numbers equal`);
   }
 
+  // --- header: it hosts the fixed mobile menu. A blur, filter, transform or containment on the header itself makes the header the menu's container, and the
+  //     menu then shrinks to a 48px strip as soon as the page is scrolled (found on a real iPhone, 15 Nov 2026). The frosted look lives on `.site-header::before`. ---
+  {
+    const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");   // comments would end up inside the selectors
+    const rules = [...bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({ sels: m[1].split(",").map((x) => x.trim().replace(/\s+/g, " ")), decl: m[2].split(";").map((d) => { const i = d.indexOf(":"); return i < 0 ? null : [d.slice(0, i).trim().toLowerCase(), d.slice(i + 1).trim().toLowerCase()]; }).filter(Boolean) }));
+    const makesContainer = (prop, val) => /^(?:-webkit-)?(?:backdrop-filter|filter)$/.test(prop) ? val !== "none"
+      : /^(?:transform|translate|rotate|scale|perspective|container-type)$/.test(prop) ? !/^(?:none|normal)$/.test(val)
+      : prop === "will-change" ? /transform|perspective|filter|backdrop/.test(val)
+      : prop === "contain" ? /layout|paint|strict|content/.test(val) : false;
+    const bad = [];
+    for (const r of rules) if (r.sels.some((x) => /^\.site-header(?:\.[\w-]+|:[\w-]+)*$/.test(x))) for (const [prop, val] of r.decl) if (makesContainer(prop, val)) bad.push(`${r.sels.join(", ")} { ${prop}: ${val} }`);
+    check(!bad.length, `the header must not carry a property that makes it the container of the fixed mobile menu (${bad.join("; ")}). Put the blur on .site-header::before instead`);
+
+    // the open menu is a panel the links sit on: it must be nearly opaque, or the page shows through the links
+    const nav = rules.find((r) => r.sels.includes(".nav") && r.decl.some(([p, v]) => p === "position" && v === "fixed"));
+    const alpha = nav && (nav.decl.find(([p]) => p === "background") || [])[1] && Number(((nav.decl.find(([p]) => p === "background"))[1].match(/rgba\(var\(--bg-rgb\),\s*([\d.]+)\)/) || [])[1]);
+    check(Number.isFinite(alpha) && alpha >= 0.9, "the open mobile menu (.nav, position:fixed) must have a background of the form rgba(var(--bg-rgb), 0.9 or more) so the page does not show through the links");
+  }
+
+  // --- images: an <img> with width and height attributes keeps the height from the attribute when CSS sets only a width, and the picture is stretched.
+  //     (The About emblem was 140 x 200 px on phones for that reason.) A rule that sets a width on such an image needs a height (usually auto) in the same selector. ---
+  {
+    const html = has("index.html") ? read("index.html") : "";
+    const imgs = [...html.matchAll(/<img\b[^>]*>/g)].map((m) => parseAttrs(m[0])).filter((a) => a.width && a.height);
+    const classes = new Set(imgs.flatMap((a) => (a.class || "").split(/\s+/).filter(Boolean)));
+    const bySel = new Map();
+    for (const m of css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const decl = m[2].split(";").map((d) => d.split(":")[0].trim().toLowerCase());
+      for (const sel of m[1].split(",").map((x) => x.trim().replace(/\s+/g, " "))) {
+        const last = sel.split(/[\s>+~]+/).pop();
+        const target = last === "img" || [...classes].some((c) => last === "." + c || last.endsWith("." + c));
+        if (!target || /::?(before|after)/.test(sel)) continue;
+        const e = bySel.get(sel) || { width: false, height: false }; e.width ||= decl.includes("width"); e.height ||= decl.includes("height"); bySel.set(sel, e);
+      }
+    }
+    const stretched = [...bySel].filter(([, e]) => e.width && !e.height).map(([sel]) => sel);
+    check(!stretched.length, `these rules set a width on an image that has width and height attributes, but no height, so the image can be stretched: ${stretched.join(", ")}. Add height:auto`);
+  }
+
   // --- the wave: theme.js is run here, in Node, and the shape it draws is checked for every screen size ---
   // The wave is an outline that grows from the toggle until the whole viewport is inside it. If this ever stops being true, part of the page would be left in the old theme.
   if (has("assets/js/theme.js")) {
