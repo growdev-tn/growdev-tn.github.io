@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // GrowDev site checker — zero dependencies (Node 18+). Run after `node tools/build.mjs`; CI runs both before every deploy.
 // It checks what search engines, AI assistants and visitors depend on: metadata, hreflang, structured data, FAQ parity,
-// links and assets, CSP, sitemap / robots / llms.txt, the Tunisia-first signals and size budgets.
+// links and assets, CSP, sitemap / robots / llms.txt, the Tunisia-first signals, the client logo wall and size budgets.
 // Usage: node tools/check.mjs [--site DIR]. Exit code 1 when anything fails; warnings do not fail the run.
 import fs from "node:fs";
 import path from "node:path";
@@ -9,6 +9,7 @@ import zlib from "node:zlib";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { FAQ_COUNT, SERVICES, pageUrl, AI_SEARCH, AI_TRAINING } from "./seo.mjs";
+import { imageSize } from "./imgsize.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteArg = process.argv.indexOf("--site");
@@ -16,9 +17,10 @@ const SITE = siteArg > -1 ? path.resolve(process.argv[siteArg + 1]) : path.join(
 const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, "src/site.json"), "utf8"));
 const origin = cfg.url;
 const hostname = new URL(origin).hostname;
+const CLIENTS = Array.isArray(cfg.clients) ? cfg.clients : [];   // the logo wall (src/site.json); the build ignores anything that is not a list, so does the checker
 
 // Budgets (gzip, per page). Generous on purpose: they exist to catch accidents, not to police every byte.
-const BUDGET = { htmlKB: 45, cssKB: 22, jsKB: 30, ogKB: 200, titleMax: 65, titleMin: 20, descMax: 165, descMin: 70 };
+const BUDGET = { htmlKB: 45, cssKB: 22, jsKB: 30, ogKB: 200, logoKB: 40, logoMinPx: 200, titleMax: 65, titleMin: 20, descMax: 165, descMin: 70 };
 
 const fails = [], warns = [];
 let passed = 0;
@@ -231,6 +233,39 @@ function checkPage(L) {
     const a = parseAttrs(m[0]);
     check("alt" in a, `${tag} <img> without alt: ${m[0].slice(0, 80)}`);
     check(a.width && a.height, `${tag} <img> without width/height (layout shift): ${a.src}`, "warn");
+    // the attributes give the picture its shape before it loads; with a wrong ratio the picture is drawn stretched
+    const ir = a.src ? resolveRef(rel, a.src) : {}, real = ir.file && has(ir.file) ? imageSize(path.join(SITE, ir.file)) : null;
+    if (real && a.width && a.height) check(Math.abs(a.width / a.height / (real.w / real.h) - 1) <= 0.02, `${tag} <img src="${a.src}"> says ${a.width}x${a.height} but the file is ${real.w}x${real.h}: the picture would be stretched`);
+  }
+
+  // clients: the logo wall shows exactly the clients listed in src/site.json, in the same order, each logo with the client's name as alt text and the true size of its file
+  {
+    const CL = CLIENTS;
+    const open = (body.match(/<section\b[^>]*\sid="clients"[^>]*>/) || [])[0];
+    if (!CL.length) check(!open, `${tag} the page has a #clients section but src/site.json lists no clients`);
+    else if (check(!!open, `${tag} the #clients section is missing (src/site.json lists ${CL.length} client${CL.length > 1 ? "s" : ""})`)) {
+      const sec = body.slice(body.indexOf(open)).split("</section>")[0];
+      const h2id = (sec.match(/<h2\b[^>]*\sid="([^"]+)"/) || [])[1];
+      check(!!h2id && parseAttrs(open)["aria-labelledby"] === h2id, `${tag} #clients must be labelled by its own <h2> (aria-labelledby = the id of the heading)`);
+      check((sec.match(/<li\b/g) || []).length === CL.length, `${tag} #clients has ${(sec.match(/<li\b/g) || []).length} list item(s) but src/site.json lists ${CL.length} client(s)`);
+      const logos = [...sec.matchAll(/<li\b[^>]*class="client"[^>]*>\s*(<img\b[^>]*>)\s*<\/li>/g)].map((m) => parseAttrs(m[1]));
+      if (check(logos.length === CL.length, `${tag} #clients shows ${logos.length} logo(s) but src/site.json lists ${CL.length}`)) CL.forEach((c, i) => {
+        const a = logos[i], n = `${tag} client "${c.name}"`, cr = resolveRef(rel, a.src || "");
+        check(a.alt === c.name, `${n}: the logo's alt text is "${a.alt}"; it should be the client's name (position ${i + 1} must match src/site.json)`);
+        if (check(!!cr.file && cr.file.startsWith("assets/img/clients/") && has(cr.file), `${n}: the logo file is missing or is not in assets/img/clients/ (${a.src})`)) {
+          const real = imageSize(path.join(SITE, cr.file));
+          if (check(!!real, `${n}: the size of ${cr.file} cannot be read (PNG, JPEG, WebP, GIF or SVG expected)`)) {
+            check(+a.width === real.w && +a.height === real.h, `${n}: width/height are ${a.width}x${a.height} but ${cr.file} is ${real.w}x${real.h}: the logo would be stretched. Run node tools/build.mjs`);
+            check(Math.max(real.w, real.h) >= BUDGET.logoMinPx, `${n}: ${cr.file} is only ${real.w}x${real.h} px; under ${BUDGET.logoMinPx} px on its longest side it looks soft on a retina screen. Ask for a larger file or an SVG`, "warn");
+          }
+          const size = fs.statSync(path.join(SITE, cr.file)).size / 1024;
+          check(size <= BUDGET.logoKB, `${n}: ${cr.file} is ${kb(size)} (budget ${BUDGET.logoKB} KB per logo). Export it again as WebP`);
+        }
+        check(a.loading === "lazy" && a.decoding === "async", `${n}: the logo needs loading="lazy" decoding="async" (the wall is far below the first screen)`);
+        const wantLang = c.lang && c.lang !== L.code ? c.lang : undefined;
+        check(a.lang === wantLang, `${n}: lang is ${a.lang ? `"${a.lang}"` : "not set"} but ${wantLang ? `"${wantLang}"` : "no lang attribute"} is expected (a name written in another language than the page needs lang, so a screen reader pronounces it correctly)`);
+      });
+    }
   }
   // form fields need a label
   const labelled = new Set([...body.matchAll(/<label\b[^>]*\sfor="([^"]+)"/g)].map((m) => m[1]));
@@ -333,6 +368,11 @@ if (check(has("llms.txt") && has("llms-full.txt"), "llms.txt and llms-full.txt a
   }
   for (const L of cfg.langs) check(full.includes(pageUrl(cfg, L.code)), `llms-full.txt should contain the ${L.code} page`);
   check(full.length > 8000, "llms-full.txt looks too short");
+  // the clients are part of what an AI assistant can quote: once in llms.txt, once per language in llms-full.txt
+  for (const c of CLIENTS) {
+    check(l.includes(`\n- ${c.name}\n`), `llms.txt does not list the client "${c.name}"`);
+    check(full.split(`\n- ${c.name}\n`).length - 1 === cfg.langs.length, `llms-full.txt should list the client "${c.name}" once per language (${cfg.langs.length} times)`);
+  }
 }
 // GitHub Pages essentials
 check(new URL(origin).pathname === "/", `"url" in src/site.json must be the root of a host, without a path (got ${origin})`);
@@ -367,6 +407,27 @@ if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
   const rate = (cfgJs.match(/TND\s*:\s*(\d+)/) || [])[1];
   check(/defaultCurrency\s*:\s*"TND"/.test(cfgJs), "config.js: defaultCurrency should be TND (DT first)");
   check(rate && read("index.html").includes(`id="s-rate" min="1" step="1" value="${rate}"`), `the default hourly cost in the page should equal config.js hourlyCost.TND (${rate})`);
+}
+
+// ---------- clients (the logo wall) ----------
+// The list lives in src/site.json ("clients": [{ "name", "logo", "lang"? }]). The build turns it into the #clients section on every page and into the
+// lists in llms.txt; the per-page checks (checkPage above) compare each page with it, and the CSS checks are in the theme section below.
+{
+  const CL = CLIENTS, dir = "assets/img/clients";
+  check(cfg.clients === undefined || Array.isArray(cfg.clients), `src/site.json: "clients" must be a list`);
+  const names = CL.map((c) => String(c.name).trim().toLowerCase());
+  check(new Set(names).size === names.length, `src/site.json: two clients have the same name`);
+  check(new Set(CL.map((c) => c.logo)).size === CL.length, `src/site.json: two clients use the same logo file`);
+  for (const c of CL) {
+    check(typeof c.name === "string" && c.name.trim() !== "" && typeof c.logo === "string" && c.logo.trim() !== "", `src/site.json: every client needs a "name" and a "logo" file name (got ${JSON.stringify(c)})`);
+    if (c.lang !== undefined) check(cfg.langs.some((o) => o.code === c.lang), `src/site.json: client "${c.name}" has an unknown "lang" (${c.lang}); use one of ${cfg.langs.map((o) => o.code).join(", ")}`);
+    if (/[؀-ۿ]/.test(c.name || "")) check(c.lang === "ar", `src/site.json: the client name "${c.name}" is written in Arabic, so it needs "lang": "ar" (screen readers use it to pronounce the name)`);
+  }
+  // a logo nobody shows is weight for nothing
+  if (has(dir)) {
+    const used = new Set(CL.map((c) => c.logo));
+    for (const f of fs.readdirSync(path.join(SITE, dir))) check(used.has(f), `${dir}/${f} is not used by any client in src/site.json (delete the file, or add the client)`, "warn");
+  } else check(!CL.length, `${dir}/ is missing but src/site.json lists clients`);
 }
 
 // ---------- theme: light / dark ----------
@@ -559,6 +620,22 @@ if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
     }
     const stretched = [...bySel].filter(([, e]) => e.width && !e.height).map(([sel]) => sel);
     check(!stretched.length, `these rules set a width on an image that has width and height attributes, but no height, so the image can be stretched: ${stretched.join(", ")}. Add height:auto`);
+  }
+
+  // --- client logos: the logo files have white backgrounds, so each logo sits on a white plate in BOTH themes (--logo-plate). The picture is fitted
+  //     inside the plate (object-fit: contain), so a logo of any shape is neither cropped nor stretched. A client's logo is shown as supplied: it is never
+  //     recoloured (no filter, blend mode or opacity), not even to "fit" the dark theme. ---
+  if (CLIENTS.length) {
+    for (const [th, T] of [["dark", dark], ["light", L]]) check(/^#(?:fff|ffffff)$/i.test(T["--logo-plate"] || ""), `styles.css (${th}): --logo-plate must be #fff (found ${T["--logo-plate"] || "nothing"}). The client logo files have white backgrounds; on any other colour each logo would show as a white box`);
+    const bareCss = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    const declsOf = (sel) => [...bareCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      .filter((m) => m[1].split(",").some((x) => x.trim().replace(/\s+/g, " ") === sel))
+      .flatMap((m) => m[2].split(";").map((d) => { const i = d.indexOf(":"); return i < 0 ? null : [d.slice(0, i).trim().toLowerCase(), d.slice(i + 1).trim().toLowerCase()]; }).filter(Boolean));
+    const plate = declsOf(".client"), pic = declsOf(".client img");
+    check(plate.some(([p, v]) => p === "background" && v === "var(--logo-plate)"), "styles.css: `.client` must have background: var(--logo-plate) (the plate stays white in both themes)");
+    check(pic.some(([p, v]) => p === "object-fit" && v === "contain"), "styles.css: `.client img` needs object-fit: contain, so a logo of any shape is fitted in its plate and never stretched or cropped");
+    const recoloured = pic.filter(([p, v]) => /^(?:-webkit-)?filter$/.test(p) && v !== "none" || p === "mix-blend-mode" && v !== "normal" || p === "opacity" && v !== "1").map(([p, v]) => `${p}: ${v}`);
+    check(!recoloured.length, `styles.css: \`.client img\` changes the look of the client's logo (${recoloured.join("; ")}). Logos are shown exactly as supplied`);
   }
 
   // --- the wave: theme.js is run here, in Node, and the shape it draws is checked for every screen size ---

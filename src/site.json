@@ -8,6 +8,13 @@
   "founder": "Aziz Chaibi",
   "xDefault": "en",
   "sameAs": ["https://github.com/aziz-art"],
+  "clients": [
+    { "name": "Bonayaty", "logo": "bonayaty.webp" },
+    { "name": "Hijabella", "logo": "hijabella.webp" },
+    { "name": "Nutrichem", "logo": "nutrichem.webp" },
+    { "name": "متجر المسلم", "logo": "matjar-al-muslim.webp", "lang": "ar" },
+    { "name": "Galerie des Décors", "logo": "galerie-des-decors.webp", "lang": "fr" }
+  ],
   "langs": [
     { "code": "fr", "dir": "ltr", "path": "/", "label": "FR", "name": "Français", "nativeName": "GrowDev en français", "englishName": "French", "ogLocale": "fr_FR" },
     { "code": "ar", "dir": "rtl", "path": "/ar/", "label": "عربي", "name": "العربية", "nativeName": "GrowDev بالعربية", "englishName": "Arabic", "ogLocale": "ar_AR" },

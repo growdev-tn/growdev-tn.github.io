@@ -140,6 +140,7 @@ export function llms(cfg, D) {
     ...cfg.langs.map((l) => `- [${l.nativeName}](${url + l.path}): ${D[l.code]["meta.desc"]}`), "",
     "## Services", "",
     ...SERVICES.map((s) => `- [${E[s.key + ".t"]}](${url + en.path}#${s.anchor}): ${E[s.key + ".p"]}`), "",
+    ...(cfg.clients && cfg.clients.length ? ["## Clients", "", `${E["clients.lead"]}`, "", ...cfg.clients.map((c) => `- ${c.name}`), ""] : []),
     "## FAQ", "",
     ...Array.from({ length: FAQ_COUNT }, (_, i) => `- [${E[`faq.q${i + 1}`]}](${url + en.path}#faq): ${firstSentence(E[`faq.a${i + 1}`])}`), "",
     "## Optional", "",
@@ -162,6 +163,7 @@ export function llmsFull(cfg, D) {
       bullets.forEach((k) => out.push(`- ${T[k]}`));
       if (bullets.length) out.push("");
     }
+    if (cfg.clients && cfg.clients.length) out.push(`## ${T["clients.title"]}`, "", T["clients.lead"], "", ...cfg.clients.map((c) => `- ${c.name}`), "");
     out.push(`## ${T["method.title"]}`, "", T["method.lead"], "");
     for (let i = 1; i <= 5; i++) out.push(`${i}. ${T[`m${i}.t`]}: ${T[`m${i}.p`]}`);
     out.push("", `## ${T["about.title"]}`, "", T["about.p1"], "", T["about.who"], "", `### ${T["facts.t"]}`, "");

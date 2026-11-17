@@ -29,6 +29,16 @@
 - [Mobile apps](https://growdev-tn.github.io/en/#svc-mobile): An Android and iOS app connected to your data.
 - [Automation](https://growdev-tn.github.io/en/#svc-auto): No more copy-paste: your repetitive tasks run on their own.
 
+## Clients
+
+Businesses and brands that entrust us with their digital projects.
+
+- Bonayaty
+- Hijabella
+- Nutrichem
+- متجر المسلم
+- Galerie des Décors
+
 ## FAQ
 
 - [What is Odoo and what does it do for my business?](https://growdev-tn.github.io/en/#faq): Odoo is a modular business management software (ERP).

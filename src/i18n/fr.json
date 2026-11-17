@@ -7,7 +7,7 @@
   "ld.founder.job": "Développeur full-stack spécialisé Odoo",
 
   "skip": "Aller au contenu",
-  "nav.services": "Services", "nav.composer": "Votre projet", "nav.method": "Méthode", "nav.sim": "Simulateur", "nav.about": "À propos", "nav.faq": "FAQ", "nav.cta": "Parler de mon projet",
+  "nav.clients": "Clients", "nav.services": "Services", "nav.composer": "Votre projet", "nav.method": "Méthode", "nav.sim": "Simulateur", "nav.about": "À propos", "nav.faq": "FAQ", "nav.cta": "Parler de mon projet",
 
   "hero.eyebrow": "Transformation digitale · Odoo · Web · Mobile",
   "hero.l1": "Votre <em>croissance,</em>",
@@ -25,6 +25,11 @@
   "bar.mobile": "Mobile", "bar.mobile.tip": "Applications Android et iOS",
   "hero.hint": "Chaque barre est un service. Cliquez pour explorer.",
   "coin": "DT",
+
+  "clients.eyebrow": "Nos clients",
+  "clients.title": "Ils nous font confiance.",
+  "clients.lead": "Des entreprises et des marques qui nous confient leurs projets numériques.",
+  "clients.note": "Les logos présentés appartiennent à leurs propriétaires respectifs.",
 
   "svc.eyebrow": "Ce que nous faisons",
   "svc.title": "Tout pour digitaliser votre entreprise, sans jargon.",

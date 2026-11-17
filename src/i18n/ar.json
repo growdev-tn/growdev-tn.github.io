@@ -7,7 +7,7 @@
   "ld.founder.job": "مطوّر Full-stack متخصص في Odoo",
 
   "skip": "انتقل إلى المحتوى",
-  "nav.services": "الخدمات", "nav.composer": "مشروعك", "nav.method": "منهجيتنا", "nav.sim": "المحاكي", "nav.about": "من نحن", "nav.faq": "الأسئلة الشائعة", "nav.cta": "ناقش مشروعك معنا",
+  "nav.clients": "عملاؤنا", "nav.services": "الخدمات", "nav.composer": "مشروعك", "nav.method": "منهجيتنا", "nav.sim": "المحاكي", "nav.about": "من نحن", "nav.faq": "الأسئلة الشائعة", "nav.cta": "ناقش مشروعك معنا",
 
   "hero.eyebrow": "التحول الرقمي · Odoo · الويب · الجوال",
   "hero.l1": "<em>نموّكم،</em>",
@@ -25,6 +25,11 @@
   "bar.mobile": "جوال", "bar.mobile.tip": "تطبيقات Android و iOS",
   "hero.hint": "كل عمود يمثل خدمة. انقر للاستكشاف.",
   "coin": "د.ت",
+
+  "clients.eyebrow": "عملاؤنا",
+  "clients.title": "يثقون بنا.",
+  "clients.lead": "شركات وعلامات تجارية تُسند إلينا مشاريعها الرقمية.",
+  "clients.note": "الشعارات المعروضة ملك لأصحابها.",
 
   "svc.eyebrow": "ما نقدّمه",
   "svc.title": "كل ما تحتاجه لرقمنة مؤسستك، دون مصطلحات معقّدة.",

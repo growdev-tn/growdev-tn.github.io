@@ -24,7 +24,7 @@ Tunisia first, then Africa, then the world. Three languages, one URL each: `/` (
 - No major AI provider has confirmed that it ranks pages using `llms.txt`. It costs nothing, and assistants and agents that fetch pages do read it. Treat it as a bonus, not a lever.
 - Nobody can promise rankings or AI citations. New sites usually take weeks to months to settle. The work here removes technical obstacles and gives the engines clear, consistent facts.
 - `geo.*` meta tags are ignored by Google; they are a harmless hint for other engines.
-- There is no `aggregateRating`, no review and no client list in the markup: nothing is invented. Add them only when they are real and visible on the page.
+- There is no `aggregateRating` and no review in the markup: nothing is invented. The client names (from `src/site.json`) are in the visible Clients section and in `llms.txt` and `llms-full.txt`; they are not repeated in the JSON-LD. Add ratings or reviews only when they are real and visible on the page.
 
 ## 2. Keyword map
 
@@ -64,7 +64,8 @@ Rules for editing the copy:
 - The sitemap `lastmod` comes from the last git commit that touched `src/` or `site/assets/`.
 - To add a FAQ item: add `faq.qN` and `faq.aN` to the three JSON files, add the `<details>` block to `src/index.template.html`, and raise `FAQ_COUNT` in `tools/seo.mjs`. The build and the checker tell you if something is missing.
 - Each month: look at Search Console (Performance → by country and by language), turn real queries into new FAQ entries, and refresh the facts block when something changes (services, prices policy, languages).
-- Next content step: one short case study per project in the three languages, once clients agree to be named. Real case studies are the best source of citations for both search and AI answers.
+- Next content step: one short case study per project in the three languages, once clients agree to be named. The Clients section (17 Nov 2026) shows names and logos only; a case study per client is the natural next step. Real case studies are the best source of citations for both search and AI answers.
+- To add a client: one line in `"clients"` in `src/site.json` and the logo in `site/assets/img/clients/` (see `ARCHITECTURE.md` §5.6). The build puts the name in `llms.txt` and `llms-full.txt` by itself.
 
 ## 5. AI crawlers
 

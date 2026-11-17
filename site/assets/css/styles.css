@@ -21,7 +21,7 @@
   --surface-1:rgba(255,255,255,.02);--surface-2:rgba(255,255,255,.04);--hover-1:rgba(255,255,255,.05);--hover-2:rgba(255,255,255,.06);
   --hero-1:#020b18;--hero-2:#031326;--bar-label:#e4fff0;--bar-hover:brightness(1.3);--ring-in:#062414;--arrow-head:#7dffa5;
   --card-shadow:none;--pop-shadow:none;--coin-shadow:rgba(0,0,0,.5);--coin-shadow-2:rgba(0,0,0,.55);
-  --fx-grid-rgb:120,170,220;--fx-grid-a:.08;
+  --fx-grid-rgb:120,170,220;--fx-grid-a:.08;--logo-plate:#fff;
   --font-display:"Sora",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -43,7 +43,7 @@
   --hero-1:#f5f9fd;--hero-2:#e8f0f7;--bar-label:#04301a;--bar-hover:saturate(1.35) brightness(.97);--ring-in:#fff;--arrow-head:#0c9a4a;
   --card-shadow:0 1px 2px rgba(6,25,44,.05),0 18px 40px -26px rgba(6,25,44,.3);--pop-shadow:0 14px 34px -14px rgba(6,25,44,.4);
   --coin-shadow:rgba(70,45,0,.3);--coin-shadow-2:rgba(70,45,0,.34);
-  --fx-grid-rgb:20,70,120;--fx-grid-a:.07;
+  --fx-grid-rgb:20,70,120;--fx-grid-a:.07;--logo-plate:#fff;
   color-scheme:light;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -214,6 +214,19 @@ html:not([lang="ar"]) .lang a[lang="ar"]{font-family:system-ui,"Segoe UI",Tahoma
   .hero__grid{grid-template-columns:1fr}
   .growth{height:clamp(320px,56vh,440px);margin-top:12px}
 }
+/* Clients: each logo sits on a white plate. The logo files are drawn on white, so --logo-plate is white in both themes (tools/check.mjs enforces it).
+   The picture is laid inside the plate and fitted with object-fit:contain: a logo of any shape fits, and none can be stretched. Add a client in src/site.json. */
+.clients-sec{padding-block:clamp(56px,7vw,96px) 0}
+.clients-sec .h2{font-size:clamp(1.65rem,1.05rem + 2.2vw,2.5rem)}
+.clients-sec .lead,.clients__note{text-wrap:balance}
+.clients{--cols:2;--gap:clamp(10px,2vw,16px);--pad:clamp(12px,2.4vw,22px);display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap);margin-top:clamp(26px,3.6vw,40px)}
+.client{position:relative;flex:0 0 calc((100% - (var(--cols) - 1)*var(--gap))/var(--cols) - .5px);aspect-ratio:4/3;min-width:0;background:var(--logo-plate);border:1px solid var(--line-2);border-radius:var(--r-chip);box-shadow:var(--card-shadow)}
+.client img{position:absolute;inset:var(--pad);width:calc(100% - 2*var(--pad));height:calc(100% - 2*var(--pad));object-fit:contain}
+.client:nth-child(4n+2){--d:1}.client:nth-child(4n+3){--d:2}.client:nth-child(4n){--d:3}
+.clients__note{margin-top:20px;color:var(--muted);font-size:.84rem;text-align:center}
+@media (min-width:600px){.clients{--cols:3}}
+@media (min-width:1000px){.clients{--cols:5}}
+
 /* Services bento */
 .svc-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);margin-top:52px}
 .svc{grid-column:span 4;position:relative;display:flex;flex-direction:column;gap:14px;padding:26px 26px 24px;min-width:0;overflow:hidden;background:linear-gradient(160deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:var(--r-card);transition:transform .4s var(--ease),border-color .3s,box-shadow .4s}

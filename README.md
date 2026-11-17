@@ -39,6 +39,7 @@ docker run --rm -v "${PWD}:/app" -w /app node:22-alpine node tools/check.mjs
 |---|---|
 | Any text (all three languages) | `src/i18n/fr.json`, `src/i18n/ar.json`, `src/i18n/en.json`. Keep the same keys in all three; the build tells you what is missing |
 | Page structure, sections, order | `src/index.template.html` (`data-i18n="key"` marks translated text) |
+| **Clients** shown in the "Clients" section (name and logo) | One line each in `"clients"` in `src/site.json`, plus the logo file in `site/assets/img/clients/`. The build reads the logo's real size. The heading and the note are `clients.*` in the three JSON files. Details and the rules: `docs/ARCHITECTURE.md` §5.6 |
 | E-mail, founder, **site address (`url`)**, social profiles (`sameAs`), languages, whether AI training crawlers are allowed (`allowAiTraining`) | `src/site.json` |
 | **Which theme a first-time visitor sees** (`"defaultTheme"`: `"dark"` now, `"light"`, or `"system"` to follow the visitor's phone or computer) and the browser-bar colours (`"themeColor"`) | `src/site.json`, then build |
 | Colours of either theme | The two token blocks at the top of `site/assets/css/styles.css` (`:root` = dark, `:root[data-theme="light"]` = light). Give every colour a value in both; the checker tells you if you forget one or if a text colour is too pale |
@@ -70,7 +71,7 @@ Push to `main`. GitHub Actions builds, runs the checks and deploys in about a mi
 | [docs/SEO-GEO-AEO.md](docs/SEO-GEO-AEO.md) | What is built in for search engines and AI assistants, keyword map, launch checklist |
 | [docs/CREATIVE-BRIEF.md](docs/CREATIVE-BRIEF.md) | Audience, messaging, tone, visual direction, open questions |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Principles, stack decisions, security, performance, design system, roadmap |
-| [docs/UX-AUDIT.md](docs/UX-AUDIT.md) | UX/UI audit of 15 Nov 2026: scores, evidence (accessibility scan, contrast, layout, speed), what was fixed, what is left |
+| [docs/UX-AUDIT.md](docs/UX-AUDIT.md) | UX/UI audit of 15 Nov 2026: scores, evidence (accessibility scan, contrast, layout, speed), what was fixed, what is left; plus an addendum of 17 Nov on the Clients section |
 
 ## Credits and licence
 

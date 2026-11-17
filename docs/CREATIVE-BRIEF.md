@@ -61,7 +61,7 @@
 | 3 | Benefit 1 | One tool for sales, purchasing, stock and invoicing (Odoo), instead of scattered files. |
 | 4 | Benefit 2 | Everything under one roof: Odoo, custom web, WordPress, PrestaShop, mobile, automation. |
 | 5 | Benefit 3 | Delivered in phases, in French, Arabic or English, quoted in DT in Tunisia. |
-| 6 | Proof | A visible five-step method; a live tool that draws *your* system; a simulator that shows hours and money saved from your own numbers; no cookies, no trackers. Client case studies are **pending** (see §8). |
+| 6 | Proof | A visible five-step method; a live tool that draws *your* system; a simulator that shows hours and money saved from your own numbers; no cookies, no trackers. A Clients section shows five client logos (added 17 Nov 2026); client case studies are still **pending** (see §8). |
 | 7 | CTA | « Parlons de votre projet » · «ناقش مشروعك معنا» · "Talk about my project" → composes an e-mail brief |
 
 **Claims we can make**
@@ -71,11 +71,12 @@
 - Work in French, Arabic and English; Tunisia first, then Africa and abroad, remotely.
 - Quotes in DT for Tunisia, in € or $ abroad; no fixed price list, each project is quoted after a first conversation.
 - No cookies and no trackers on this site.
+- GrowDev has worked for the five businesses in the Clients section (Bonayaty, Hijabella, Nutrichem, متجر المسلم, Galerie des Décors): names and logos supplied by the owner. Say nothing more about any of them (what was built, results) until the owner confirms it and the client agrees.
 
 **Claims to avoid** (until they are true and provable)
 
 - "Official Odoo partner", "certified", "#1", "leader".
-- Number of clients or projects, client logos, testimonials, ratings.
+- Number of clients or projects, testimonials, ratings. Client logos only for clients who agreed to be shown.
 - "From X DT", guaranteed deadlines, guaranteed savings. The simulator is an estimate built from the visitor's own inputs, and says so.
 
 **Tone of voice.** Warm, direct, calm: a competent colleague who explains things simply. No buzzwords, no hype, no fear. French: *vous*, short sentences. English: plain, international. Arabic: simple Modern Standard Arabic, written natively (not translated word for word), addressing the reader in the plural.
@@ -159,7 +160,7 @@
 **Nice-to-haves**
 
 - [ ] WhatsApp contact button (needs the number; very common for Tunisian SMEs)
-- [ ] Case studies with client permission
+- [ ] Case studies with client permission (the Clients section already lists names and logos; it says nothing about the work)
 - [ ] A short video demo of the composer
 
 **Things to avoid:** invented proof, a pricing table, jargon in headlines, auto-playing sound, any pop-up.

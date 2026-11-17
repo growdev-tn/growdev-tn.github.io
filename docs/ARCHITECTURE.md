@@ -1,6 +1,6 @@
 # GrowDev Portfolio — Architecture Constitution
 
-Version: 0.2 | Date: 2026-11-15 | Author: Aziz Chaibi (with Claude)
+Version: 0.3 | Date: 2026-11-17 | Author: Aziz Chaibi (with Claude)
 
 Written with the *dev-architect* method: constitution first, then architecture, security, performance, design system and roadmap. The "discovery" phase is already answered by the brief:
 
@@ -28,7 +28,7 @@ A fast, accessible, animated showcase that tells a non-technical owner what Grow
 3. **One source of truth.** `src/` generates everything. `site/*.html` is output; nobody edits it by hand.
 4. **Three languages are equal.** Same keys, same structure. The build fails if a key, a placeholder or an HTML tag differs between languages. Arabic is right-to-left by design, not a mirror afterthought.
 5. **Motion has a job and can be switched off.** Animation explains or guides, and respects `prefers-reduced-motion`. The theme wave only plays when the visitor presses the button.
-6. **Honesty.** No invented clients, reviews, prices or partner badges.
+6. **Honesty.** No invented clients, reviews, prices or partner badges. A client is shown only with the owner's confirmation that the client agrees (§5.6).
 7. **Simple enough for a junior.** Change copy in a JSON file, run two commands, push.
 
 ### Hard constraints
@@ -94,10 +94,11 @@ A fast, accessible, animated showcase that tells a non-technical owner what Grow
 | Template | `src/index.template.html` | `data-i18n="key"` shells, `data-i18n-attr="attr:key"`, `{{placeholder}}` |
 | Dictionaries | `src/i18n/{fr,ar,en}.json`, flat keys | Same keys in all three; same `{vars}` and tags; Arabic adds plural forms |
 | Site facts | `src/site.json` | URL, e-mail, founder, languages, `sameAs`, font preloads, runtime keys |
+| Clients | `src/site.json` → `clients`, logos in `site/assets/img/clients/` | One `{ "name", "logo", "lang"? }` per client, in display order. The build writes the plates and each logo's real `width` and `height`; the names also go into `llms.txt` and `llms-full.txt` (§5.6) |
 | Runtime slice | `site/assets/js/dict-<lang>.js` (generated) | Only keys that scripts need (`mod.`, `hint.`, `sum.`, `phase.`, `brief.`, `curfmt.`…) |
 | Structured data | `tools/seo.mjs` | One JSON-LD `@graph` per page, stable `@id`s |
 
-Key namespaces: `meta`, `ld`, `hero`, `svc`, `comp`, `method`, `sim`, `about`, `facts`, `faq`, `contact`, `foot`, `mod`, `hint`, `sum`, `phase`, `brief`, `cur`, `curfmt`.
+Key namespaces: `meta`, `ld`, `hero`, `svc`, `clients`, `comp`, `method`, `sim`, `about`, `facts`, `faq`, `contact`, `foot`, `mod`, `hint`, `sum`, `phase`, `brief`, `cur`, `curfmt`.
 
 ### 2.4 "API" design
 
@@ -156,9 +157,10 @@ Privacy note: with no cookies, analytics or forms, the site itself processes no 
 | LCP (mobile, slow 4G) | < 2.5 s | > 4 s | 1.30 s dark, 1.43 s light (phone 390 px, CPU 4× slower, throttled network); 0.17 s on desktop |
 | CLS | < 0.1 | > 0.25 | 0 on every run |
 | INP | < 200 ms | > 500 ms | not measured (needs a real device or field data) |
-| HTML, gzipped | ≤ 45 KB per page | checker fails | 12.3 to 13.6 KB |
-| CSS, gzipped | ≤ 22 KB | checker fails | 11.6 KB (the light theme and the toggle added about 2 KB) |
+| HTML, gzipped | ≤ 45 KB per page | checker fails | 12.6 to 14.0 KB (re-measured 2026-11-17; the Clients section added 0.3 to 0.4 KB) |
+| CSS, gzipped | ≤ 22 KB | checker fails | 12.4 KB (re-measured 2026-11-17; the light theme and the toggle added about 2 KB, the Clients section 0.4 KB) |
 | JavaScript, gzipped | ≤ 30 KB | checker fails | 16.6 to 17.0 KB (`theme.js` is about 3 KB of it) |
+| Client logos | ≤ 40 KB each | checker fails | 7.5 to 11.6 KB each, about 48 KB for the five, loaded lazily (`loading="lazy"`) |
 | Third-party requests | 0 | any | 0 |
 
 How the speed numbers were taken: headless Chromium against the built `site/` on a local server, median of three runs, first paint of the page with the saved theme already applied. The same method on the version before the themes gave a 1.25 s phone LCP and 0.17 s on desktop, so the themes cost about 50 ms on a slow phone and nothing measurable on desktop. A local server has no network distance: the numbers compare builds, they do not predict what a visitor in Sfax sees. Re-measure with Lighthouse or PageSpeed Insights after the next push.
@@ -235,6 +237,19 @@ Hand-built, no library: sticky header with language switch and the light/dark bu
 - **Header width.** The five links, the language switch, the toggle and the call-to-action only fit side by side from 1141 px. Below that the links move into the Menu button (`@media (max-width:1140px)` in `styles.css`, `MENU_BREAKPOINT` in `ui.js`: the checker fails if the two numbers differ). Below 340 px the "GrowDev" word beside the logo is dropped; the logo link keeps its accessible name. **The header must never carry `backdrop-filter`, `filter`, `transform` or containment itself**: it hosts the fixed menu, and any of those makes the header the menu's container, so the menu collapses to a strip once the page is scrolled. The frosted bar is `.site-header::before`; the open menu is opaque (`.nav` background at least 0.9) and scrolls on its own; `ui.js` puts `is-menu-open` on the header so the bar turns opaque with it.
 - **What `tools/check.mjs` enforces** (section "theme"): every colour token exists in both themes (unless listed as shared); text colours reach 4.5 : 1 and graphic colours 3 : 1 on all four surfaces of each theme; the browser-bar colour equals `--bg`; no colour is written directly in a rule or in the markup; every SVG gradient stop has a light colour; each page has the right default, toggle, status region and script order; no cookie, network call or other storage key in the scripts; the wave geometry (it runs `theme.js` in Node over 12 screen sizes, 6 starting points and 12 seeds: the outline must cover the whole screen at the end, start small and never shrink); reduced-motion and fallback code present; the menu breakpoint is the same in CSS and JS; nothing on `.site-header` can turn it into the menu's container; the open menu is at least 90 % opaque; any CSS rule that sets a width on an image that has width and height attributes also sets a height (else the picture is stretched).
 - **What it cannot see** (checked by hand with a browser on 2026-11-15, see `docs/UX-AUDIT.md`): contrast on gradients and photos, header overlap at each width, and how the wave looks frame by frame.
+
+### 5.6 Client logos (the "Clients" section)
+
+A short wall of white plates, one logo each, between the marquee and the services (`#clients`, `.clients-sec`). It says who GrowDev has worked for and claims nothing else: the copy never says what was built for a client.
+
+- **The list is data, not markup.** `src/site.json` → `"clients"`, in display order: `{ "name": "Hijabella", "logo": "hijabella.webp" }`. Add `"lang": "ar"` (or `"fr"`, `"en"`) when the name is written in a language that is not the page's: a screen reader then pronounces it correctly (the build writes `lang` on a logo only on the pages in another language, and the checker fails an Arabic name without `"lang": "ar"`). The logo file lives in `site/assets/img/clients/`. The build opens every logo and writes its real `width` and `height` (`tools/imgsize.mjs`: PNG, JPEG, WebP, GIF and SVG, no dependency), so a logo cannot be given a wrong shape by hand. The same names go into `llms.txt` and, once per language, `llms-full.txt`. Texts: `clients.eyebrow`, `clients.title`, `clients.lead`, `clients.note` and `nav.clients` (the footer link) in the three dictionaries.
+- **To add a client:** put the logo in `site/assets/img/clients/` (WebP, PNG or SVG; ideally 400 px or more on the long side, or an SVG; at most 40 KB; the checker warns under 200 px), add one line to `"clients"`, run build and check. Nothing else changes: the wall reflows by itself (2 plates per row on phones, 3 from 600 px, 5 from 1000 px, a short last row centred).
+- **A white plate in both themes.** Logo files come with white backgrounds, and on the dark page they would show as white boxes. Each logo therefore sits on a white plate (`--logo-plate`, `#fff` in both token blocks) with the brand's asymmetric corners and a hairline border, in 4 : 3 proportion. The picture is fitted inside it with `object-fit: contain` in an absolutely positioned box, so a logo of any shape is neither stretched nor cropped. **Never recolour a client's logo**: no `filter`, blend mode or opacity, not even to suit the dark theme.
+- **Preparing a logo.** WebP: lossless for flat-colour artwork, high-quality lossy for the rest. The source of one logo (Bonayaty) had its drop shadow cut by the bottom edge of the file, which would show as a hard line on a white plate, so its last rows were faded to white. Check any new logo for the same thing at its edges.
+- **Accessibility and loading.** A plain `<ul>` inside a `<section aria-labelledby>`; each logo's `alt` is the client's name; logos are not links, so there are no extra tab stops. `loading="lazy" decoding="async"`: the wall is far below the first screen. Each plate reveals on scroll like the other sections and is visible at once without scripts or with reduced motion.
+- **No link in the header.** The header is already full between 1141 and 1400 px (§5.5), so the section is linked from the footer only. The scroll-spy tracks navigation links only, so it ignores the section by design.
+- **What `tools/check.mjs` enforces** (section "clients", the per-page block and the theme section): the section exists on all three pages with the same logos in the same order as `src/site.json`; each `alt` is the client's name; the file exists in `assets/img/clients/` and `width` and `height` equal its real size (a warning under 200 px on the long side); at most 40 KB per logo; `lazy` and `async`; the right `lang` on each page; no two clients with the same name or file; a logo file that no client uses is reported; `--logo-plate` is `#fff` in both themes, `.client` uses it, and `.client img` keeps `object-fit: contain` and has no filter, blend mode or opacity; `llms.txt` lists every client and `llms-full.txt` lists each one once per language. For every image on every page, the `width` and `height` attributes must also have the real ratio of the file.
+- **What it cannot see** (checked by hand in Chromium on 2026-11-17, see the addendum in `docs/UX-AUDIT.md`): how the wall looks, the Arabic wording, and Safari. **It cannot know whether a client agrees to be shown.** Confirm that with each client before publishing (and with the employer, for a project delivered through one).
 
 ---
 

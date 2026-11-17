@@ -135,9 +135,28 @@ All run on 2026-11-15 against the built `site/` (headless Chromium, local server
 | Mobile menu | Opened at scroll 0, 40, 600 and 4,000 px in 3 languages, both themes, on a phone in portrait and landscape, a tablet, 1100 px and 320 px: it fills the screen under the bar, is opaque (no page visible through it, measured by comparing with the same screen with the page hidden), its last item can be reached, and Escape closes it without moving the page. |
 | Layout | No horizontal scrolling and no clipped content from 320 to 1440 px, in the three languages. Header: no two items overlap and nothing leaves the screen at any width from 320 to 520 px (every pixel) and from 521 to 1400 px (every third). Tablet (768 px) checked in both themes. |
 | Speed | Same as before the themes: LCP 0.17 s on desktop; on a slowed phone 1.30 s (dark) and 1.43 s (light) against 1.25 s before; CLS 0. |
-| Checker | `node tools/check.mjs`: 1,290 checks pass. It was tested by deliberately breaking things (a missing light colour, a low-contrast colour, a wave that stops short, a gradient stop without a light colour, mismatched menu breakpoints, a blur or transform on the header, a see-through menu, an image with a width but no height) and caught each one. |
+| Checker | `node tools/check.mjs`: 1,290 checks passed on 15 Nov (1,549 since the Clients section of 17 Nov, see the addendum). It was tested by deliberately breaking things (a missing light colour, a low-contrast colour, a wave that stops short, a gradient stop without a light colour, mismatched menu breakpoints, a blur or transform on the header, a see-through menu, an image with a width but no height) and caught each one. |
 
 **Not measured:** real phones and tablets beyond the owner's single iPhone check, and WebKit (Safari's engine) was not available to the author, so the menu fix is tested in Chromium and rests on the CSS rule that a blur or transform makes an element the container of fixed descendants, which Safari follows too; screen readers (NVDA, VoiceOver, TalkBack) beyond the accessibility tree and the live-region text; INP; Lighthouse; a test with real visitors; the live address (not reachable from the build environment; run `bash tools/verify-launch.sh` after each push).
+
+---
+
+## Addendum, 17 Nov 2026: the Clients section
+
+Five client logos were added between the marquee and the services (`#clients`). This is the author's own review, done in headless Chromium against the built site. WebKit (Safari), real phones and the live address were not available.
+
+| Check | Result |
+|---|---|
+| Layout | 1,340 assertions pass: 3 languages × dark and light × 13 widths (320, 360, 390, 599, 600, 768, 820, 999, 1000, 1024, 1280, 1440 and 1920 px). Five plates of equal size and 4 : 3 proportion; 2, 3 and 5 per row, with a short last row centred; the first client on the right in Arabic and on the left in French and English; every plate pure white in both themes; every logo inside its plate and never drawn larger than its file; no sideways scrolling; nothing outside the content column; names and order equal to `src/site.json`; section texts equal to the three dictionaries. |
+| Accessibility scan | axe-core: **0 violations** on 12 page states (3 languages × 2 themes × phone and desktop) with the section on screen; nothing left "to review" inside the section. |
+| Motion and no script | The plates start hidden and fade in when scrolled to. With scripts blocked, or with reduced motion, all five are visible at once, and the logos still load without scripts. |
+| Navigation | The footer "Clients" link brings the heading below the header at 390 and 1440 px in all three languages. The theme button keeps the plates white. While the section is centred, the scroll-spy marks no link (it has no header link, by design). |
+| Speed and hygiene | Layout shift caused by the section: 0 (3 languages, 390 and 1440 px). No console message and no request to another host on any page. Weight: about 48 KB of lazily loaded images; HTML +0.3 to 0.4 KB and CSS +0.4 KB gzipped. LCP was not re-measured. |
+| Checker | 1,549 checks pass (1,290 before). The new rules were tested by breaking them 39 ways, and each was caught: missing section, wrong or empty `alt`, swapped order, an extra or missing logo, a deleted logo or one outside the folder, a wrong `width` or `height`, a logo that is too small (warning) or over 40 KB, missing `lazy` or `async`, a wrong or missing `lang`, a duplicate name or file, an unknown `lang`, an orphan file (warning), a plate that is not white in either theme, a plate that no longer uses its colour token, `object-fit` removed or set to `cover`, and a filter, blend mode or opacity on a logo. The browser tests themselves were run on a deliberately broken copy (square plates, a grey plate, stretched logos) and raised 201 failures. |
+
+**Found and fixed while building:** square plates made the phone layout too tall (now 4 : 3); on a phone the Arabic lead and the footnote left one word alone on the last line (`text-wrap: balance`); the source of one logo had its drop shadow cut by the bottom edge of the file, which would have shown as a hard line on a white plate (its last rows were faded to white).
+
+**Not measured, not decided:** Safari and iOS, real Android phones, screen-reader speech, the live address. The Arabic lines of the section need a native read. Logos under about 400 px on the long side (the smallest is 238 px) look slightly soft on high-density phones: SVG or larger files would fix that. Each client must agree to be shown; nothing in the code can check that.
 
 ---
 

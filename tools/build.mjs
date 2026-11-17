@@ -11,6 +11,7 @@ import path from "node:path";
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { jsonLd, sitemap, robots, llms, llmsFull, pageUrl } from "./seo.mjs";
+import { imageSize } from "./imgsize.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const args = process.argv.slice(2);
@@ -41,6 +42,21 @@ const THEME_DEFAULT = cfg.defaultTheme || "dark";
 if (!["dark", "light", "system"].includes(THEME_DEFAULT)) fail(`"defaultTheme" in src/site.json must be "dark", "light" or "system" (got "${THEME_DEFAULT}")`);
 const THEME_COLOR = { dark: "#020b18", light: "#eef3f8", ...(cfg.themeColor || {}) };
 for (const [k, v] of Object.entries(THEME_COLOR)) if (!/^#[0-9a-f]{6}$/i.test(v)) fail(`"themeColor.${k}" in src/site.json must be a #rrggbb colour (got "${v}")`);
+
+// Clients: the logos of the Clients section. One entry per client in src/site.json ("clients"); the picture lives in site/assets/img/clients/.
+// The build reads each picture's real size, so the width and height attributes in the pages are always right and a logo can never be stretched by a wrong attribute.
+// "lang" (optional) is the language of the name when it is not the page's own (the Arabic name shown on the French and English pages gets lang="ar").
+const CLIENTS = Array.isArray(cfg.clients) ? cfg.clients : [];
+const clientDims = CLIENTS.map((c, i) => {
+  const where = `src/site.json clients[${i}]${c && c.name ? ` ("${c.name}")` : ""}`;
+  if (!c || typeof c.name !== "string" || !c.name.trim()) { fail(`${where}: "name" is required`); return null; }
+  if (typeof c.logo !== "string" || !/^[\w.-]+\.(webp|png|jpe?g|svg)$/i.test(c.logo)) { fail(`${where}: "logo" must be a file name such as acme.webp (webp, png, jpg or svg)`); return null; }
+  if (c.lang !== undefined && !cfg.langs.some((l) => l.code === c.lang)) fail(`${where}: "lang" must be one of ${cfg.langs.map((l) => l.code).join(", ")}`);
+  const file = path.join(OUT, "assets/img/clients", c.logo);
+  const dim = fs.existsSync(file) ? imageSize(file) : null;
+  if (!dim) { fail(`${where}: site/assets/img/clients/${c.logo} is missing or is not a readable image`); return null; }
+  return dim;
+});
 
 function lastmod() {
   try {
@@ -108,6 +124,9 @@ function render(L) {
     preload: (cfg.preload[L.code] || []).map((f) => `<link rel="preload" href="${base}assets/fonts/${f}.woff2" as="font" type="font/woff2" crossorigin>`).join("\n"),
     entryAttrs: entry ? " data-entry" + others.map((o) => ` data-${o.code}="${rel(L, o)}"`).join("") : "",
     langLinks: cfg.langs.map((o) => `<a href="${o.code === L.code ? "#top" : rel(L, o)}" hreflang="${o.code}" lang="${o.code}" data-lang="${o.code}" title="${o.name}"${o.code === L.code ? ' aria-current="page"' : ""}>${o.label}</a>`).join(""),
+    clients: CLIENTS.map((c, i) => !clientDims[i] ? "" :
+      `<li class="client" data-reveal><img src="${base}assets/img/clients/${esc(c.logo)}" width="${clientDims[i].w}" height="${clientDims[i].h}" alt="${esc(c.name)}"${c.lang && c.lang !== L.code ? ` lang="${c.lang}"` : ""} loading="lazy" decoding="async"></li>`
+    ).join("\n      "),
     mailSubject: encodeURIComponent(tr("contact.mailsubject")),
     jsonld: JSON.stringify(jsonLd(cfg, D, L.code, { ogImage, lastmod: LASTMOD })).replace(/</g, "\\u003c")
   };
