@@ -30,6 +30,11 @@
   "clients.title": "Ils nous font confiance.",
   "clients.lead": "Des entreprises et des marques qui nous confient leurs projets numériques.",
   "clients.note": "Les logos présentés appartiennent à leurs propriétaires respectifs.",
+  "clients.role": "carrousel",
+  "clients.prev": "Client précédent",
+  "clients.next": "Client suivant",
+  "clients.pause": "Mettre en pause le défilement automatique",
+  "clients.play": "Relancer le défilement automatique",
 
   "svc.eyebrow": "Ce que nous faisons",
   "svc.title": "Tout pour digitaliser votre entreprise, sans jargon.",

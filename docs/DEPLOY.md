@@ -120,7 +120,8 @@ If you moved an existing repository with **Settings → General → Danger Zone 
 | `404` right after the first deploy | The deployment is not finished, or Source is still "Deploy from a branch". Check the Actions tab and Settings → Pages |
 | The address looks like `…github.io/growdev-site/` and has no styling | An old project-page address. The site only works at the root: use `https://growdev-tn.github.io/` |
 | `robots.txt` or the sitemap still shows an old address | The deploy is not finished, or the browser cached it. Hard-refresh. Make sure `"url"` in `src/site.json` was changed and pushed |
-| You changed something but see the old page | GitHub caches files for about 10 minutes. Hard-refresh, or wait |
+| You changed something but see the old page | GitHub caches files for about 10 minutes. Hard-refresh (Ctrl+F5), or wait. Since 18 Nov the pages ask for versioned files (`styles.css?v=…`), so a changed stylesheet or script is fetched as soon as the page itself is fresh |
+| CHECK says "carries the version … but the file now hashes to …" | You edited a stylesheet, a script or a logo and did not run the build. Run `node tools/build.mjs`, then commit the pages it rewrote |
 | `git push` says "Permission denied (publickey)" | The SSH key is not added to your GitHub account, or `ssh -T git@github.com` does not greet `aziz-art`. Fix the key first |
 | CHECK says "CNAME must not exist on a github.io address" | An old `site/CNAME` is still there. Run the build: it removes the file. Then commit the deletion |
 | E-mail at `@werchti.tn` stops working | It has nothing to do with the website now. Check the mail records of the `werchti.tn` DNS zone, and never edit MX or mail TXT records for the website |

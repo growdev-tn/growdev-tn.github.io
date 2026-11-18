@@ -30,6 +30,11 @@
   "clients.title": "They trust us.",
   "clients.lead": "Businesses and brands that entrust us with their digital projects.",
   "clients.note": "Logos shown belong to their respective owners.",
+  "clients.role": "carousel",
+  "clients.prev": "Previous client",
+  "clients.next": "Next client",
+  "clients.pause": "Pause automatic scrolling",
+  "clients.play": "Resume automatic scrolling",
 
   "svc.eyebrow": "What we do",
   "svc.title": "Everything to digitalise your business, jargon-free.",

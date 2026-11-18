@@ -140,14 +140,26 @@
       <h2 class="h2" id="clients-title" data-i18n="clients.title"></h2>
       <p class="lead" data-i18n="clients.lead"></p>
     </div>
-    <ul class="clients">
-      {{clients}}
-    </ul>
+    <div class="carousel" data-carousel data-reveal role="group" aria-labelledby="clients-title" data-i18n-attr="aria-roledescription:clients.role">
+      <div class="carousel__viewport">
+        <ul class="clients">
+          {{clients}}
+        </ul>
+      </div>
+      <div class="carousel__bar">
+        <div class="carousel__dots" aria-hidden="true"></div>
+        <div class="carousel__ctrl">
+          <button class="carousel__btn carousel__btn--play" type="button" data-i18n-attr="aria-label:clients.pause;data-pause:clients.pause;data-play:clients.play"><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-pause"/></svg><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-play"/></svg></button>
+          <button class="carousel__btn carousel__btn--prev" type="button" data-i18n-attr="aria-label:clients.prev"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+          <button class="carousel__btn carousel__btn--next" type="button" data-i18n-attr="aria-label:clients.next"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+        </div>
+      </div>
+    </div>
     <p class="clients__note" data-i18n="clients.note"></p>
   </div>
 </section>
 
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="i-pause" viewBox="0 0 24 24"><path d="M8.5 5.5v13M15.5 5.5v13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.6v12.8L18.6 12z" fill="currentColor" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol></svg>
 
 <section class="section" id="services" aria-labelledby="svc-title">
   <div class="wrap">
@@ -527,6 +539,7 @@
 <script src="{{base}}assets/js/i18n.js"></script>
 <script src="{{base}}assets/js/hero.js"></script>
 <script src="{{base}}assets/js/ui.js"></script>
+<script src="{{base}}assets/js/carousel.js"></script>
 <script src="{{base}}assets/js/theme.js"></script>
 <script src="{{base}}assets/js/composer.js"></script>
 <script src="{{base}}assets/js/calculator.js"></script>

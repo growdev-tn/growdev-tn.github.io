@@ -8,6 +8,7 @@
 //   --index-links   link to ".../index.html" instead of ".../" (for file:// previews and artifact hosts)
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { jsonLd, sitemap, robots, llms, llmsFull, pageUrl } from "./seo.mjs";
@@ -34,6 +35,19 @@ const problems = [];
 const fail = (m) => problems.push(m);
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const used = new Set();
+
+// Asset versions. GitHub Pages lets a browser keep a stylesheet or a script for about ten minutes without asking again, and nothing in
+// a file name changes when the file does. After a deploy a visitor could therefore receive the NEW page with the OLD stylesheet: a broken
+// layout until the cache expires. So every local stylesheet, script and client logo is requested as "file?v=<8 hex digits>", where the digits
+// are the start of the file's SHA-256. The address changes exactly when the content changes, and never otherwise.
+// tools/check.mjs recomputes the same digits and fails the build on any reference that is missing one or carries a stale one.
+const assetVersion = (relPath, where) => {
+  const f = path.join(OUT, relPath);
+  if (!fs.existsSync(f)) { fail(`${where}: ${relPath} does not exist`); return "missing"; }
+  return crypto.createHash("sha256").update(fs.readFileSync(f)).digest("hex").slice(0, 8);
+};
+const CODE_REF = /(<(?:link|script)\b[^>]*?\s(?:href|src)=")((?:\.\.\/|\/)?assets\/(?:css|js)\/[\w.-]+\.(?:css|js))(?:\?v=[0-9a-f]*)?(")/g;
+const versionCodeRefs = (html, where) => html.replace(CODE_REF, (m, a, ref, c) => `${a}${ref}?v=${assetVersion(ref.replace(/^(?:\.\.\/|\/)/, ""), where)}${c}`);
 
 // Theme: "dark" is the GrowDev look. "defaultTheme" is what a first-time visitor sees ("dark", "light", or "system" = follow the device);
 // a choice made with the toggle always wins (boot.js, theme.js). The two colours feed <meta name="theme-color"> (the browser bar on phones)
@@ -125,12 +139,13 @@ function render(L) {
     entryAttrs: entry ? " data-entry" + others.map((o) => ` data-${o.code}="${rel(L, o)}"`).join("") : "",
     langLinks: cfg.langs.map((o) => `<a href="${o.code === L.code ? "#top" : rel(L, o)}" hreflang="${o.code}" lang="${o.code}" data-lang="${o.code}" title="${o.name}"${o.code === L.code ? ' aria-current="page"' : ""}>${o.label}</a>`).join(""),
     clients: CLIENTS.map((c, i) => !clientDims[i] ? "" :
-      `<li class="client" data-reveal><img src="${base}assets/img/clients/${esc(c.logo)}" width="${clientDims[i].w}" height="${clientDims[i].h}" alt="${esc(c.name)}"${c.lang && c.lang !== L.code ? ` lang="${c.lang}"` : ""} loading="lazy" decoding="async"></li>`
+      `<li class="client"><img src="${base}assets/img/clients/${esc(c.logo)}?v=${assetVersion("assets/img/clients/" + c.logo, L.code)}" width="${clientDims[i].w}" height="${clientDims[i].h}" alt="${esc(c.name)}"${c.lang && c.lang !== L.code ? ` lang="${c.lang}"` : ""} loading="lazy" decoding="async"></li>`
     ).join("\n      "),
     mailSubject: encodeURIComponent(tr("contact.mailsubject")),
     jsonld: JSON.stringify(jsonLd(cfg, D, L.code, { ogImage, lastmod: LASTMOD })).replace(/</g, "\\u003c")
   };
   html = html.replace(/\{\{(\w+)\}\}/g, (m, k) => { if (!(k in vals)) { fail(`${L.code}: unknown placeholder ${m}`); return m; } return vals[k]; });
+  html = versionCodeRefs(html, L.code);
 
   // sanity checks on the final page
   if (/\{\{\w+\}\}/.test(html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, ""))) fail(`${L.code}: unreplaced placeholder left in page`);
@@ -154,19 +169,20 @@ function runtimeDict(L) {
 }
 
 const written = [];
-for (const L of cfg.langs) { written.push(render(L)); written.push(runtimeDict(L)); }
+for (const L of cfg.langs) { const dict = runtimeDict(L); written.push(render(L)); written.push(dict); }   // the dictionary is written first: the page carries its version
 const put = (name, body) => { fs.writeFileSync(path.join(OUT, name), body); written.push(path.relative(ROOT, path.join(OUT, name))); };
 put("sitemap.xml", sitemap(cfg, LASTMOD));
 put("robots.txt", robots(cfg));
 put("llms.txt", llms(cfg, D));
 put("llms-full.txt", llmsFull(cfg, D));
 
-// 404.html is written by hand (it needs absolute paths), but its theme settings come from src/site.json like every other page.
+// 404.html is written by hand (it needs absolute paths), but its theme settings come from src/site.json like every other page,
+// and its stylesheet and script addresses carry the same asset versions as the other pages.
 {
   const f = path.join(OUT, "404.html");
   if (fs.existsSync(f)) {
     const before = fs.readFileSync(f, "utf8");
-    const after = before
+    const after = versionCodeRefs(before, "404.html")
       .replace(/(<html\b[^>]*?\sdata-theme-default=")[^"]*(")/, `$1${THEME_DEFAULT}$2`)
       .replace(/<meta name="theme-color"[^>]*>/, `<meta name="theme-color" content="${THEME_COLOR[THEME_DEFAULT === "light" ? "light" : "dark"]}" data-dark="${THEME_COLOR.dark}" data-light="${THEME_COLOR.light}">`);
     if (after !== before) fs.writeFileSync(f, after);

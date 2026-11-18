@@ -61,7 +61,7 @@
 | 3 | Benefit 1 | One tool for sales, purchasing, stock and invoicing (Odoo), instead of scattered files. |
 | 4 | Benefit 2 | Everything under one roof: Odoo, custom web, WordPress, PrestaShop, mobile, automation. |
 | 5 | Benefit 3 | Delivered in phases, in French, Arabic or English, quoted in DT in Tunisia. |
-| 6 | Proof | A visible five-step method; a live tool that draws *your* system; a simulator that shows hours and money saved from your own numbers; no cookies, no trackers. A Clients section shows five client logos (added 17 Nov 2026); client case studies are still **pending** (see §8). |
+| 6 | Proof | A visible five-step method; a live tool that draws *your* system; a simulator that shows hours and money saved from your own numbers; no cookies, no trackers. A Clients carousel shows five client logos (a still wall on 17 Nov 2026, a carousel on 18 Nov); client case studies are still **pending** (see §8). |
 | 7 | CTA | « Parlons de votre projet » · «ناقش مشروعك معنا» · "Talk about my project" → composes an e-mail brief |
 
 **Claims we can make**

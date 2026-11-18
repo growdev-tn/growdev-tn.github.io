@@ -6,6 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
+import crypto from "node:crypto";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { FAQ_COUNT, SERVICES, pageUrl, AI_SEARCH, AI_TRAINING } from "./seo.mjs";
@@ -59,6 +60,16 @@ function resolveRef(pageRel, ref) {
   return { file: p.slice(1), hash: u.hash.slice(1) };
 }
 
+// Asset versions (see tools/build.mjs): every stylesheet, script and client logo is requested as "file?v=<first 8 hex digits of its SHA-256>", so a
+// browser that cached the old file can never be paired with a new page. A missing or stale version is a failure: it means the build was not run.
+const sha8 = (file) => crypto.createHash("sha256").update(fs.readFileSync(path.join(SITE, file))).digest("hex").slice(0, 8);
+const VERSIONED = /^assets\/(?:css\/[\w.-]+\.css|js\/[\w.-]+\.js|img\/clients\/[\w.-]+)$/;
+function checkVersion(where, ref, r) {
+  if (!r || !r.file || !VERSIONED.test(r.file) || !has(r.file)) return;
+  const v = (/(?:^|&)v=([0-9a-f]+)(?:&|$)/.exec(ref.split("#")[0].split("?")[1] || "") || [])[1], now = sha8(r.file);
+  check(v === now, `${where}: ${ref} ${v ? `carries the version ?v=${v} but the file now hashes to ${now}` : "has no ?v= version"}. Run node tools/build.mjs (it writes the versions that stop a browser from mixing a new page with an old cached file)`);
+}
+
 function jpegSize(file) {
   const b = fs.readFileSync(file);
   if (b[0] !== 0xff || b[1] !== 0xd8) return null;
@@ -74,7 +85,7 @@ function jpegSize(file) {
 
 // ---------- per-page checks ----------
 const pages = [];
-const seen = { title: new Map(), desc: new Map() };
+const seen = { title: new Map(), desc: new Map(), cx: { role: new Map(), pause: new Map(), play: new Map(), prev: new Map(), next: new Map() } };   // cx: the carousel's spoken labels, per language
 
 function checkPage(L) {
   const rel = L.path === "/" ? "index.html" : L.path.slice(1) + "index.html";
@@ -227,6 +238,7 @@ function checkPage(L) {
       continue;
     }
     if (!check(has(r.file), `${tag} <${el}> points to a missing file: ${ref}`)) continue;
+    if (el === "link" || el === "script") checkVersion(tag, ref, r);
     if (r.hash && r.file.endsWith(".html")) check(pageIds(r.file).has(r.hash), `${tag} anchor #${r.hash} does not exist in ${r.file} (from ${ref})`);
   }
   for (const m of body.matchAll(/<img\b[^>]*>/g)) {
@@ -258,6 +270,7 @@ function checkPage(L) {
             check(+a.width === real.w && +a.height === real.h, `${n}: width/height are ${a.width}x${a.height} but ${cr.file} is ${real.w}x${real.h}: the logo would be stretched. Run node tools/build.mjs`);
             check(Math.max(real.w, real.h) >= BUDGET.logoMinPx, `${n}: ${cr.file} is only ${real.w}x${real.h} px; under ${BUDGET.logoMinPx} px on its longest side it looks soft on a retina screen. Ask for a larger file or an SVG`, "warn");
           }
+          checkVersion(n, a.src, cr);
           const size = fs.statSync(path.join(SITE, cr.file)).size / 1024;
           check(size <= BUDGET.logoKB, `${n}: ${cr.file} is ${kb(size)} (budget ${BUDGET.logoKB} KB per logo). Export it again as WebP`);
         }
@@ -265,6 +278,37 @@ function checkPage(L) {
         const wantLang = c.lang && c.lang !== L.code ? c.lang : undefined;
         check(a.lang === wantLang, `${n}: lang is ${a.lang ? `"${a.lang}"` : "not set"} but ${wantLang ? `"${wantLang}"` : "no lang attribute"} is expected (a name written in another language than the page needs lang, so a screen reader pronounces it correctly)`);
       });
+      // the carousel around the logos (assets/js/carousel.js makes it move; without JavaScript the same markup is the plain wall)
+      const noteCx = (k, v) => seen.cx[k].set(v, [...(seen.cx[k].get(v) || []), L.code]);
+      const car = (sec.match(/<div\b[^>]*\sdata-carousel(?=[\s>])[^>]*>/) || [])[0];
+      if (check(!!car, `${tag} #clients has no carousel (<div data-carousel>) around the logos`)) {
+        const ca = parseAttrs(car);
+        check(ca.role === "group" && ca["aria-labelledby"] === h2id, `${tag} the carousel needs role="group" and aria-labelledby pointing at the section heading: that is its name`);
+        check(!!ca["aria-roledescription"] && ca["aria-roledescription"].trim().length >= 3, `${tag} the carousel needs an aria-roledescription written in the page's language (a screen reader says it instead of "group")`);
+        noteCx("role", (ca["aria-roledescription"] || "").trim());
+        check(!/<li\b[^>]*class="client"[^>]*\sdata-reveal/.test(sec), `${tag} a logo plate carries data-reveal: the reveal moves it with a transform, and the carousel owns the plates' transform`);
+        const iView = sec.indexOf('class="carousel__viewport"'), iUl = sec.indexOf('<ul class="clients">'), iBar = sec.indexOf('class="carousel__bar"');
+        check(iView > -1 && iUl > iView && iBar > iUl, `${tag} the carousel must hold, in this order: .carousel__viewport (with <ul class="clients"> inside it), then .carousel__bar`);
+        check(/<div\b[^>]*class="carousel__dots"[^>]*\saria-hidden="true"/.test(sec), `${tag} the dots (.carousel__dots) must be aria-hidden="true": they only show where the belt is; a screen reader gets the list of logos instead`);
+        const btns = ["play", "prev", "next"].map((k) => { const m = sec.match(new RegExp(`<button\\b[^>]*class="carousel__btn carousel__btn--${k}"[^>]*>[\\s\\S]*?</button>`)); return { k, html: m ? m[0] : "", at: m ? m.index : -1 }; });
+        if (check(btns.every((b) => b.at > -1), `${tag} the carousel bar needs three buttons: .carousel__btn--play, .carousel__btn--prev and .carousel__btn--next`)) {
+          check(btns[0].at < btns[1].at && btns[1].at < btns[2].at, `${tag} the carousel buttons must come in the order Pause/Play, Previous, Next (Pause first: a keyboard user reaches it before anything moves under them)`);
+          for (const b of btns) {
+            const a = parseAttrs((b.html.match(/^<button\b[^>]*>/) || [""])[0]);
+            check(a.type === "button", `${tag} carousel button "${b.k}" needs type="button"`);
+            check(!!a["aria-label"] && a["aria-label"].trim().length >= 3, `${tag} carousel button "${b.k}" has no accessible name (aria-label)`);
+            noteCx(b.k === "play" ? "pause" : b.k, (a["aria-label"] || "").trim());
+            const svgs = b.html.match(/<svg\b[^>]*>/g) || [];
+            check(svgs.length > 0 && svgs.every((x) => /\saria-hidden="true"/.test(x)), `${tag} the icons inside carousel button "${b.k}" must be aria-hidden="true" (the button's own label is its name)`);
+            if (b.k === "play") {
+              check(!!a["data-pause"] && !!a["data-play"] && a["data-pause"] !== a["data-play"], `${tag} the Pause/Play button needs two different labels in data-pause and data-play (the script swaps its aria-label between them)`);
+              check(a["aria-label"] === a["data-pause"], `${tag} the Pause/Play button starts as Pause: its aria-label must equal data-pause`);
+              noteCx("play", (a["data-play"] || "").trim());
+            }
+          }
+        }
+        for (const id of ["i-arrow", "i-pause", "i-play"]) check(new RegExp(`<symbol\\b[^>]*\\sid="${id}"`).test(html), `${tag} the carousel buttons use #${id}, which is missing from the SVG sprite`);
+      }
     }
   }
   // form fields need a label
@@ -309,6 +353,7 @@ for (const L of cfg.langs) checkPage(L);
 for (const [k, m] of [["title", seen.title], ["meta description", seen.desc]]) {
   for (const [v, langs] of m) check(langs.length === 1, `the ${k} is identical on ${langs.join(", ")} ("${v.slice(0, 50)}…"): each language needs its own`);
 }
+for (const [k, m] of Object.entries(seen.cx)) for (const [v, langs] of m) check(!v || langs.length === 1, `the carousel's "${k}" text is identical on ${langs.join(", ")} ("${v}"): each language needs its own`);
 
 // ---------- shared files ----------
 // sitemap.xml
@@ -384,7 +429,7 @@ if (check(has("404.html"), "404.html is missing")) {
   const h = read("404.html");
   check(/<meta name="robots" content="noindex">/.test(h), "404.html should be noindex");
   for (const l of cfg.langs) check(h.includes(`lang="${l.code}"`) && h.includes(`href="${l.path}"`), `404.html should offer the ${l.code} version`);
-  for (const m of h.matchAll(/<(?:link|script|img)\b[^>]*(?:href|src)="([^"]+)"/g)) { const r = resolveRef("404.html", m[1]); if (!r.skip && !r.external) check(has(r.file), `404.html points to a missing file: ${m[1]}`); }
+  for (const m of h.matchAll(/<(?:link|script|img)\b[^>]*(?:href|src)="([^"]+)"/g)) { const r = resolveRef("404.html", m[1]); if (!r.skip && !r.external) { if (check(has(r.file), `404.html points to a missing file: ${m[1]}`) && !/\srel="(?:icon|apple-touch-icon|manifest)"/.test(m[0])) checkVersion("404.html", m[1], r); } }
 }
 if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
   try {
@@ -535,6 +580,7 @@ if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
     check(!!boot && !/\b(defer|async)\b/.test(boot), `${tag} boot.js must be a plain <script> in <head> (no defer/async): it sets the theme before the first paint, so the page never flashes`);
     const iTheme = html.search(/<script\b[^>]*assets\/js\/theme\.js/), iMain = html.search(/<script\b[^>]*assets\/js\/main\.js/);
     check(iTheme > -1 && iMain > -1 && iTheme < iMain, `${tag} theme.js must load before main.js`);
+    if (CLIENTS.length) { const iCar = html.search(/<script\b[^>]*assets\/js\/carousel\.js/); check(iCar > -1 && iCar < iMain, `${tag} carousel.js must load before main.js (main.js starts the carousel)`); }
     // the toggle
     const btnHtml = (html.match(/<button\b[^>]*id="theme-toggle"[\s\S]*?<\/button>/) || [""])[0];
     const ba = parseAttrs((btnHtml.match(/^<button\b[^>]*>/) || [""])[0]);
@@ -636,6 +682,49 @@ if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
     check(pic.some(([p, v]) => p === "object-fit" && v === "contain"), "styles.css: `.client img` needs object-fit: contain, so a logo of any shape is fitted in its plate and never stretched or cropped");
     const recoloured = pic.filter(([p, v]) => /^(?:-webkit-)?filter$/.test(p) && v !== "none" || p === "mix-blend-mode" && v !== "normal" || p === "opacity" && v !== "1").map(([p, v]) => `${p}: ${v}`);
     check(!recoloured.length, `styles.css: \`.client img\` changes the look of the client's logo (${recoloured.join("; ")}). Logos are shown exactly as supplied`);
+
+    // the carousel: assets/js/carousel.js moves the belt, but the stylesheet decides what a visitor sees without it and before it has started
+    const rulesOf = (test) => [...bareCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter((m) => m[1].split(",").some((x) => test(x.trim().replace(/\s+/g, " "))))
+      .flatMap((m) => m[2].split(";").map((d) => { const i = d.indexOf(":"); return i < 0 ? null : [d.slice(0, i).trim().toLowerCase(), d.slice(i + 1).trim().toLowerCase().replace(/\s+/g, "")]; }).filter(Boolean));
+    check(rulesOf((x) => x.endsWith(".carousel__viewport")).some(([p, v]) => p === "touch-action" && v === "pan-y"), "styles.css: the carousel window (.carousel__viewport) needs touch-action: pan-y. Without it the browser keeps the horizontal swipe for itself (the belt cannot be dragged) or blocks the vertical one (the page cannot be scrolled from the carousel)");
+    check(rulesOf((x) => x === ".carousel__viewport").some(([p, v]) => p === "overflow" && /^(?:hidden|clip)$/.test(v)), "styles.css: .carousel__viewport must clip (overflow: hidden or clip), or the plates waiting outside the window would show and the page would scroll sideways");
+    check(rulesOf((x) => x === ".js .carousel:not(.is-static) .clients").some(([p, v]) => p === "flex-wrap" && v === "nowrap"), "styles.css: the belt (.js .carousel:not(.is-static) .clients) must be one row (flex-wrap: nowrap)");
+    check(/\.carousel__btn\[hidden\]\s*\{[^}]*display\s*:\s*none/.test(bareCss), "styles.css: `.carousel__btn[hidden]{display:none}` is missing: the button's own display would override the hidden attribute and Pause would stay visible with reduced motion");
+    const barBase = rulesOf((x) => x === ".carousel__bar"), barJs = rulesOf((x) => x === ".js .carousel__bar");
+    check(barBase.some(([p, v]) => p === "display" && v === "none"), "styles.css: .carousel__bar must be display:none by default: without JavaScript its buttons would do nothing");
+    check(barJs.some(([p, v]) => p === "visibility" && v === "hidden") && !barJs.some(([p, v]) => p === "display" && v === "none"), "styles.css: with JavaScript the bar must keep its room before the script starts (.js .carousel__bar: display flex + visibility hidden), otherwise the page jumps when the bar appears");
+    check(!plate.some(([p]) => p === "transform" || p === "transition"), "styles.css: `.client` must not set transform or transition: the carousel script moves the plates with transforms, and a CSS one would fight it");
+    check(/\.carousel__btn--prev svg\s*\{[^}]*transform\s*:\s*scaleX\(-1\)/.test(bareCss) && /\[dir="rtl"\]\s*\.carousel__btn--prev svg\s*\{[^}]*transform\s*:\s*none/.test(bareCss) && /\[dir="rtl"\]\s*\.carousel__btn--next svg\s*\{[^}]*transform\s*:\s*scaleX\(-1\)/.test(bareCss), "styles.css: the arrows must point the way the belt goes: Previous flipped in left-to-right pages, Next flipped in Arabic ([dir=rtl])");
+    // how many plates are in view: --show on .carousel (the belt) and on html:not(.js) .carousel (the wall, which wraps onto rows and so needs whole numbers)
+    for (const m of bareCss.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const v = (m[2].match(/(?:^|;)\s*--show\s*:\s*([^;]+)/) || [])[1];
+      if (v === undefined) continue;
+      const sel = m[1].trim().replace(/\s+/g, " "), x = Number(v.trim()), n = CLIENTS.length;
+      if (sel === ".carousel") {
+        if (!check(Number.isFinite(x) && x >= 1, `styles.css: .carousel --show is "${v.trim()}"; it must be a number, at least 1 (how many plates are in view)`)) continue;
+        check(!(x > n - 1 && x < n), `styles.css: .carousel --show: ${x} with ${n} clients. Between ${n - 1} and ${n} the belt cannot fill its window all the way round, so it falls back to the still wall. Show ${n - 1} or fewer, or ${n} or more`, "warn");
+        check(x < n, `styles.css: .carousel --show: ${x} shows every client at once, so the belt never moves at that width (a carousel needs at least one client out of view)`, "warn");
+      } else if (sel === "html:not(.js) .carousel") check(Number.isInteger(x) && x >= 1, `styles.css: ${sel} --show is "${v.trim()}"; without JavaScript the plates wrap onto rows, so it must be a whole number`);
+    }
+
+    // the carousel's script
+    const carJs = has("assets/js/carousel.js") ? read("assets/js/carousel.js") : "";
+    if (check(!!carJs, "assets/js/carousel.js is missing: without it the Clients section stays a still wall")) {
+      for (const [needle, why] of [
+        ["prefers-reduced-motion", "it must not move by itself for a visitor who asked for less motion"],
+        ["visibilitychange", "it must wait while the tab is hidden"],
+        ["IntersectionObserver", "it must wait while the section is out of view, and load the logos before they slide in"],
+        ['"eager"', "the plates outside the window are loading=lazy, and a browser never loads a lazy picture that an ancestor clips away: they must be switched to eager shortly before the section is reached"],
+        ["pointercancel", "it must cope with the browser taking a touch gesture over (a vertical swipe scrolls the page)"],
+        ["ResizeObserver", "it must follow the window being resized or turned"],
+        ["data-play", "the Pause/Play button swaps its label between data-pause and data-play"]
+      ]) check(carJs.includes(needle), `assets/js/carousel.js no longer contains ${needle}: ${why}`);
+      const every = Number((carJs.match(/\bEVERY\s*=\s*(\d+)/) || [])[1]), glide = Number((carJs.match(/\bGLIDE\s*=\s*(\d+)/) || [])[1]);
+      check(every >= 2500, `assets/js/carousel.js: EVERY = ${every || "?"} ms. A logo needs at least 2.5 s in view before the belt moves on`);
+      check(glide >= 300 && glide <= 1200, `assets/js/carousel.js: GLIDE = ${glide || "?"} ms. A step should take between 0.3 and 1.2 s: quicker is a jerk, slower is sluggish`);
+      check(/GD\.carousel\s*=\s*\{/.test(carJs) && /\binit\s*:/.test(carJs), "assets/js/carousel.js must export GD.carousel.init");
+    }
+    check(/GD\.carousel\.init\(\)/.test(has("assets/js/main.js") ? read("assets/js/main.js") : ""), "assets/js/main.js must call GD.carousel.init(), or the logos never move");
   }
 
   // --- the wave: theme.js is run here, in Node, and the shape it draws is checked for every screen size ---

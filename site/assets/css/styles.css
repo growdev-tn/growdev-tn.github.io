@@ -215,17 +215,49 @@ html:not([lang="ar"]) .lang a[lang="ar"]{font-family:system-ui,"Segoe UI",Tahoma
   .growth{height:clamp(320px,56vh,440px);margin-top:12px}
 }
 /* Clients: each logo sits on a white plate. The logo files are drawn on white, so --logo-plate is white in both themes (tools/check.mjs enforces it).
-   The picture is laid inside the plate and fitted with object-fit:contain: a logo of any shape fits, and none can be stretched. Add a client in src/site.json. */
+   The picture is laid inside the plate and fitted with object-fit:contain: a logo of any shape fits, and none can be stretched. Add a client in src/site.json.
+   The plates are a carousel (assets/js/carousel.js): an endless belt that can be dragged, stepped with the buttons, and moves by itself unless the visitor
+   prefers reduced motion. --show is how many plates are in view at once (a fraction on phones: the next plate peeks in, which tells you to swipe). Keep it
+   below the number of clients; when every plate fits, or without JavaScript, the same plates are a plain wall on several rows. */
 .clients-sec{padding-block:clamp(56px,7vw,96px) 0}
 .clients-sec .h2{font-size:clamp(1.65rem,1.05rem + 2.2vw,2.5rem)}
 .clients-sec .lead,.clients__note{text-wrap:balance}
-.clients{--cols:2;--gap:clamp(10px,2vw,16px);--pad:clamp(12px,2.4vw,22px);display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap);margin-top:clamp(26px,3.6vw,40px)}
-.client{position:relative;flex:0 0 calc((100% - (var(--cols) - 1)*var(--gap))/var(--cols) - .5px);aspect-ratio:4/3;min-width:0;background:var(--logo-plate);border:1px solid var(--line-2);border-radius:var(--r-chip);box-shadow:var(--card-shadow)}
-.client img{position:absolute;inset:var(--pad);width:calc(100% - 2*var(--pad));height:calc(100% - 2*var(--pad));object-fit:contain}
-.client:nth-child(4n+2){--d:1}.client:nth-child(4n+3){--d:2}.client:nth-child(4n){--d:3}
+.carousel{--show:2.25;--gap:clamp(10px,2vw,16px);--pad:clamp(12px,2.4vw,22px);margin-top:clamp(26px,3.6vw,40px)}
+@media (min-width:600px){.carousel{--show:3}}
+@media (min-width:1000px){.carousel{--show:4}}
+@media (max-width:599.98px){.js .carousel:not(.is-static) .carousel__viewport{margin-inline-end:calc(-1*var(--gut));padding-inline-end:var(--gut)}}   /* on a phone the plate that peeks in runs to the edge of the screen */
+html:not(.js) .carousel{--show:2}
+@media (min-width:600px){html:not(.js) .carousel{--show:3}}
+@media (min-width:1000px){html:not(.js) .carousel{--show:5}}
+.carousel__viewport{overflow:hidden;overflow:clip;padding-block:6px 32px;margin-block:-6px -32px}   /* the padding leaves room for the plates' shadow; the margin cancels it */
+.clients{display:flex;flex-wrap:wrap;justify-content:center;gap:var(--gap)}
+.client{position:relative;flex:0 0 calc((100% - (var(--show) - 1)*var(--gap))/var(--show) - .5px);aspect-ratio:4/3;min-width:0;background:var(--logo-plate);border:1px solid var(--line-2);border-radius:var(--r-chip);box-shadow:var(--card-shadow)}
+.client img{position:absolute;inset:var(--pad);width:calc(100% - 2*var(--pad));height:calc(100% - 2*var(--pad));object-fit:contain;pointer-events:none;-webkit-user-drag:none}
+/* the belt: one row that never wraps. The script moves each plate with a transform, so nothing in the page ever reflows. */
+.js .carousel:not(.is-static) .clients{flex-wrap:nowrap;justify-content:flex-start}
+.js .carousel:not(.is-static) .carousel__viewport{touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}   /* pan-y: a vertical swipe still scrolls the page */
+.js .carousel:not(.is-static) .client{flex-basis:calc((100% - (var(--show) - 1)*var(--gap))/var(--show));will-change:transform}   /* exact: the belt never wraps, so it needs no safety margin */
+.js .carousel.is-dragging .carousel__viewport{cursor:grabbing}
+/* the bar under the belt: where it is (dots, not clickable), then pause/play and the two arrows. Its room is reserved before the script runs, so nothing jumps. */
+.carousel__bar{display:none;align-items:center;justify-content:space-between;gap:16px;margin-top:16px}
+.js .carousel__bar{display:flex;visibility:hidden}
+.js .carousel.is-ready .carousel__bar{visibility:visible}
+.js .carousel.is-static .carousel__bar{display:none}
+.carousel__dots{display:flex;align-items:center;gap:7px}
+.carousel__dot{width:7px;height:7px;border-radius:7px;background:rgba(var(--w-rgb),.26);transition:width .35s var(--ease)}
+.carousel__dot.is-on{width:24px;background:var(--grad)}
+.carousel__ctrl{display:flex;gap:8px}
+.carousel__btn{display:grid;place-items:center;flex:none;width:44px;height:44px;border:1px solid var(--line-2);border-radius:var(--r-chip);color:var(--ink);transition:border-color .2s,background .2s,transform .2s var(--ease)}
+.carousel__btn[hidden]{display:none}
+.carousel__btn:hover{border-color:var(--sky);background:rgba(var(--s-rgb),.08)}
+.carousel__btn:active{transform:scale(.95)}
+.carousel__btn svg{width:20px;height:20px}
+.carousel__btn--prev svg{transform:scaleX(-1)}   /* the arrow points the way the belt goes: forward is to the right, or to the left in Arabic */
+[dir="rtl"] .carousel__btn--prev svg{transform:none}
+[dir="rtl"] .carousel__btn--next svg{transform:scaleX(-1)}
+.carousel__btn--play .i-play,.carousel__btn--play.is-paused .i-pause{display:none}
+.carousel__btn--play.is-paused .i-play{display:block}
 .clients__note{margin-top:20px;color:var(--muted);font-size:.84rem;text-align:center}
-@media (min-width:600px){.clients{--cols:3}}
-@media (min-width:1000px){.clients{--cols:5}}
 
 /* Services bento */
 .svc-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:clamp(14px,1.6vw,22px);margin-top:52px}

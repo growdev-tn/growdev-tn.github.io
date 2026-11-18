@@ -24,7 +24,7 @@ Tunisia first, then Africa, then the world. Three languages, one URL each: `/` (
 - No major AI provider has confirmed that it ranks pages using `llms.txt`. It costs nothing, and assistants and agents that fetch pages do read it. Treat it as a bonus, not a lever.
 - Nobody can promise rankings or AI citations. New sites usually take weeks to months to settle. The work here removes technical obstacles and gives the engines clear, consistent facts.
 - `geo.*` meta tags are ignored by Google; they are a harmless hint for other engines.
-- There is no `aggregateRating` and no review in the markup: nothing is invented. The client names (from `src/site.json`) are in the visible Clients section and in `llms.txt` and `llms-full.txt`; they are not repeated in the JSON-LD. Add ratings or reviews only when they are real and visible on the page.
+- There is no `aggregateRating` and no review in the markup: nothing is invented. The client names (from `src/site.json`) are in the visible Clients carousel and in `llms.txt` and `llms-full.txt`; they are not repeated in the JSON-LD. The carousel is plain HTML (a list of five logos with their names as `alt` text) that a script only moves, so crawlers and AI assistants read the same five names without running it. Add ratings or reviews only when they are real and visible on the page.
 
 ## 2. Keyword map
 
