@@ -1,10 +1,11 @@
 {
-  "url": "https://growdev-tn.github.io",
+  "url": "https://growdev.tn",
+  "legacyHosts": ["growdev-tn.github.io", "growdev.werchti.tn"],
   "allowAiTraining": false,
   "defaultTheme": "dark",
   "themeColor": { "dark": "#020b18", "light": "#eef3f8" },
   "name": "GrowDev",
-  "email": "contact@werchti.tn",
+  "email": "contact@growdev.tn",
   "founder": "Aziz Chaibi",
   "xDefault": "en",
   "sameAs": ["https://github.com/aziz-art"],

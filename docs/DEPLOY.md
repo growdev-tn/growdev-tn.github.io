@@ -1,19 +1,22 @@
-# Deploy GrowDev to GitHub Pages: `https://growdev-tn.github.io/`
+# Deploy GrowDev to GitHub Pages: `https://growdev.tn/`
 
-The site is a static build published by GitHub Actions. There is **no DNS to configure**: the address comes from the GitHub organization `growdev-tn` and the repository named `growdev-tn.github.io`.
+The site is a static build published by GitHub Actions on GitHub Pages, on the custom domain **`growdev.tn`**. The domain is registered at OVHcloud, its DNS zone is managed there, and the company mailbox `contact@growdev.tn` is an OVH **MX Plan** mailbox. The code lives in the GitHub organization `growdev-tn`.
 
 | Item | Value |
 |---|---|
-| Public address | `https://growdev-tn.github.io/` (French `/`, Arabic `/ar/`, English `/en/`) |
+| Public address | `https://growdev.tn/` (French `/`, Arabic `/ar/`, English `/en/`) |
+| Earlier addresses | `https://growdev-tn.github.io/` (GitHub redirects it to the domain) and `growdev.werchti.tn` (dropped on 7 Nov 2026). Both are listed in `"legacyHosts"` in `src/site.json`, so the checker fails if either is written anywhere in the built site |
+| Domain, DNS and mail | OVHcloud: domain `growdev.tn`, standard OVH DNS servers, mailbox `contact@growdev.tn` (MX Plan) |
 | GitHub organization | `growdev-tn` (owner: `aziz-art`) |
-| Repository | `growdev-tn/growdev-tn.github.io` (must be **public** on a free plan) |
+| Repository | `growdev-tn/growdev-tn.github.io` (must be **public** on a free plan; keep this name, it is also the target of the `www` CNAME) |
 | Git remote (SSH) | `git@github.com:growdev-tn/growdev-tn.github.io.git` |
-| Pages source | **GitHub Actions** (`.github/workflows/pages.yml`), no custom domain |
-| The one setting that holds the address | `"url"` in `src/site.json` |
+| Pages source | **GitHub Actions** (`.github/workflows/pages.yml`) |
+| Custom domain | Set in the repository: **Settings → Pages → Custom domain** = `growdev.tn`. GitHub ignores a `CNAME` file when a workflow publishes the site; the build still writes `site/CNAME` and the checker keeps it equal to the host |
+| Settings that hold the address and the e-mail | `"url"`, `"email"` and `"legacyHosts"` in `src/site.json` |
 
-The organization is named `growdev-tn` because `growdev` was already taken on GitHub. A repository named `<organization>.github.io` is published at the **root** of `https://<organization>.github.io/`, which is what the site needs: `robots.txt`, `sitemap.xml`, `llms.txt` and `404.html` only work at the root of a host.
+The organization is named `growdev-tn` because `growdev` was already taken on GitHub. A repository named `<organization>.github.io` is published at the **root** of a host, which the site needs: `robots.txt`, `sitemap.xml`, `llms.txt` and `404.html` only work at the root.
 
-The contact e-mail stays `contact@werchti.tn` (the address of the company's mail). Only the website moved.
+The contact address is `contact@growdev.tn`. To change it, edit `"email"` in `src/site.json`, the template, the three `src/i18n` files, `site/assets/js/config.js` and `site/404.html`; the checker names whichever one you forgot. If `"url"` changes, run `npm run og` as well (needs Playwright): the share images print the host and are tagged with it.
 
 ## Everyday workflow (Windows, PowerShell, Docker, SSH)
 
@@ -49,15 +52,15 @@ The last command should greet `aziz-art`. Keep the SSH key private. If you reins
 
 ## Check the live site after a deploy
 
-In Git Bash (it needs `curl`):
+In Git Bash (it needs `curl`), from the repository folder:
 
 ```bash
 bash tools/verify-launch.sh
 ```
 
-Every line must say `ok`. The script defaults to `growdev-tn.github.io`; pass another host as the first argument to test a different address.
+Every line must say `ok` (30 checks today). The script defaults to `growdev.tn`; pass another host as the first argument to test a different address. It checks the three pages and their canonical links, the contact link on every page, that no earlier address is still written, `sitemap.xml`, `robots.txt`, `llms.txt` and `llms-full.txt`, the three share images, that `http` leads to `https`, that `www.growdev.tn` and `growdev-tn.github.io` redirect to `https://growdev.tn/`, and the 404 page. A line that says **gave no answer** means DNS is not ready yet or GitHub has not issued the HTTPS certificate yet.
 
-Then look at the site yourself: `/`, `/ar/` and `/en/`, the language switch, and a wrong address such as `/nothing-here` (the trilingual 404 page).
+Then look at the site yourself: `/`, `/ar/` and `/en/`, the language switch, the contact links, and a wrong address such as `/nothing-here` (the trilingual 404 page).
 
 ## Search engines and AI assistants
 
@@ -69,26 +72,122 @@ Then look at the site yourself: `/`, `/ar/` and `/en/`, the language switch, and
 
 `robots.txt` is a request, not a lock: reputable crawlers respect it, others may not.
 
-### Google Search Console and Bing (do this after the first deploy with the new address)
+### Google Search Console and Bing (after the domain is live and `verify-launch.sh` passes)
 
-1. Open `https://search.google.com/search-console` and add a **URL prefix** property: `https://growdev-tn.github.io/`. A *Domain* property needs a DNS record, which a `github.io` address cannot have.
-2. Choose the **HTML file** verification method. Download the file Google gives you (`googleXXXXXXXX.html`), put it in the `site/` folder, run the checks, commit and push. When the file answers at `https://growdev-tn.github.io/googleXXXXXXXX.html`, click **Verify**. Keep the file forever.
-3. In Search Console go to **Sitemaps** and submit `sitemap.xml`.
-4. In Bing Webmaster Tools use **Import from Google Search Console**.
+1. Open `https://search.google.com/search-console` and add a **Domain** property: `growdev.tn`. This is now possible because the domain has its own DNS zone. Google shows a TXT record (`google-site-verification=…`): add it in the OVH DNS zone (type **TXT**, empty subdomain) and click **Verify**. Keep the record forever.
+2. In Search Console go to **Sitemaps** and submit `sitemap.xml`. Use **URL inspection → Request indexing** for the three pages.
+3. In Bing Webmaster Tools use **Import from Google Search Console**.
+4. The earlier address `growdev-tn.github.io` redirects to the domain, so nothing needs to be done for it. If a property for it exists, keep it for a few weeks and use **Change of address** only if Google offers it.
 
-Do not submit anything before the deployed `robots.txt` and `sitemap.xml` show `growdev-tn.github.io`. The launch script checks this.
+Do not submit anything before the deployed `robots.txt` and `sitemap.xml` show `growdev.tn`. The launch script checks this.
 
-## Moving to your own domain later (for example `growdev.tn`)
+## Custom domain `growdev.tn` (OVHcloud → GitHub Pages)
 
-This is a one-line change, and nothing else in the code mentions the address.
+Three things live under the domain. They use **different DNS records**, so changing one does not break the others:
 
-1. Buy the domain. Edit `src/site.json`: `"url": "https://growdev.tn"` (no trailing slash, no path).
-2. Build and check. For a custom domain the build writes `site/CNAME` itself, and the checker verifies it.
-3. Push. In the repository go to **Settings → Pages → Custom domain**, type the domain, click **Save**.
-4. At the domain's DNS provider: a subdomain such as `www` is a **CNAME** to `growdev-tn.github.io.` (final dot). A bare domain needs the four `A` records listed in the GitHub Docs (*Managing a custom domain for your GitHub Pages site*). Never add a wildcard `*` record.
-5. When GitHub says **DNS check successful**, tick **Enforce HTTPS**.
-6. **Verify the domain** so nobody else can claim it: organization **Settings → Pages → Add a domain**, then add the TXT record GitHub shows and click **Verify**.
-7. GitHub then redirects `growdev-tn.github.io` to the new domain. Add the new address in Search Console as a new property, and use its **Change of address** tool if Google offers it for your old property.
+| What | DNS records | Managed by |
+|---|---|---|
+| The website | `A` and `AAAA` on the bare domain, `CNAME` on `www` | GitHub Pages |
+| The mailbox `contact@growdev.tn` | `MX`, plus `TXT` for SPF and DMARC (and DKIM records if OVH adds them) | OVH MX Plan |
+| Proofs of ownership | `TXT`: GitHub's `_github-pages-challenge-growdev-tn`, Google's | GitHub, Google |
+
+**The order matters.** Do steps 1 to 4, then push (step 5). The only contact channel of the site is e-mail, so the mailbox must work before its address is published. And the new pages must go out when the domain already answers; otherwise the canonical links, the sitemap and the share images would point at a domain that does not serve the site yet. You can apply the update on your PC and run the build and the checks at any time: only `git push` has to wait.
+
+### 1. Create the mailbox `contact@growdev.tn`
+
+1. OVH Control Panel → **Web Cloud → MX Plan** → select `growdev.tn`. (The domain page also shows **Emails: Your business emails included** under *Linked services*; its **⋮** menu leads there. If OVH asks you to activate the e-mail option first, do it: it is included.)
+2. Create the address `contact`. The steps depend on the webmail technology of the MX Plan:
+   - **Roundcube:** tab **Emails** → **Create an email address** → *Account name* `contact`, *Account description*, *Account size*, *Password* → **Next** → check the summary → **Next** → **Confirm**.
+   - **Zimbra or Outlook Web App:** tab **Email accounts** → **Add Account** → *Email account* `contact`, *First name*, *Name*, *Name to display*, *Password* → **Next** → **Confirm**. Wait a few minutes. Name: 2 to 32 characters, no accents. Password: 9 to 30 characters, no accents.
+3. Keep the password in your password manager.
+4. Test it now: open the OVH webmail (`https://www.ovhcloud.com/en-gb/mail/`), sign in with the full address, send a message to it from another address (Gmail, say) and reply from the mailbox.
+5. For a phone or Outlook: incoming **IMAP** `imap.mail.ovh.net` (or `ssl0.ovh.net`), port **993**, SSL/TLS; outgoing **SMTP** `smtp.mail.ovh.net` (or `ssl0.ovh.net`), port **465**, SSL/TLS; user name = the full address.
+6. Keep the old `contact@werchti.tn` mailbox and forward it to the new one (or keep reading both) for at least 6 to 12 months: anyone who saved the old address, and any cached copy of the old pages, still writes to it. Do not delete it.
+
+### 2. Check the mail records in the OVH DNS zone
+
+OVH Control Panel → **Web Cloud → Domain names → `growdev.tn` → DNS zone** tab. These records are for **mail**; step 3 never touches them:
+
+| Type | Subdomain | Value | Note |
+|---|---|---|---|
+| `MX` | (empty) | `mx0.mail.ovh.net.` priority **1**, `mx1.mail.ovh.net.` **5**, `mx2.mail.ovh.net.` **50**, `mx3.mail.ovh.net.` **100**, `mx4.mail.ovh.net.` **200** | OVH creates them for MX Plan. If one is missing, add it (**Add an entry** → `MX`) |
+| `TXT` (SPF) | (empty) | `v=spf1 include:mx.ovh.com ~all` | A domain may have **one** SPF record. If one exists, keep it; do not add a second. If none exists: **Add an entry** → type `SPF` → tick *Include OVH email servers* → **Add** |
+| `TXT` (DMARC) | `_dmarc` | `v=DMARC1; p=none;` | Add it. `p=none` only monitors; it asks receivers to reject nothing. Gmail and others trust a domain with SPF and DMARC more |
+| DKIM | | | If the MX Plan page in the panel offers to activate **DKIM**, activate it: OVH then publishes the records itself. Not verified from here; skip it if the screen is not there |
+
+Test deliverability once the mailbox works: send a message **from** `contact@growdev.tn` to a Gmail address, open it, **⋮ → Show original**. SPF should say `PASS` (DMARC too; DKIM only if activated).
+
+### 3. Point the website at GitHub (OVH DNS zone)
+
+In the same **DNS zone** tab:
+
+1. **Look before you change anything.** The zone probably contains records that OVH created for the hosting plan of the domain: an `A` (maybe an `AAAA`) on the bare domain and a `www` record. Check also that the domain's **Redirection** tab is empty.
+2. **Delete** every `A`, `AAAA` or `CNAME` record whose subdomain is empty (the bare domain) or `www`: on its row open **⋮ → Delete the entry** and confirm. **Keep** every `MX` and `TXT` record and every other subdomain (`mail`, `imap`, `smtp`, `autoconfig`, `autodiscover`, `ftp`…). If an old OVH address stays next to GitHub's, visitors are split between the two.
+3. **Add** these nine records (**Add an entry**, or **Create a record** in the newer panel; leave the TTL on default):
+
+| Type | Subdomain | Target |
+|---|---|---|
+| `A` | (empty) | `185.199.108.153` |
+| `A` | (empty) | `185.199.109.153` |
+| `A` | (empty) | `185.199.110.153` |
+| `A` | (empty) | `185.199.111.153` |
+| `AAAA` | (empty) | `2606:50c0:8000::153` |
+| `AAAA` | (empty) | `2606:50c0:8001::153` |
+| `AAAA` | (empty) | `2606:50c0:8002::153` |
+| `AAAA` | (empty) | `2606:50c0:8003::153` |
+| `CNAME` | `www` | `growdev-tn.github.io.` (with the **final dot**, otherwise OVH appends your domain to it) |
+
+   The `www` target is `<organization>.github.io` **without** the repository name. Never add a wildcard `*` record.
+4. Wait, then check what the world sees (PowerShell; `-Server 8.8.8.8` skips your PC's cache):
+
+```powershell
+Resolve-DnsName growdev.tn     -Type A     -Server 8.8.8.8 -DnsOnly
+Resolve-DnsName growdev.tn     -Type AAAA  -Server 8.8.8.8 -DnsOnly
+Resolve-DnsName www.growdev.tn -Type CNAME -Server 8.8.8.8 -DnsOnly
+Resolve-DnsName growdev.tn     -Type MX    -Server 8.8.8.8 -DnsOnly
+Resolve-DnsName growdev.tn     -Type TXT   -Server 8.8.8.8 -DnsOnly
+```
+
+   Expected: exactly the four IPv4 and the four IPv6 addresses above, `www` → `growdev-tn.github.io`, the five `mx*.mail.ovh.net` records, one SPF `TXT`. To see what **OVH itself** serves (it updates at once), use a name from the domain's **DNS servers** tab as the server: `Resolve-DnsName growdev.tn -Type A -Server <that name>`. If OVH shows the right records but `8.8.8.8` still shows an old address, only caches are left; OVH says to allow up to 24 hours.
+5. Leave the OVH **hosting plan** (`growdes.cluster129.hosting.ovh.net`) and its multisite entries alone. Once DNS points elsewhere they serve nothing. Do not delete the plan before you know the mailbox does not depend on it.
+
+### 4. GitHub: verify the domain, set it, enforce HTTPS
+
+1. **Verify the domain** (so nobody else can claim it). Organization `growdev-tn` → **Settings → Pages → Add a domain** → `growdev.tn`. GitHub shows a TXT record named `_github-pages-challenge-growdev-tn`. Add it in the OVH DNS zone (type `TXT`, that subdomain, the value GitHub shows) and click **Verify**. Keep the record forever.
+2. **Set the custom domain.** Repository `growdev-tn/growdev-tn.github.io` → **Settings → Pages** (under *Code, planning, and automation*) → **Custom domain** → type `growdev.tn` → **Save**. GitHub runs a **DNS check**: if it fails, wait 10 to 30 minutes and check again (DNS changes can take up to 24 hours).
+3. **Enforce HTTPS.** GitHub issues the certificate itself; this can take up to about an hour after the DNS check passes. When the **Enforce HTTPS** box becomes available, tick it. If it stays grey for hours, clear the custom domain, save, and type it again. A `CAA` record in the zone, if there is one, must allow `letsencrypt.org`.
+4. Until the certificate exists, `https://growdev.tn` may show a certificate warning. The site has no regular visitors yet: do this when you are not about to share the link.
+
+### 5. Apply this update and push
+
+Apply the zip and check it at any time (nothing leaves your PC until `git push`):
+
+```powershell
+Expand-Archive -Path "$HOME\Downloads\growdev-portfolio-domain.zip" -DestinationPath .. -Force
+docker run --rm -v "${PWD}:/app" -w /app node:22-alpine node tools/build.mjs
+docker run --rm -v "${PWD}:/app" -w /app node:22-alpine node tools/check.mjs
+git status
+```
+
+The check must end with `All checks passed.` Then, **only after steps 1 to 4**:
+
+```powershell
+git add -A
+git commit -m "Move the site to growdev.tn and the contact address to contact@growdev.tn"
+git push
+```
+
+### 6. After the deploy
+
+1. Actions tab: the workflow is green. Then `bash tools/verify-launch.sh`: every line `ok`.
+2. Open `/`, `/ar/` and `/en/`, click every contact link (a mail to `contact@growdev.tn` opens) and send yourself a brief from the *build your system* section.
+3. Paste `https://growdev.tn/` into WhatsApp and LinkedIn: the share image now prints `growdev.tn`. A platform that cached the old address may keep showing the old preview for a while; its link-preview debugger refreshes it.
+4. Search Console and Bing (section above).
+
+### Backing out
+
+- **Mail never depends on the website.** Nothing in steps 3 to 5 touches `MX` or the mail `TXT` records.
+- To serve the site on the GitHub address again: **Settings → Pages**, clear **Custom domain**, **Save**. Then `git revert <commit>` the move and push, so that `"url"`, `"email"`, the sitemap and the share images go back together (the checker refuses a `"url"` on `github.io` while `"legacyHosts"` still lists it).
 
 ## First-time setup, or rebuilding from scratch
 
@@ -106,7 +205,7 @@ git remote add origin git@github.com:growdev-tn/growdev-tn.github.io.git
 git push -u origin main
 ```
 
-4. In the repository: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Leave **Custom domain** empty.
+4. In the repository: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Then set the **Custom domain** as in step 4 above (the DNS records must already be in place).
 5. **Actions** tab → latest run → **Re-run all jobs**. The first run fails at *Configure Pages* until step 4 is done; that is expected.
 
 If you moved an existing repository with **Settings → General → Danger Zone → Transfer**, GitHub keeps the history, the issues and the Actions settings. Check step 4 again after a transfer.
@@ -115,16 +214,24 @@ If you moved an existing repository with **Settings → General → Danger Zone 
 
 | Symptom | Cause and fix |
 |---|---|
-| Workflow fails at **Configure Pages**: "Get Pages site failed" or "Not Found" | Pages source is not **GitHub Actions** yet. Set it (step 4 above), then re-run |
-| Workflow fails at **Check** | Read the line: it names the page and the problem (a missing translation, a broken link, a title too long, a `robots.txt` rule that does not match `allowAiTraining`…). Fix it in `src/` or `tools/`, rebuild, push |
+| Workflow fails at **Configure Pages**: "Get Pages site failed" or "Not Found" | Pages source is not **GitHub Actions** yet. Set it (first-time setup, step 4), then re-run |
+| Workflow fails at **Check** | Read the line: it names the page and the problem (a missing translation, a broken link, a title too long, an address that does not match `site.json`, a `robots.txt` rule that does not match `allowAiTraining`…). Fix it in `src/` or `tools/`, rebuild, push |
 | `404` right after the first deploy | The deployment is not finished, or Source is still "Deploy from a branch". Check the Actions tab and Settings → Pages |
-| The address looks like `…github.io/growdev-site/` and has no styling | An old project-page address. The site only works at the root: use `https://growdev-tn.github.io/` |
-| `robots.txt` or the sitemap still shows an old address | The deploy is not finished, or the browser cached it. Hard-refresh. Make sure `"url"` in `src/site.json` was changed and pushed |
-| You changed something but see the old page | GitHub caches files for about 10 minutes. Hard-refresh (Ctrl+F5), or wait. Since 18 Nov the pages ask for versioned files (`styles.css?v=…`), so a changed stylesheet or script is fetched as soon as the page itself is fresh |
+| `growdev.tn` shows an OVH "under construction" page, or the old hosting | An old `A` or `AAAA` record of the OVH hosting plan is still in the DNS zone, or caches have not expired. Run the `Resolve-DnsName` commands: only the four GitHub addresses must appear. If OVH puts the old records back after you delete them, they are tied to the multisite entries for `growdev.tn` and `www.growdev.tn` of the hosting plan (domain page → *Linked services*): detach only those two entries, not the plan, then delete the records again |
+| GitHub says **DNS check unsuccessful** | The records are not exactly those of step 3 (a leftover `A`, a wrong IP, the `www` target without the final dot or with the repository name), or DNS is still propagating (up to 24 hours) |
+| `https://growdev.tn` shows a certificate warning, or **Enforce HTTPS** stays grey | GitHub has not issued the certificate yet (up to about an hour after the DNS check passes), or a `CAA` record does not allow `letsencrypt.org`. Wait, check the zone; as a last resort clear the custom domain, save, and add it again |
+| `www.growdev.tn` does not redirect | The `www` `CNAME` is missing or points elsewhere, or its certificate is not issued yet. GitHub redirects `www` to the bare domain by itself once both names resolve to it |
+| The address looks like `…github.io/growdev-site/` and has no styling | An old project-page address. The site only works at the root: use `https://growdev.tn/` |
+| `robots.txt` or the sitemap shows an old address | The deploy is not finished, or the browser cached it. Hard-refresh. Make sure `"url"` in `src/site.json` was changed and pushed |
+| You changed something but see the old page | GitHub caches files for about 10 minutes. Hard-refresh (Ctrl+F5), or wait. The pages ask for versioned files (`styles.css?v=…`), so a changed stylesheet or script is fetched as soon as the page itself is fresh |
 | CHECK says "carries the version … but the file now hashes to …" | You edited a stylesheet, a script or a logo and did not run the build. Run `node tools/build.mjs`, then commit the pages it rewrote |
+| CHECK says "contains an e-mail address other than …" or "still mentions an earlier address" | An old address is written somewhere. The message names the file; fix it at the source (see the list near the top) and rebuild |
+| CHECK says "og-xx.jpg was not made for growdev.tn" | `"url"` changed but the share images were not regenerated. Run `npm run og` (needs Playwright), then rebuild |
+| CHECK says "CNAME should contain exactly …" or "CNAME must not exist on a github.io address" | `site/CNAME` is out of date. Run the build: it writes the file for a custom domain and removes it for a `github.io` address. Commit the result |
 | `git push` says "Permission denied (publickey)" | The SSH key is not added to your GitHub account, or `ssh -T git@github.com` does not greet `aziz-art`. Fix the key first |
-| CHECK says "CNAME must not exist on a github.io address" | An old `site/CNAME` is still there. Run the build: it removes the file. Then commit the deletion |
-| E-mail at `@werchti.tn` stops working | It has nothing to do with the website now. Check the mail records of the `werchti.tn` DNS zone, and never edit MX or mail TXT records for the website |
+| Mail to `contact@growdev.tn` bounces or never arrives | The website does not carry mail. In the OVH DNS zone check the five `MX` records and the single SPF `TXT` (step 2). Check that the mailbox exists and is not full (its size was chosen when it was created) |
+| Your replies from `contact@growdev.tn` land in the recipient's spam | Check SPF is a single record, activate DKIM if the panel offers it, add the DMARC record (step 2), then test with Gmail's **Show original** |
+| E-mail at `@werchti.tn` stops working | It has nothing to do with this site. Check the mail records of the `werchti.tn` DNS zone; never edit them for a website change |
 
 ## Roll back
 
@@ -136,5 +243,6 @@ git push                             # redeploys in about a minute
 
 ## References
 
-- GitHub Docs: *Creating a GitHub Pages site*, *Using custom workflows with GitHub Pages*, *Managing a custom domain for your GitHub Pages site*, *Verifying your custom domain for GitHub Pages*.
+- GitHub Docs: [Managing a custom domain for your GitHub Pages site](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site), [Verifying your custom domain for GitHub Pages](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/verifying-your-custom-domain-for-github-pages), [Troubleshooting custom domains and GitHub Pages](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/troubleshooting-custom-domains-and-github-pages), *Using custom workflows with GitHub Pages*.
+- OVHcloud guides: [Editing an OVHcloud DNS zone](https://docs.ovhcloud.com/en/guides/web-cloud/domains/dns-zone-edit), [Adding an A record](https://docs.ovhcloud.com/en/guides/web-cloud/domains/dns-zone-a-record-creation), [Configuring MX records](https://docs.ovhcloud.com/en/guides/web-cloud/domains/dns-zone-mx), [Improving e-mail security with an SPF record](https://docs.ovhcloud.com/en/guides/web-cloud/domains/dns-zone-spf), [Creating an e-mail address with MX Plan](https://docs.ovhcloud.com/en/guides/web-cloud/email-and-collaborative-solutions/mx-plan/email-creation), [MX Plan: general information and server settings](https://docs.ovhcloud.com/en/guides/web-cloud/email-and-collaborative-solutions/mx-plan/email-generalities).
 - The workflow is `.github/workflows/pages.yml` (checkout, configure-pages, upload-pages-artifact, deploy-pages). Dependabot proposes updates weekly. Merge its pull requests after the checks are green.

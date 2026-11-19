@@ -50,7 +50,7 @@ Rules for editing the copy:
 ## 3. Launch checklist (in this order)
 
 1. **Deploy and check HTTPS** (see `docs/DEPLOY.md`). Open `/`, `/ar/`, `/en/`, `/sitemap.xml`, `/robots.txt`, `/llms.txt`.
-2. **Google Search Console.** Add a *URL prefix* property for `https://growdev-tn.github.io/` (a *Domain* property needs a DNS record, which a `github.io` address cannot have). Verify with the *HTML file* method: put the file Google gives you in `site/`, push, then click Verify. Then submit `https://growdev-tn.github.io/sitemap.xml` and use *URL inspection → Request indexing* for the three pages. Details are in `docs/DEPLOY.md`.
+2. **Google Search Console.** Add a *Domain* property for `growdev.tn` (the site has its own DNS zone since the move to `growdev.tn`) and verify it with the TXT record Google gives you, added in the OVH DNS zone. Then submit `https://growdev.tn/sitemap.xml` and use *URL inspection → Request indexing* for the three pages. Details are in `docs/DEPLOY.md`.
 3. **Bing Webmaster Tools.** Import the site from Search Console, then submit the same sitemap. Bing's index also feeds Microsoft Copilot and some other assistants.
 4. **Validate the markup.** Run the three URLs through the Google Rich Results Test and validator.schema.org. Run PageSpeed Insights on mobile.
 5. **Google Business Profile.** Create a *Software company* profile (service-area business if there is no public address). Use the same name, email and website everywhere.

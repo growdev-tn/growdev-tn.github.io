@@ -201,7 +201,7 @@
   "brief.split": "Suggested split:", "brief.p1": "- Phase 1: {list}", "brief.p2": "- Phase 2: {list}", "brief.par": "- In parallel: {list}",
   "brief.when": "Preferred start: {when}", "brief.company": "Company: {company}", "brief.bye": "Kind regards,",
   "brief.empty": "Pick at least one need above to generate your brief.",
-  "brief.opened": "Your email app is opening. Otherwise, copy the brief and write to contact@werchti.tn.",
-  "brief.copied": "Brief copied. Paste it into an email to contact@werchti.tn.",
+  "brief.opened": "Your email app is opening. Otherwise, copy the brief and write to contact@growdev.tn.",
+  "brief.copied": "Brief copied. Paste it into an email to contact@growdev.tn.",
   "brief.copyfail": "Copy isn’t available in this browser. Use the “Send” button instead."
 }

@@ -1,10 +1,10 @@
 # GrowDev — full text
 
-Source: https://growdev-tn.github.io/ · Contact: contact@werchti.tn
+Source: https://growdev.tn/ · Contact: contact@growdev.tn
 
 # GrowDev in English (en)
 
-URL: https://growdev-tn.github.io/en/
+URL: https://growdev.tn/en/
 
 ## GrowDev | Odoo ERP, Websites and Mobile Apps in Tunisia
 
@@ -113,7 +113,7 @@ Founded by Aziz Chaibi, a full-stack developer specialised in Odoo.
 - Coverage: Tunisia first, then Africa and worldwide, remotely
 - Languages: French, Arabic, English
 - Quotes: In DT for Tunisia, in € or $ internationally
-- Contact: contact@werchti.tn
+- Contact: contact@growdev.tn
 
 ## Frequently asked questions
 
@@ -151,7 +151,7 @@ We train your team, set up backups and security, then keep following up: fixes, 
 
 # GrowDev en français (fr)
 
-URL: https://growdev-tn.github.io/
+URL: https://growdev.tn/
 
 ## GrowDev | Odoo, sites web et applications mobiles en Tunisie
 
@@ -260,7 +260,7 @@ Fondée par Aziz Chaibi, développeur full-stack spécialisé Odoo.
 - Intervention: Tunisie d’abord, puis Afrique et international, à distance
 - Langues: Français, arabe, anglais
 - Devis: En DT pour la Tunisie, en € ou en $ à l’international
-- Contact: contact@werchti.tn
+- Contact: contact@growdev.tn
 
 ## Questions fréquentes
 
@@ -298,7 +298,7 @@ Nous formons vos équipes, mettons en place les sauvegardes et la sécurité, pu
 
 # GrowDev بالعربية (ar)
 
-URL: https://growdev-tn.github.io/ar/
+URL: https://growdev.tn/ar/
 
 ## GrowDev | نظام Odoo ERP ومواقع الويب وتطبيقات الجوال في تونس
 
@@ -407,7 +407,7 @@ GrowDev شركة تطوير برمجيات مقرّها تونس. نرافق ا�
 - مجال التدخل: تونس أولًا، ثم إفريقيا والعالم، عن بُعد
 - اللغات: العربية، الفرنسية، الإنجليزية
 - عروض الأسعار: بالدينار التونسي (د.ت) لتونس، وباليورو أو الدولار دوليًا
-- التواصل: contact@werchti.tn
+- التواصل: contact@growdev.tn
 
 ## الأسئلة الشائعة
 

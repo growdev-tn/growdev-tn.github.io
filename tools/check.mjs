@@ -83,6 +83,19 @@ function jpegSize(file) {
   return null;
 }
 
+// The text of every JPEG comment (COM) segment before the image data. tools/make-og.cjs writes "GrowDev share image for <host>" there.
+function jpegComments(b) {
+  const out = [];
+  if (b[0] !== 0xff || b[1] !== 0xd8) return out;
+  let i = 2;
+  while (i + 4 <= b.length && b[i] === 0xff && b[i + 1] !== 0xda) {
+    const len = b.readUInt16BE(i + 2);
+    if (b[i + 1] === 0xfe) out.push(b.subarray(i + 4, i + 2 + len).toString("latin1"));
+    i += 2 + len;
+  }
+  return out;
+}
+
 // ---------- per-page checks ----------
 const pages = [];
 const seen = { title: new Map(), desc: new Map(), cx: { role: new Map(), pause: new Map(), play: new Map(), prev: new Map(), next: new Map() } };   // cx: the carousel's spoken labels, per language
@@ -148,6 +161,8 @@ function checkPage(L) {
     check(dim && dim.w === 1200 && dim.h === 630, `${tag} ${ogRel} should be a 1200x630 JPEG (found ${dim ? dim.w + "x" + dim.h : "not a JPEG"})`);
     const size = fs.statSync(path.join(SITE, ogRel)).size / 1024;
     check(size <= BUDGET.ogKB, `${tag} ${ogRel} is ${kb(size)} (budget ${BUDGET.ogKB} KB: heavier images are skipped by some chat apps)`, "warn");
+    // The image prints the site's address. tools/make-og.cjs tags each JPEG with the host it was made for, so a stale image is caught here.
+    check(jpegComments(fs.readFileSync(path.join(SITE, ogRel))).includes(`GrowDev share image for ${hostname}`), `${tag} ${ogRel} was not made for ${hostname}, so it prints another address. Run npm run og (it needs Playwright) after changing "url" in src/site.json, then run the build`);
   }
   check(meta("geo.region") === "TN", `${tag} geo.region should be TN`);
 
@@ -418,6 +433,31 @@ if (check(has("llms.txt") && has("llms-full.txt"), "llms.txt and llms-full.txt a
     check(l.includes(`\n- ${c.name}\n`), `llms.txt does not list the client "${c.name}"`);
     check(full.split(`\n- ${c.name}\n`).length - 1 === cfg.langs.length, `llms-full.txt should list the client "${c.name}" once per language (${cfg.langs.length} times)`);
   }
+}
+// ---------- identity: one address, one contact e-mail ----------
+// "url" and "email" in src/site.json are the only truth. The pages, the dictionaries, the llms files and 404.html are built from them or checked
+// against them, so a leftover of an earlier address (the old host, the old mailbox) fails the build instead of reaching a visitor's mail client.
+// "legacyHosts" lists the hosts the site used to have; none of them may be written anywhere in the built site.
+{
+  const legacy = Array.isArray(cfg.legacyHosts) ? cfg.legacyHosts : [];
+  const mail = typeof cfg.email === "string" ? cfg.email.trim() : "";
+  const validMail = /^[^\s@]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(mail);
+  check(validMail, `"email" in src/site.json is not an e-mail address (got ${JSON.stringify(cfg.email)})`);
+  check(legacy.every((h) => typeof h === "string" && /^[a-z0-9.-]+\.[a-z]{2,}$/.test(h) && h !== hostname), `"legacyHosts" in src/site.json must be plain host names (no https://, no path) and must not contain the current host ${hostname}`);
+  if (!hostname.endsWith(".github.io") && validMail) check(mail.toLowerCase().endsWith("@" + hostname), `the contact address ${mail} is not on the site's own domain ${hostname}; visitors may take "GrowDev" and that address for two companies (docs/UX-AUDIT.md)`, "warn");
+  const pageFiles = cfg.langs.map((L) => (L.path === "/" ? "index.html" : L.path.slice(1) + "index.html"));
+  const files = [...pageFiles, "404.html", "assets/js/config.js", ...cfg.langs.map((L) => `assets/js/dict-${L.code}.js`), "llms.txt", "llms-full.txt", "sitemap.xml", "robots.txt", "site.webmanifest"].filter(has);
+  const MAIL = /[A-Za-z0-9._%+-]+@[A-Za-z][A-Za-z0-9-]*(?:\.[A-Za-z][A-Za-z0-9-]*)*\.[A-Za-z]{2,}/g;   // a name, an @, a host that starts with a letter (so "logo@2x.png" is not an address)
+  for (const f of files) {
+    const text = read(f);
+    const others = [...new Set((text.match(MAIL) || []).filter((a) => a.toLowerCase() !== mail.toLowerCase()))];
+    check(others.length === 0, `${f} contains an e-mail address other than ${mail}: ${others.join(", ")}. Change it at the source: the template, the three src/i18n files, site/assets/js/config.js and site/404.html each write the address`);
+    const old = legacy.filter((h) => text.includes(h));
+    check(old.length === 0, `${f} still mentions an earlier address of the site: ${old.join(", ")}`);
+  }
+  // every page and the 404 page offer the configured address; the runtime brief (composer.js) reads it from config.js
+  for (const f of [...pageFiles, "404.html"].filter(has)) check(read(f).includes(`href="mailto:${mail}`), `${f} has no mailto: link to ${mail}`);
+  if (has("assets/js/config.js")) check((/\bemail:\s*"([^"]+)"/.exec(read("assets/js/config.js")) || [])[1] === mail, `site/assets/js/config.js: "email" should be exactly ${mail} (the brief's mail button uses it)`);
 }
 // GitHub Pages essentials
 check(new URL(origin).pathname === "/", `"url" in src/site.json must be the root of a host, without a path (got ${origin})`);

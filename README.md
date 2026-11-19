@@ -2,7 +2,7 @@
 
 Animated portfolio for **GrowDev** (Odoo ERP, web, WordPress, PrestaShop, mobile apps, automation), in **French, Arabic and English**, for Tunisia first, then Africa, then the world.
 
-Live address: **https://growdev-tn.github.io/** · French `/` · Arabic `/ar/` (right-to-left) · English `/en/`
+Live address: **https://growdev.tn/** · French `/` · Arabic `/ar/` (right-to-left) · English `/en/`
 
 No framework, no runtime dependencies, no cookies, no third-party requests. A zero-dependency Node script turns one template and three dictionaries into three real HTML pages.
 
@@ -63,17 +63,18 @@ branding/             original logo file
 
 ## Publish
 
-Push to `main`. GitHub Actions builds, runs the checks and deploys in about a minute. Everyday commands (PowerShell, Docker, SSH), Search Console, the AI-crawler policy, moving to your own domain later and a first-time setup: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+Push to `main`. GitHub Actions builds, runs the checks and deploys in about a minute. Everyday commands (PowerShell, Docker, SSH), the domain and mailbox setup at OVHcloud, Search Console, the AI-crawler policy and a first-time setup: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
 
 ## Documentation
 
 | File | What it is |
 |---|---|
-| [docs/DEPLOY.md](docs/DEPLOY.md) | Publishing on `growdev-tn.github.io`: PowerShell, Docker and SSH commands, Search Console, AI-crawler policy, moving to your own domain, troubleshooting |
+| [docs/DEPLOY.md](docs/DEPLOY.md) | Publishing on `growdev.tn` (GitHub Pages, OVHcloud DNS and mail): PowerShell, Docker and SSH commands, the order of operations for the domain and the mailbox, Search Console, AI-crawler policy, troubleshooting |
 | [docs/SEO-GEO-AEO.md](docs/SEO-GEO-AEO.md) | What is built in for search engines and AI assistants, keyword map, launch checklist |
 | [docs/CREATIVE-BRIEF.md](docs/CREATIVE-BRIEF.md) | Audience, messaging, tone, visual direction, open questions |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Principles, stack decisions, security, performance, design system, roadmap |
-| [docs/UX-AUDIT.md](docs/UX-AUDIT.md) | UX/UI audit of 15 Nov 2026: scores, evidence (accessibility scan, contrast, layout, speed), what was fixed, what is left; plus addenda of 17 and 18 Nov on the Clients section and its carousel |
+| [docs/UX-AUDIT.md](docs/UX-AUDIT.md) | UX/UI audit of 15 Nov 2026: scores, evidence (accessibility scan, contrast, layout, speed), what was fixed, what is left; plus addenda of 17 and 18 Nov on the Clients section and its carousel and of 19 Nov on the contact address |
+| [docs/INFRA-AUDIT.md](docs/INFRA-AUDIT.md) | Infrastructure audit of 19 Nov 2026 (domain, DNS, mail, HTTPS, headers, performance): what was measured, what could not be, what to fix and what to re-run once the domain is live |
 
 ## Credits and licence
 

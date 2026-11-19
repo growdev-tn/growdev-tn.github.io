@@ -201,7 +201,7 @@
   "brief.split": "Découpage suggéré :", "brief.p1": "- Phase 1 : {list}", "brief.p2": "- Phase 2 : {list}", "brief.par": "- En parallèle : {list}",
   "brief.when": "Démarrage souhaité : {when}", "brief.company": "Entreprise : {company}", "brief.bye": "Cordialement,",
   "brief.empty": "Choisissez au moins un besoin ci-dessus pour générer votre brief.",
-  "brief.opened": "Votre application e-mail s’ouvre. Sinon, copiez le brief et écrivez à contact@werchti.tn.",
-  "brief.copied": "Brief copié. Collez-le dans un e-mail à contact@werchti.tn.",
+  "brief.opened": "Votre application e-mail s’ouvre. Sinon, copiez le brief et écrivez à contact@growdev.tn.",
+  "brief.copied": "Brief copié. Collez-le dans un e-mail à contact@growdev.tn.",
   "brief.copyfail": "La copie n’est pas disponible dans ce navigateur. Utilisez plutôt le bouton « Envoyer »."
 }

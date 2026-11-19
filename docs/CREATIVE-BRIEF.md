@@ -21,9 +21,9 @@
 | Type | Always-on website (not a time-boxed campaign) |
 | Funnel | Awareness (hero, services) → consideration (method, "compose your system", simulator, FAQ) → conversion (project brief by e-mail) |
 | Platforms | Web, mobile first. Link previews on WhatsApp, LinkedIn, Facebook, X |
-| Address | `https://growdev-tn.github.io/` (GitHub Pages; an own domain can replace it later by changing one setting) |
+| Address | `https://growdev.tn/` (GitHub Pages on an own domain registered at OVHcloud; the earlier `growdev-tn.github.io` redirects to it) |
 | Flight dates | Live as soon as the first deploy is done. No end date |
-| Budget | No hosting cost. A custom domain is optional and is the only possible expense |
+| Budget | No hosting cost for the site (GitHub Pages). The domain `growdev.tn` is registered at OVHcloud and has to be renewed: the site and the mailbox both depend on it |
 
 **Success looks like.** A visitor can say in one sentence what GrowDev does, finds the service that matches their problem in under 30 seconds, and sends a brief without having to know any IT vocabulary.
 
@@ -140,7 +140,7 @@
 |---|---|
 | Brief and first preview | 2026-11-05 |
 | Owner feedback | to be set by the owner |
-| Go-live | after the first deploy on `growdev-tn.github.io` (same day is possible) |
+| Go-live | first deploy on `growdev-tn.github.io` (7 Nov 2026); move to `growdev.tn` prepared on 19 Nov 2026 |
 
 **Revision policy.** Two rounds of copy and layout changes after the first preview. Copy lives in three JSON files, so wording changes never touch the layout.
 
@@ -190,7 +190,7 @@
 
 **Assets provided:** logo (emblem and wordmark) supplied by the owner; fonts self-hosted (SIL Open Font License).
 
-**Contact:** Aziz Chaibi, `contact@werchti.tn`.
+**Contact:** Aziz Chaibi, `contact@growdev.tn`.
 
 **Open questions for the owner**
 

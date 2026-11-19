@@ -201,7 +201,7 @@
   "brief.split": "التقسيم المقترح:", "brief.p1": "- المرحلة 1: {list}", "brief.p2": "- المرحلة 2: {list}", "brief.par": "- بالتوازي: {list}",
   "brief.when": "موعد البدء المفضل: {when}", "brief.company": "المؤسسة: {company}", "brief.bye": "مع أطيب التحيات،",
   "brief.empty": "اختر احتياجًا واحدًا على الأقل أعلاه لإنشاء ملخصك.",
-  "brief.opened": "يتم فتح تطبيق البريد لديك. وإلا فانسخ الملخص وراسل contact@werchti.tn.",
-  "brief.copied": "تم نسخ الملخص. الصقه في رسالة إلى contact@werchti.tn.",
+  "brief.opened": "يتم فتح تطبيق البريد لديك. وإلا فانسخ الملخص وراسل contact@growdev.tn.",
+  "brief.copied": "تم نسخ الملخص. الصقه في رسالة إلى contact@growdev.tn.",
   "brief.copyfail": "النسخ غير متاح في هذا المتصفح. استعمل زر «الإرسال» بدلًا من ذلك."
 }

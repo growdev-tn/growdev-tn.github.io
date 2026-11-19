@@ -187,6 +187,18 @@ The 17 Nov wall became a carousel (made for the phone first), and every local st
 
 **Not measured, not decided:** Safari and iOS, real Android phones and a real finger (touch was emulated), how screen readers announce the carousel, the live address. The Arabic lines of the section (text, widget name and the four button names) need a native read. Logos under about 400 px on the long side (the smallest is 238 px) look slightly soft on high-density phones. Each client must agree to be shown; nothing in the code can check that.
 
+## Addendum, 19 Nov 2026: the contact address and the domain
+
+The site moves to its own domain, `growdev.tn` (OVHcloud), and the contact address moves with it: `contact@growdev.tn` replaces `contact@werchti.tn` on every page, in the structured data, in `llms.txt` and `llms-full.txt`, in the brief's mail button and on the 404 page.
+
+**Resolved from this audit:** the *Help and escape paths* note that the address "is on `werchti.tn`, another name than the brand", and priority action 6, "Use an address on the brand's own name". The checker now warns when the contact address is not on the site's own domain.
+
+**Still open from the same row:** e-mail is the only channel (no phone or WhatsApp number yet). The new mailbox is an OVH MX Plan mailbox; it must exist, and have received a test message, before the new pages are pushed (`docs/DEPLOY.md`, step 1).
+
+**Measured on the built site (Claude's own review, headless Chromium, local server):** 3 languages × 2 themes × 390 and 1440 px, plus `404.html` and an unknown address: 114 checks, 0 failures; no console message, no failed request and no request to another host; every `mailto:` link and `GD.config.email` carry the new address; the canonical link and the share-image links use `https://growdev.tn`; no sideways scrolling. The Arabic contact card, where the address sits left-to-right inside right-to-left text, was looked at on a phone: no overflow and no change of layout (the new address is as long as the old one). The three share images were regenerated; a pixel comparison with the old ones shows that only the strip with the address changed.
+
+**Not measured:** the live domain (nothing answers there yet), DNS, the HTTPS certificate, mail delivery. See `docs/INFRA-AUDIT.md`.
+
 ---
 
 ## Would you like me to

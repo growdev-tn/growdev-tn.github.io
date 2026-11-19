@@ -22,4 +22,4 @@ User-agent: Applebot-Extended
 User-agent: CCBot
 Disallow: /
 
-Sitemap: https://growdev-tn.github.io/sitemap.xml
+Sitemap: https://growdev.tn/sitemap.xml
