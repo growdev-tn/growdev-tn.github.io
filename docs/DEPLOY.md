@@ -58,7 +58,7 @@ In Git Bash (it needs `curl`), from the repository folder:
 bash tools/verify-launch.sh
 ```
 
-Every line must say `ok` (30 checks today). The script defaults to `growdev.tn`; pass another host as the first argument to test a different address. It checks the three pages and their canonical links, the contact link on every page, that no earlier address is still written, `sitemap.xml`, `robots.txt`, `llms.txt` and `llms-full.txt`, the three share images, that `http` leads to `https`, that `www.growdev.tn` and `growdev-tn.github.io` redirect to `https://growdev.tn/`, and the 404 page. A line that says **gave no answer** means DNS is not ready yet or GitHub has not issued the HTTPS certificate yet.
+Every line must say `ok` (30 checks today). Each page is downloaded once; if a download fails, the script says so once, with curl's own reason, and the checks that depended on it are listed as `skip` (not checked), which does not count as a pass. The script defaults to `growdev.tn`; pass another host as the first argument to test a different address. It checks the three pages and their canonical links, the contact link on every page, that no earlier address is still written, `sitemap.xml`, `robots.txt`, `llms.txt` and `llms-full.txt`, the three share images, that `http` leads to `https`, that `www.growdev.tn` and `growdev-tn.github.io` redirect to `https://growdev.tn/`, and the 404 page. A line that says **gave no answer** means DNS is not ready yet or GitHub has not issued the HTTPS certificate yet.
 
 Then look at the site yourself: `/`, `/ar/` and `/en/`, the language switch, the contact links, and a wrong address such as `/nothing-here` (the trilingual 404 page).
 
@@ -110,10 +110,12 @@ OVH Control Panel → **Web Cloud → Domain names → `growdev.tn` → DNS zone
 
 | Type | Subdomain | Value | Note |
 |---|---|---|---|
-| `MX` | (empty) | `mx0.mail.ovh.net.` priority **1**, `mx1.mail.ovh.net.` **5**, `mx2.mail.ovh.net.` **50**, `mx3.mail.ovh.net.` **100**, `mx4.mail.ovh.net.` **200** | OVH creates them for MX Plan. If one is missing, add it (**Add an entry** → `MX`) |
-| `TXT` (SPF) | (empty) | `v=spf1 include:mx.ovh.com ~all` | A domain may have **one** SPF record. If one exists, keep it; do not add a second. If none exists: **Add an entry** → type `SPF` → tick *Include OVH email servers* → **Add** |
+| `MX` | (empty) | On `growdev.tn` OVH created three: `mx1.mail.ovh.net.` priority **1**, `mx2.mail.ovh.net.` **5**, `mx3.mail.ovh.net.` **100** (read from the live zone on 19 Nov 2026) | OVH creates them when the free hosting or an MX Plan is activated. Leave them exactly as they are; do not add others |
+| `TXT` (SPF) | (empty) | `v=spf1 include:mx.ovh.com -all` (as OVH created it on `growdev.tn`; OVH's guide shows the softer `~all`) | A domain may have **one** SPF record. It exists: keep it, do not add a second. `-all` rejects any sender that is not listed, so a second sender (an Odoo server, a newsletter service) needs its own `include:` in this same record. If none exists: **Add an entry** → type `SPF` → tick *Include OVH email servers* → **Add** |
 | `TXT` (DMARC) | `_dmarc` | `v=DMARC1; p=none;` | Add it. `p=none` only monitors; it asks receivers to reject nothing. Gmail and others trust a domain with SPF and DMARC more |
 | DKIM | | | If the MX Plan page in the panel offers to activate **DKIM**, activate it: OVH then publishes the records itself. Not verified from here; skip it if the screen is not there |
+
+The zone also holds a `TXT` record on the bare domain with the value `1|www.growdev.tn`: it is OVH's marker for the hosting's `www` entry, not mail. Leave it.
 
 Test deliverability once the mailbox works: send a message **from** `contact@growdev.tn` to a Gmail address, open it, **⋮ → Show original**. SPF should say `PASS` (DMARC too; DKIM only if activated).
 
@@ -121,8 +123,8 @@ Test deliverability once the mailbox works: send a message **from** `contact@gro
 
 In the same **DNS zone** tab:
 
-1. **Look before you change anything.** The zone probably contains records that OVH created for the hosting plan of the domain: an `A` (maybe an `AAAA`) on the bare domain and a `www` record. Check also that the domain's **Redirection** tab is empty.
-2. **Delete** every `A`, `AAAA` or `CNAME` record whose subdomain is empty (the bare domain) or `www`: on its row open **⋮ → Delete the entry** and confirm. **Keep** every `MX` and `TXT` record and every other subdomain (`mail`, `imap`, `smtp`, `autoconfig`, `autodiscover`, `ftp`…). If an old OVH address stays next to GitHub's, visitors are split between the two.
+1. **Look before you change anything.** The zone contains records that OVH created when the free hosting was activated. On `growdev.tn` (read on 19 Nov 2026): an `A` `51.91.236.255` and an `AAAA` `2001:41d0:301::29` on the bare domain, and a record on `www` that is not a `CNAME`. Check also that the domain's **Redirection** tab is empty.
+2. **Delete** every `A`, `AAAA` or `CNAME` record whose subdomain is empty (the bare domain) or `www`: on its row open **⋮ → Delete the entry** and confirm. **Keep** every `MX` and `TXT` record on the bare domain and every other subdomain (`mail`, `imap`, `smtp`, `autoconfig`, `autodiscover`, `ftp`…). The exception is `www`: a `CNAME` cannot share a name with any other record, so OVH refuses the `www` `CNAME` until **every** record on `www` is gone, `TXT` ones included (on `growdev.tn` there was a `TXT` `3|welcome`). If an old OVH address stays next to GitHub's, visitors are split between the two. If the bare domain still answers an address that is not in the zone list (on `growdev.tn`: `213.186.33.5`, which is OVH's redirection service), open the domain's **Redirection** tab and delete the redirection.
 3. **Add** these nine records (**Add an entry**, or **Create a record** in the newer panel; leave the TTL on default):
 
 | Type | Subdomain | Target |
@@ -137,6 +139,8 @@ In the same **DNS zone** tab:
 | `AAAA` | (empty) | `2606:50c0:8003::153` |
 | `CNAME` | `www` | `growdev-tn.github.io.` (with the **final dot**, otherwise OVH appends your domain to it) |
 
+   **The Subdomain field stays empty** for the bare domain (type `@` only if OVH insists on a value). Typing `a` or `aaaa` there creates `a.growdev.tn` and `aaaa.growdev.tn` instead (it happened on 19 Nov 2026). The **Record preview** must start with `growdev.tn.`, for example `growdev.tn. IN A 185.199.108.153`.
+
    The `www` target is `<organization>.github.io` **without** the repository name. Never add a wildcard `*` record.
 4. Wait, then check what the world sees (PowerShell; `-Server 8.8.8.8` skips your PC's cache):
 
@@ -148,8 +152,8 @@ Resolve-DnsName growdev.tn     -Type MX    -Server 8.8.8.8 -DnsOnly
 Resolve-DnsName growdev.tn     -Type TXT   -Server 8.8.8.8 -DnsOnly
 ```
 
-   Expected: exactly the four IPv4 and the four IPv6 addresses above, `www` → `growdev-tn.github.io`, the five `mx*.mail.ovh.net` records, one SPF `TXT`. To see what **OVH itself** serves (it updates at once), use a name from the domain's **DNS servers** tab as the server: `Resolve-DnsName growdev.tn -Type A -Server <that name>`. If OVH shows the right records but `8.8.8.8` still shows an old address, only caches are left; OVH says to allow up to 24 hours.
-5. Leave the OVH **hosting plan** (`growdes.cluster129.hosting.ovh.net`) and its multisite entries alone. Once DNS points elsewhere they serve nothing. Do not delete the plan before you know the mailbox does not depend on it.
+   Expected: exactly the four IPv4 and the four IPv6 addresses above, `www` → `growdev-tn.github.io`, the three `mx*.mail.ovh.net` records (`mx1`, `mx2`, `mx3` on this zone), one SPF `TXT`. To see what **OVH itself** serves (it updates at once), use a name from the domain's **DNS servers** tab as the server: `Resolve-DnsName growdev.tn -Type A -Server <that name>`. If OVH shows the right records but `8.8.8.8` still shows an old address, only caches are left; OVH says to allow up to 24 hours.
+5. Leave the OVH **free hosting** (`growdes.cluster129.hosting.ovh.net`) alone and **never delete it**: OVH's pages describe the free offer as 100 MB of hosting plus the 5 GB mailbox, renewed free every year until the domain expires, and its activation guide says that deleting the offer means backing up the hosting data and the e-mail contents. Once DNS points elsewhere it serves nothing for `growdev.tn`; it only keeps the mailbox. Its multisite entries (`growdev.tn`, `www.growdev.tn`) stay, unless OVH keeps re-creating the old DNS records (see Troubleshooting).
 
 ### 4. GitHub: verify the domain, set it, enforce HTTPS
 
@@ -218,6 +222,10 @@ If you moved an existing repository with **Settings → General → Danger Zone 
 | Workflow fails at **Check** | Read the line: it names the page and the problem (a missing translation, a broken link, a title too long, an address that does not match `site.json`, a `robots.txt` rule that does not match `allowAiTraining`…). Fix it in `src/` or `tools/`, rebuild, push |
 | `404` right after the first deploy | The deployment is not finished, or Source is still "Deploy from a branch". Check the Actions tab and Settings → Pages |
 | `growdev.tn` shows an OVH "under construction" page, or the old hosting | An old `A` or `AAAA` record of the OVH hosting plan is still in the DNS zone, or caches have not expired. Run the `Resolve-DnsName` commands: only the four GitHub addresses must appear. If OVH puts the old records back after you delete them, they are tied to the multisite entries for `growdev.tn` and `www.growdev.tn` of the hosting plan (domain page → *Linked services*): detach only those two entries, not the plan, then delete the records again |
+| OVH will not add the `www` `CNAME` | Another record already exists on `www` (an `A`, an `AAAA` or a `TXT` such as `3\|welcome`). A `CNAME` needs the name to itself: delete every record on `www`, then add it |
+| `Resolve-DnsName` shows an address that is not GitHub's and no such line is in the zone list (`213.186.33.5`) | That address is OVH's redirection service (`redirect.ovh.net`). Open the domain's **Redirection** tab and delete the redirection for `growdev.tn` |
+| Records named `a.growdev.tn` or `aaaa.growdev.tn` appear in the zone | The **Subdomain** field was filled in for the bare domain. Delete them and add the records again with the field empty |
+| Right after saving the custom domain, `verify-launch.sh` fails on `http` not redirecting and on `growdev-tn.github.io` leading to `http://…` | GitHub is still issuing the certificate, and **Enforce HTTPS** is not on yet. Wait (up to about an hour), tick **Enforce HTTPS**, run the script again |
 | GitHub says **DNS check unsuccessful** | The records are not exactly those of step 3 (a leftover `A`, a wrong IP, the `www` target without the final dot or with the repository name), or DNS is still propagating (up to 24 hours) |
 | `https://growdev.tn` shows a certificate warning, or **Enforce HTTPS** stays grey | GitHub has not issued the certificate yet (up to about an hour after the DNS check passes), or a `CAA` record does not allow `letsencrypt.org`. Wait, check the zone; as a last resort clear the custom domain, save, and add it again |
 | `www.growdev.tn` does not redirect | The `www` `CNAME` is missing or points elsewhere, or its certificate is not issued yet. GitHub redirects `www` to the bare domain by itself once both names resolve to it |
@@ -229,7 +237,7 @@ If you moved an existing repository with **Settings → General → Danger Zone 
 | CHECK says "og-xx.jpg was not made for growdev.tn" | `"url"` changed but the share images were not regenerated. Run `npm run og` (needs Playwright), then rebuild |
 | CHECK says "CNAME should contain exactly …" or "CNAME must not exist on a github.io address" | `site/CNAME` is out of date. Run the build: it writes the file for a custom domain and removes it for a `github.io` address. Commit the result |
 | `git push` says "Permission denied (publickey)" | The SSH key is not added to your GitHub account, or `ssh -T git@github.com` does not greet `aziz-art`. Fix the key first |
-| Mail to `contact@growdev.tn` bounces or never arrives | The website does not carry mail. In the OVH DNS zone check the five `MX` records and the single SPF `TXT` (step 2). Check that the mailbox exists and is not full (its size was chosen when it was created) |
+| Mail to `contact@growdev.tn` bounces or never arrives | The website does not carry mail. In the OVH DNS zone check the three `MX` records and the single SPF `TXT` (step 2). Check that the mailbox exists and is not full (its size was chosen when it was created) |
 | Your replies from `contact@growdev.tn` land in the recipient's spam | Check SPF is a single record, activate DKIM if the panel offers it, add the DMARC record (step 2), then test with Gmail's **Show original** |
 | E-mail at `@werchti.tn` stops working | It has nothing to do with this site. Check the mail records of the `werchti.tn` DNS zone; never edit them for a website change |
 
