@@ -10,7 +10,16 @@ export const SERVICES = [
   { id: "mobile", key: "svc.mobile", anchor: "svc-mobile" },
   { id: "automation", key: "svc.auto", anchor: "svc-auto" }
 ];
-export const FAQ_COUNT = 8;
+export const FAQ_COUNT = 10;
+// "Which of these sounds like you?" (section #situations): the sentence a visitor recognises and the service card it leads to.
+// The text is in the dictionaries (sit.<n>.q / .t / .p); tools/check.mjs compares the page with this list.
+export const SITUATIONS = [
+  { n: 1, anchor: "svc-odoo" }, { n: 2, anchor: "svc-auto" }, { n: 3, anchor: "svc-shop" },
+  { n: 4, anchor: "svc-wp" }, { n: 5, anchor: "svc-web" }, { n: 6, anchor: "svc-digital" }
+];
+// The four areas of the technical profile (section #developpeur; dictionary keys dev.s<n>.t / .p)
+export const DEV_AREAS = [1, 2, 3, 4];
+const KNOWS = ["Odoo", "Python", "Django", "PostgreSQL", "Docker", "Nginx", "Linux", "Git", "JavaScript", "WordPress", "PrestaShop", "Flutter"];
 
 const AREA = [
   { "@type": "Country", name: "Tunisia" },
@@ -21,6 +30,9 @@ const AREA = [
 export function pageUrl(cfg, lang) {
   return cfg.url + cfg.langs.find((l) => l.code === lang).path;
 }
+
+/** The founder's own public profiles (src/site.json "profiles"); empty entries are left out. */
+export const personProfiles = (cfg) => ["github", "linkedin"].map((k) => cfg.profiles && cfg.profiles[k]).filter(Boolean);
 
 /** One @graph per language page: organisation, founder, website, page, services and FAQ share stable @ids. */
 export function jsonLd(cfg, D, lang, ctx) {
@@ -54,8 +66,9 @@ export function jsonLd(cfg, D, lang, ctx) {
       ...(cfg.sameAs && cfg.sameAs.length ? { sameAs: cfg.sameAs } : {})
     },
     {
-      "@type": "Person", "@id": founder, name: cfg.founder, jobTitle: T("ld.founder.job"),
-      worksFor: { "@id": org }, knowsLanguage: cfg.langs.map((l) => l.code)
+      "@type": "Person", "@id": founder, name: cfg.founder, jobTitle: T("ld.founder.job"), url: page + "#developpeur",
+      worksFor: { "@id": org }, knowsLanguage: cfg.langs.map((l) => l.code), knowsAbout: KNOWS,
+      ...(personProfiles(cfg).length ? { sameAs: personProfiles(cfg) } : {})
     },
     {
       "@type": "WebSite", "@id": website, url: url + "/", name: cfg.name,
@@ -140,6 +153,13 @@ export function llms(cfg, D) {
     ...cfg.langs.map((l) => `- [${l.nativeName}](${url + l.path}): ${D[l.code]["meta.desc"]}`), "",
     "## Services", "",
     ...SERVICES.map((s) => `- [${E[s.key + ".t"]}](${url + en.path}#${s.anchor}): ${E[s.key + ".p"]}`), "",
+    `## ${E["sit.title"]}`, "",
+    ...SITUATIONS.map(({ n, anchor }) => `- [${E[`sit.${n}.t`]}](${url + en.path}#${anchor}): ${E[`sit.${n}.q`]} ${E[`sit.${n}.p`]}`), "",
+    "## Developer profile", "",
+    `- ${E["dev.lead"]}`,
+    `- ${E["dev.how.t"]}: ${[1, 2, 3, 4, 5].map((i) => E[`dev.how.${i}`]).join(" ")}`,
+    ...DEV_AREAS.map((i) => `- ${E[`dev.s${i}.t`]}: ${E[`dev.s${i}.p`]}`),
+    ...(cfg.repo ? [`- ${E["dev.link.repo"]}: ${cfg.repo}`] : []), "",
     ...(cfg.clients && cfg.clients.length ? ["## Clients", "", `${E["clients.lead"]}`, "", ...cfg.clients.map((c) => `- ${c.name}`), ""] : []),
     "## FAQ", "",
     ...Array.from({ length: FAQ_COUNT }, (_, i) => `- [${E[`faq.q${i + 1}`]}](${url + en.path}#faq): ${firstSentence(E[`faq.a${i + 1}`])}`), "",
@@ -168,7 +188,15 @@ export function llmsFull(cfg, D) {
     for (let i = 1; i <= 5; i++) out.push(`${i}. ${T[`m${i}.t`]}: ${T[`m${i}.p`]}`);
     out.push("", `## ${T["about.title"]}`, "", T["about.p1"], "", T["about.who"], "", `### ${T["facts.t"]}`, "");
     for (let i = 1; i <= 5; i++) out.push(`- ${T[`facts.k${i}`]}: ${T[`facts.v${i}`]}`);
-    out.push(`- ${T["facts.k6"]}: ${cfg.email}`, "", `## ${T["faq.eyebrow"]}`, "");
+    out.push(`- ${T["facts.k6"]}: ${cfg.email}`, "", `## ${T["sit.title"]}`, "", T["sit.lead"], "");
+    for (const { n } of SITUATIONS) out.push(`- ${T[`sit.${n}.q`]} → ${T[`sit.${n}.t`]}: ${T[`sit.${n}.p`]}`);
+    out.push("", `## ${T["dev.title"]}`, "", T["dev.lead"], "", `### ${T["dev.how.t"]}`, "");
+    for (let i = 1; i <= 5; i++) out.push(`- ${T[`dev.how.${i}`]}`);
+    out.push("", `### ${T["dev.stack.t"]}`, "");
+    for (const i of DEV_AREAS) out.push(`- ${T[`dev.s${i}.t`]}: ${T[`dev.s${i}.p`]}`);
+    out.push("", `### ${T["dev.proof.t"]}`, "", T["dev.proof.p"], "");
+    if (cfg.repo) out.push(`${T["dev.link.repo"]}: ${cfg.repo}`, "");
+    out.push(`## ${T["faq.eyebrow"]}`, "");
     for (let i = 1; i <= FAQ_COUNT; i++) out.push(`### ${T[`faq.q${i}`]}`, "", T[`faq.a${i}`], "");
   }
   return out.join("\n");

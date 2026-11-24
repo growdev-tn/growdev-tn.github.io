@@ -9,7 +9,7 @@ import zlib from "node:zlib";
 import crypto from "node:crypto";
 import vm from "node:vm";
 import { fileURLToPath } from "node:url";
-import { FAQ_COUNT, SERVICES, pageUrl, AI_SEARCH, AI_TRAINING } from "./seo.mjs";
+import { FAQ_COUNT, SERVICES, SITUATIONS, DEV_AREAS, pageUrl, AI_SEARCH, AI_TRAINING } from "./seo.mjs";
 import { imageSize } from "./imgsize.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -18,6 +18,7 @@ const SITE = siteArg > -1 ? path.resolve(process.argv[siteArg + 1]) : path.join(
 const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, "src/site.json"), "utf8"));
 const origin = cfg.url;
 const hostname = new URL(origin).hostname;
+const PROFILES = cfg.profiles && typeof cfg.profiles === "object" ? cfg.profiles : {};   // the developer's public profiles (src/site.json); an empty one is left out of the page
 const CLIENTS = Array.isArray(cfg.clients) ? cfg.clients : [];   // the logo wall (src/site.json); the build ignores anything that is not a list, so does the checker
 
 // Budgets (gzip, per page). Generous on purpose: they exist to catch accidents, not to police every byte.
@@ -63,7 +64,7 @@ function resolveRef(pageRel, ref) {
 // Asset versions (see tools/build.mjs): every stylesheet, script and client logo is requested as "file?v=<first 8 hex digits of its SHA-256>", so a
 // browser that cached the old file can never be paired with a new page. A missing or stale version is a failure: it means the build was not run.
 const sha8 = (file) => crypto.createHash("sha256").update(fs.readFileSync(path.join(SITE, file))).digest("hex").slice(0, 8);
-const VERSIONED = /^assets\/(?:css\/[\w.-]+\.css|js\/[\w.-]+\.js|img\/clients\/[\w.-]+)$/;
+const VERSIONED = /^assets\/(?:css\/[\w.-]+\.css|js\/[\w.-]+\.js|img\/clients\/[\w.-]+|img\/tech\/[\w.-]+)$/;
 function checkVersion(where, ref, r) {
   if (!r || !r.file || !VERSIONED.test(r.file) || !has(r.file)) return;
   const v = (/(?:^|&)v=([0-9a-f]+)(?:&|$)/.exec(ref.split("#")[0].split("?")[1] || "") || [])[1], now = sha8(r.file);
@@ -98,6 +99,8 @@ function jpegComments(b) {
 
 // ---------- per-page checks ----------
 const pages = [];
+const techUsed = new Set();   // ids of the technology logos the pages really show (checked against the files below)
+const TECH_FILES = has("assets/img/tech") ? fs.readdirSync(path.join(SITE, "assets/img/tech")).filter((f) => f.endsWith(".svg")).sort() : [];
 const seen = { title: new Map(), desc: new Map(), cx: { role: new Map(), pause: new Map(), play: new Map(), prev: new Map(), next: new Map() } };   // cx: the carousel's spoken labels, per language
 
 function checkPage(L) {
@@ -326,6 +329,148 @@ function checkPage(L) {
       }
     }
   }
+  // who the page speaks to: situations, technology logos, developer profile, contact doors, footer credits ----------------------------------
+  // A visitor with no IT knowledge must find their own problem in the first screens (#situations); a recruiter must find the technical profile (#developpeur).
+  {
+    const idsHere = idsOf(html);
+    const section = (id) => {
+      const open = (body.match(new RegExp(`<section\\b[^>]*\\sid="${id}"[^>]*>`)) || [])[0];
+      return open ? { open, html: body.slice(body.indexOf(open)).split("</section>")[0] } : null;
+    };
+    const ownHeading = (sec, name) => {
+      const h2id = (sec.html.match(/<h2\b[^>]*\sid="([^"]+)"/) || [])[1];
+      check(!!h2id && parseAttrs(sec.open)["aria-labelledby"] === h2id, `${tag} #${name} must be labelled by its own <h2> (aria-labelledby = the id of the heading)`);
+    };
+    const at = (id) => body.indexOf(`id="${id}"`);
+
+    // the first screen leads to both audiences
+    const hero = (body.match(/<section\b[^>]*class="hero"[^>]*>[\s\S]*?<\/section>/) || [])[0] || "";
+    check(/<a\b[^>]*\shref="#situations"/.test(hero), `${tag} the hero must lead to #situations ("Find my solution"): that is where a visitor with no IT knowledge recognises their problem`);
+    check(/<a\b[^>]*\shref="#developpeur"/.test(hero), `${tag} the hero must offer the technical profile (#developpeur) to recruiters and technical teams`);
+
+    // situations
+    const sit = section("situations");
+    if (check(!!sit, `${tag} the #situations section is missing: it is where a visitor who does not know IT recognises their own problem`)) {
+      ownHeading(sit, "situations");
+      const rows = [...sit.html.matchAll(/<a\b([^>]*)class="pick"([^>]*)>([\s\S]*?)<\/a>/g)];
+      check(rows.length === SITUATIONS.length, `${tag} #situations has ${rows.length} row(s); SITUATIONS in tools/seo.mjs lists ${SITUATIONS.length}`);
+      SITUATIONS.forEach(({ n, anchor }, i) => {
+        const r = rows[i]; if (!r) return;
+        const a = parseAttrs(`<a${r[1]}${r[2]}>`), inner = r[3];
+        const q = textOf((inner.match(/class="pick__q"[^>]*>([\s\S]*?)<\/span>/) || [])[1] || "");
+        const t = textOf((inner.match(/<b\b[^>]*>([\s\S]*?)<\/b>/) || [])[1] || "");
+        const p = textOf((inner.match(/class="pick__a"[^>]*>([\s\S]*?)<\/span><svg/) || [])[1] || "").replace(t, "").trim();
+        check(a.href === `#${anchor}` && idsHere.has(anchor), `${tag} situation ${n} should lead to #${anchor}, which must exist on the page (found href="${a.href}")`);
+        check(q.length >= 25 && t.length >= 5 && p.length >= 25, `${tag} situation ${n}: the visitor's sentence, the answer's title and its explanation must all be written (found ${q.length}, ${t.length} and ${p.length} characters)`);
+        check(/<svg\b[^>]*\saria-hidden="true"/.test(inner), `${tag} situation ${n}: the arrow icon must be aria-hidden="true"`);
+      });
+      check(at("clients") < at("situations") && at("situations") < at("services"), `${tag} section order: #clients, then #situations, then #services`);
+    }
+
+    // the simulator explains itself: help under each control, the formula in words, one calm sentence for screen readers
+    const sim = section("simulateur");
+    if (check(!!sim, `${tag} the #simulateur section is missing`)) {
+      for (const id of ["sim-form", "s-people", "s-hours", "s-share", "s-rate", "s-cur", "o-people", "o-hours", "o-share", "r-hours", "r-days", "r-value", "r-rate", "e-people", "e-hours", "e-share", "e-total", "sbars", "sim-cap", "sim-fine", "sim-say"])
+        check(idsHere.has(id), `${tag} the simulator needs #${id} (assets/js/calculator.js writes into it)`);
+      check(!/<details\b/.test(sim.html), `${tag} the simulator hides something in a <details>: the hourly cost is part of the answer and stays visible`);
+      for (const id of ["s-people", "s-hours", "s-share", "s-rate"]) {
+        const field = (sim.html.match(new RegExp(`<input\\b[^>]*\\sid="${id}"[^>]*>`)) || [])[0];
+        const d = field && parseAttrs(field)["aria-describedby"];
+        const help = d ? textOf((sim.html.match(new RegExp(`\\sid="${d}"[^>]*>([\\s\\S]*?)</p>`)) || [])[1] || "") : "";
+        check(help.length >= 15, `${tag} #${id} needs a help line (aria-describedby pointing at a <p> with a sentence): visitors who do not work in IT must know what to enter`);
+      }
+      const say = (sim.html.match(/<p\b[^>]*\sid="sim-say"[^>]*>/) || [""])[0];
+      check(/\srole="status"/.test(say) && /\saria-live="polite"/.test(say) && /\bsr-only\b/.test(say), `${tag} #sim-say must be class="sr-only" role="status" aria-live="polite": it is the one sentence a screen reader gets, a moment after the visitor stops moving a control`);
+      check(!/aria-live/.test((sim.html.match(/<[^>]*\sid="r-(?:value|hours|days)"[^>]*>/g) || []).join("")), `${tag} the animated numbers (#r-value, #r-hours, #r-days) must not be live regions: they change on every frame and a screen reader would read each step`);
+      const ops = sim.html.match(/<span class="eq__op"[^>]*>/g) || [];
+      check(ops.length === 4 && ops.every((o) => /\saria-hidden="true"/.test(o)), `${tag} the formula needs its four signs (x x x =), each aria-hidden="true"`);
+      // the formula written on the page is the formula the script uses
+      const weeksText = (sim.html.match(/<b data-i18n="sim\.weeks">([^<]+)<\/b>/) || [])[1] || "";
+      const weeksJs = (read("assets/js/calculator.js").match(/\bWEEKS\s*=\s*([\d.]+)/) || [])[1] || "";
+      check(weeksText !== "" && parseFloat(weeksText.replace(",", ".")) === parseFloat(weeksJs), `${tag} the formula says "${weeksText}" weeks per month but assets/js/calculator.js uses ${weeksJs || "?"}: the page would show one calculation and run another`);
+      check(textOf((sim.html.match(/\sid="sim-fine"[^>]*>([\s\S]*?)<\/p>/) || [])[1] || "").includes(weeksText), `${tag} the fine print under the result should repeat the ${weeksText} weeks per month used in the formula`);
+    }
+
+    // developer profile
+    const dev = section("developpeur");
+    if (check(!!dev, `${tag} the #developpeur section ("Who writes the code?") is missing: recruiters and technical teams look for it`)) {
+      ownHeading(dev, "developpeur");
+      check((dev.html.match(/<dt\b/g) || []).length === DEV_AREAS.length, `${tag} #developpeur should describe ${DEV_AREAS.length} areas (one <dt> each; DEV_AREAS in tools/seo.mjs)`);
+      const dds = [...dev.html.matchAll(/<dd>([\s\S]*?)<\/dd>/g)].map((m) => m[1]);
+      check(dds.length === DEV_AREAS.length && dds.every((d) => /<ul class="tags"[^>]*\saria-label="[^"]+"/.test(d) && /<li class="tech/.test(d)), `${tag} every area of #developpeur needs its list of technologies, with logos and an aria-label`);
+      const ext = [...dev.html.matchAll(/<a\b[^>]*\shref="(https?:[^"]+)"[^>]*>/g)].map((m) => parseAttrs(m[0]));
+      const wantExt = [cfg.repo, PROFILES.github, PROFILES.linkedin].filter(Boolean);
+      check(JSON.stringify(ext.map((a) => a.href)) === JSON.stringify(wantExt), `${tag} #developpeur should link to exactly the addresses set in src/site.json ("repo", "profiles.github", "profiles.linkedin"; an empty one is left out). Found: ${ext.map((a) => a.href).join(", ") || "none"}`);
+      check(ext.every((a) => /\bnoopener\b/.test(a.rel || "")), `${tag} every external link in #developpeur needs rel="noopener"`);
+      const mails = [...dev.html.matchAll(/<a\b[^>]*\shref="(mailto:[^"]+)"/g)].map((m) => decode(m[1]));
+      check(mails.length >= 1 && mails.every((h) => h.startsWith(`mailto:${cfg.email}?subject=`) && h.includes("&body=")), `${tag} the "propose an assignment" link in #developpeur must be a mailto: to ${cfg.email} with a subject and a body to fill in (context, technologies, duration)`);
+      check(at("about") < at("developpeur") && at("developpeur") < at("faq"), `${tag} section order: #about, then #developpeur, then #faq`);
+    }
+    check(/<a\b[^>]*\shref="#developpeur"/.test((section("about") || { html: "" }).html), `${tag} the About section should link to #developpeur (the technical profile)`);
+
+    // contact: two doors, what happens next, WhatsApp only when a number is set
+    const con = section("contact");
+    if (check(!!con, `${tag} the #contact section is missing`)) {
+      check((con.html.match(/<div class="door">/g) || []).length === 2, `${tag} #contact needs two doors: "you have a project" and "you are looking for a developer"`);
+      const mails = [...con.html.matchAll(/<a\b[^>]*\shref="(mailto:[^"]+)"/g)].map((m) => decode(m[1]));
+      const msgs = mails.filter((h) => h.includes("?subject="));
+      check(msgs.length === 2 && msgs.every((h) => h.startsWith(`mailto:${cfg.email}?subject=`) && /&body=[^&]{20,}/.test(h)) && new Set(msgs.map((h) => h.split("&body=")[0])).size === 2 && msgs.every((h) => /\?subject=[^&]+&body=/.test(h) && /(connu|heard about|عرفت)/i.test(decodeURIComponent(h.split("&body=")[1]))), `${tag} #contact needs two mailto: links (projects, assignments), each with a subject and a guided body, and the body must ask how the visitor heard about GrowDev`);
+      const steps = (con.html.match(/<div class="next">[\s\S]*?<ol>([\s\S]*?)<\/ol>/) || [])[1] || "";
+      check((steps.match(/<li\b/g) || []).length === 3, `${tag} #contact must say what happens after the first message: three steps in <div class="next"><ol>`);
+    }
+    const wa = [...html.matchAll(/https:\/\/wa\.me\/(\d+)/g)].map((m) => m[1]);
+    check(cfg.whatsapp ? wa.length === 1 && wa[0] === String(cfg.whatsapp) : wa.length === 0, `${tag} the WhatsApp button must appear once when "whatsapp" is set in src/site.json (${cfg.whatsapp || "empty"}) and never when it is empty (found ${wa.length})`);
+
+    // plain words where visitors who do not work in IT read first
+    const JARGON = /(?<![\w-])(ERP|API|SaaS|CRM|back-?end|front-?end|framework|stack|workflow|DevOps|CI\/CD|cron)(?![\w-])/i;
+    const plain = {
+      "the hero lead": (hero.match(/class="hero__lead"[^>]*>([\s\S]*?)<\/p>/) || [])[1] || "",
+      "#situations": sit ? sit.html : "",
+      "the contact text": con ? con.html.replace(/<a class="mail"[\s\S]*?<\/a>/, "") : ""
+    };
+    for (const [where, text] of Object.entries(plain)) {
+      const m = JARGON.exec(textOf(text));
+      check(!m, `${tag} ${where} uses the jargon word "${m && m[1]}": visitors who do not work in IT read it first. Say what it does instead (docs/UX-AUDIT.md)`);
+    }
+
+    // technology logos
+    check(!/\sdata-logo=/.test(html), `${tag} a data-logo attribute is still in the page: the build only converts <li data-logo="odoo">Odoo</li> (or a <span>) that holds plain text (docs/LOGOS.md)`);
+    const chips = [...body.matchAll(/<li class="tech( is-wide)?"([^>]*)>(<span class="tech__plate"><img\b[^>]*><\/span>)<span class="(tech__name|sr-only)"([^>]*)>([^<]+)<\/span><\/li>/g)];
+    check(chips.length === (body.match(/<li class="tech/g) || []).length && chips.length >= 24, `${tag} some technology chips are malformed (${chips.length} well-formed of ${(body.match(/<li class="tech/g) || []).length}); each is <li class="tech"><span class="tech__plate"><img></span><span class="tech__name">Name</span></li>`);
+    for (const c of chips) {
+      const img = parseAttrs(c[3].match(/<img\b[^>]*>/)[0]), name = c[6].trim(), wide = !!c[1], ir = resolveRef(rel, img.src || "");
+      const n = `${tag} logo "${name}"`;
+      if (!check(!!ir.file && /^assets\/img\/tech\/[a-z0-9-]+\.svg$/.test(ir.file) && has(ir.file), `${n}: the picture is missing or is not in assets/img/tech/ (${img.src})`)) continue;
+      techUsed.add(path.basename(ir.file, ".svg"));
+      const real = imageSize(path.join(SITE, ir.file));
+      check(!!real && +img.width === real.w && +img.height === real.h, `${n}: width/height are ${img.width}x${img.height} but the file is ${real ? real.w + "x" + real.h : "unreadable"}: the logo would be stretched. Run node tools/build.mjs`);
+      check(img.alt === "" && img.decoding === "async", `${n}: the picture is decoration (alt="") with decoding="async"; the name next to it is the text`);
+      checkVersion(n, img.src, ir);
+      check(!!real && wide === real.w / real.h >= 2 && (c[4] === "sr-only") === wide, `${n}: a wide mark (width at least twice its height) already spells the name, so it is class "tech is-wide" and its name is sr-only; a square mark shows its name (tech__name)`);
+      check(name.length >= 2 && name.length <= 20, `${n}: the name should be 2 to 20 characters`);
+      check(L.code === "ar" ? /\slang="en"/.test(c[5]) : !/\slang=/.test(c[5]), `${n}: the name is written in Latin letters, so it carries lang="en" on the Arabic page (a screen reader pronounces it correctly) and no lang elsewhere`);
+    }
+    const marq = (body.match(/<div class="marquee"[\s\S]*?<\/div>\s*<\/div>/) || [])[0] || "";
+    const sets = [...marq.matchAll(/<ul class="marquee__set"([^>]*)>([\s\S]*?)<\/ul>/g)];
+    if (check(sets.length === 2 && !/aria-hidden/.test(sets[0][1]) && /\saria-hidden="true"/.test(sets[1][1]), `${tag} the marquee needs two lists, the second one aria-hidden="true" (it is the copy that makes the loop)`)) {
+      const names = (h) => [...h.matchAll(/<span class="(?:tech__name|sr-only)"[^>]*>([^<]+)<\/span>/g)].map((m) => m[1]).join("|");
+      check(names(sets[0][2]) !== "" && names(sets[0][2]) === names(sets[1][2]), `${tag} the two marquee lists must hold the same technologies in the same order`);
+    }
+    for (const m of body.matchAll(/<ul class="tags"([^>]*)>/g)) check(/\saria-label="[^"]+"/.test(m[1]), `${tag} a technology list (<ul class="tags">) has no aria-label`);
+
+    // footer: credits for the logos, links to the new sections, GitHub only when set
+    const foot = (body.match(/<footer\b[\s\S]*?<\/footer>/) || [])[0] || "";
+    check(/\shref="#situations"/.test(foot) && /\shref="#developpeur"/.test(foot), `${tag} the footer should link to #situations and #developpeur`);
+    const ghLinks = [...foot.matchAll(/<a\b[^>]*\shref="(https:\/\/github\.com[^"]*)"/g)].map((m) => m[1]);
+    check(PROFILES.github ? ghLinks.length === 1 && ghLinks[0] === PROFILES.github : ghLinks.length === 0, `${tag} the footer shows the GitHub link only when "profiles.github" is set in src/site.json`);
+    const credits = textOf((foot.match(/<p class="credits"[^>]*>([\s\S]*?)<\/p>/) || [])[1] || "");
+    check(credits.includes("Simple Icons"), `${tag} the footer must say where the technology logos come from (Simple Icons, CC0)`);
+    for (const f of TECH_FILES) {
+      const by = /logo by ([^,(]+?),\s*CC[ -]BY/i.exec(read(`assets/img/tech/${f}`));
+      if (by) check(credits.includes(by[1].trim()), `${tag} assets/img/tech/${f} is licensed CC BY: the footer must credit its author "${by[1].trim()}" (foot.logos in the dictionaries)`);
+    }
+  }
+
   // form fields need a label
   const labelled = new Set([...body.matchAll(/<label\b[^>]*\sfor="([^"]+)"/g)].map((m) => m[1]));
   const wrapped = [...body.matchAll(/<label\b[^>]*>([\s\S]*?)<\/label>/g)].map((m) => m[1]);
@@ -452,7 +597,9 @@ if (check(has("llms.txt") && has("llms-full.txt"), "llms.txt and llms-full.txt a
     const text = read(f);
     const others = [...new Set((text.match(MAIL) || []).filter((a) => a.toLowerCase() !== mail.toLowerCase()))];
     check(others.length === 0, `${f} contains an e-mail address other than ${mail}: ${others.join(", ")}. Change it at the source: the template, the three src/i18n files, site/assets/js/config.js and site/404.html each write the address`);
-    const old = legacy.filter((h) => text.includes(h));
+    // the address of the source repository may contain an old host name (the repository kept its name when the site moved to its own domain)
+    const scan = cfg.repo ? text.split(cfg.repo).join("") : text;
+    const old = legacy.filter((h) => scan.includes(h));
     check(old.length === 0, `${f} still mentions an earlier address of the site: ${old.join(", ")}`);
   }
   // every page and the 404 page offer the configured address; the runtime brief (composer.js) reads it from config.js
@@ -513,6 +660,26 @@ if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
     const used = new Set(CL.map((c) => c.logo));
     for (const f of fs.readdirSync(path.join(SITE, dir))) check(used.has(f), `${dir}/${f} is not used by any client in src/site.json (delete the file, or add the client)`, "warn");
   } else check(!CL.length, `${dir}/ is missing but src/site.json lists clients`);
+}
+
+// ---------- technology logos ----------
+// <li data-logo="odoo">Odoo</li> in the template becomes a logo chip (tools/build.mjs). The pictures live in site/assets/img/tech/ (docs/LOGOS.md).
+{
+  const dir = "assets/img/tech";
+  if (check(has(dir) && TECH_FILES.length >= 12, `${dir}/ is missing or holds fewer than 12 logos`)) {
+    for (const f of TECH_FILES) {
+      const n = `${dir}/${f}`, svg = read(n), open = (svg.match(/^<svg\b[^>]*>/) || [""])[0], bytes = Buffer.byteLength(svg);
+      check(/^[a-z0-9-]+\.svg$/.test(f), `${n}: use a lower-case name made of letters, digits and hyphens (it is the id written in data-logo)`);
+      check(/\sxmlns="http:\/\/www\.w3\.org\/2000\/svg"/.test(open) && /\sviewBox="[^"]+"/.test(open) && /\swidth="\d+"/.test(open) && /\sheight="\d+"/.test(open), `${n}: the <svg> needs xmlns, viewBox, width and height (the build reads the logo's shape from them)`);
+      check(!/<script|\son[a-z]+\s*=|<image\b|<foreignObject|<style\b|\bhref\s*=|url\(|javascript:|<!ENTITY|<!DOCTYPE/i.test(svg.replace(/<!--[\s\S]*?-->/g, "")), `${n}: a logo must be a plain drawing: no script, event handler, linked file, style sheet or entity`);
+      check(bytes <= 6144, `${n} is ${bytes} bytes (budget 6 KB per logo): use the simple version of the mark`);
+      check(/\b(CC0|MIT|CC[ -]BY|Apache|BSD)\b/i.test((svg.match(/<!--([\s\S]*?)-->/) || [])[1] || ""), `${n}: add a comment right after the <svg> tag saying where the logo comes from and under which licence (CC0, MIT, CC BY...). See docs/LOGOS.md`);
+      const d = imageSize(path.join(SITE, n));
+      check(!!d && d.w / d.h >= 0.4 && d.w / d.h <= 5, `${n}: its shape is unreadable or too extreme (width/height ${d ? d.w + "x" + d.h : "?"})`);
+    }
+    // a logo nobody shows is weight for nothing
+    for (const f of TECH_FILES) check(techUsed.has(f.replace(/\.svg$/, "")), `${dir}/${f} is not used by any data-logo in the template (delete the file, or use it)`, "warn");
+  }
 }
 
 // ---------- theme: light / dark ----------

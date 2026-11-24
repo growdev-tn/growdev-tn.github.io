@@ -183,7 +183,7 @@ The 17 Nov wall became a carousel (made for the phone first), and every local st
 
 **Found and fixed while building:** on a desktop the belt fell back to the still wall because a half-pixel safety margin in the plate width left it 1 to 2 px short of its window (exact width in belt mode, 2 px tolerance); logos outside the window never loaded, because a browser does not load a lazy picture that an ancestor clips away (the section now loads them all when it is within 900 px of the screen); three drag defects (a flick after holding the finger still, the "grabbing" cursor being overridden, and a touch drag aborted by an event that bubbled up from the plate under the finger).
 
-**Found, not changed:** outside the carousel, axe reports `color-contrast` on the Method steps while they are dimmed (6 of the 24 runs, at 390 px with motion allowed: 3.5 : 1 for the paragraphs in the dark theme, 2.5 : 1 for paragraphs and 3.3 : 1 for titles in the light theme). The cause is `.step{opacity:.5}` until a step is reached, which is in the original files and is part of the look you approved, so it is yours to decide: an opacity of .8 instead of .5 would pass in both themes (worked out from the colours, not tried in a browser).
+**Found, not changed:** outside the carousel, axe reports `color-contrast` on the Method steps while they are dimmed (6 of the 24 runs, at 390 px with motion allowed: 3.5 : 1 for the paragraphs in the dark theme, 2.5 : 1 for paragraphs and 3.3 : 1 for titles in the light theme). The cause is `.step{opacity:.5}` until a step is reached, which is in the original files and is part of the look you approved, so it is yours to decide: an opacity of .8 instead of .5 would pass in both themes (worked out from the colours, not tried in a browser). *Resolved on 24 Nov 2026, see the addendum below: the dimming was removed from the text instead.*
 
 **Not measured, not decided:** Safari and iOS, real Android phones and a real finger (touch was emulated), how screen readers announce the carousel, the live address. The Arabic lines of the section (text, widget name and the four button names) need a native read. Logos under about 400 px on the long side (the smallest is 238 px) look slightly soft on high-density phones. Each client must agree to be shown; nothing in the code can check that.
 
@@ -198,6 +198,52 @@ The site moves to its own domain, `growdev.tn` (OVHcloud), and the contact addre
 **Measured on the built site (Claude's own review, headless Chromium, local server):** 3 languages × 2 themes × 390 and 1440 px, plus `404.html` and an unknown address: 114 checks, 0 failures; no console message, no failed request and no request to another host; every `mailto:` link and `GD.config.email` carry the new address; the canonical link and the share-image links use `https://growdev.tn`; no sideways scrolling. The Arabic contact card, where the address sits left-to-right inside right-to-left text, was looked at on a phone: no overflow and no change of layout (the new address is as long as the old one). The three share images were regenerated; a pixel comparison with the old ones shows that only the strip with the address changed.
 
 **Not measured:** the live domain (nothing answers there yet), DNS, the HTTPS certificate, mail delivery. See `docs/INFRA-AUDIT.md`.
+
+---
+
+## Addendum, 24 Nov 2026: two visitors, one page
+
+**The brief.** A visitor who knows nothing about IT (an owner who wants a solution) must understand what GrowDev does and want to write. A recruiter, or someone looking for a freelance developer, must understand who Aziz is and how he works. Both through the same page, in three languages, with SEO. The audit below follows the three lenses of this document (non-technical usability, clarity, colour in context) and uses user stories.
+
+**User stories and what answers them**
+
+| Visitor and story | Before | Now |
+|---|---|---|
+| *Owner, no IT background:* "I lose hours retyping the same data. Is this for me?" | A tagline and a list of seven services named after technologies | The hero lead starts from the pain in plain words; the second button "Find my solution" opens `#situations`, six first-person rows ("I retype the same data…") that each lead to the matching service card, which is highlighted on arrival |
+| *The same owner:* "What is that simulator telling me?" | Result shown first; hours per person and cost mixed; the formula hidden | Inputs in the order of the sentence: people, hours, share automatable. The hourly cost is shown with a help line. The formula is written out in words (people × hours × share × 4.33 weeks = hours per month), then a caption ("Over 12 months: 2 078 hours won back, or 108% of a full-time job"). A button leads to the contact. A screen reader gets one polite sentence after the visitor stops moving a control |
+| *Cautious owner:* "Can I trust a company I cannot see?" | Names of technologies as text | Twelve recognisable logos (Odoo, WordPress, PrestaShop, Python…) in the marquee, on the service cards and in the technical profile; the five client logos; FAQ 9 ("I know nothing about IT: can I still trust you?"); "What happens next?" in three steps; the code of this site is public |
+| *Recruiter:* "Who is this person and what do they work with?" | Not answered on the page | A link in the hero ("Hiring a developer for a project?"), the section `#developpeur` (how Aziz works, the proof: this website, technologies by area with logos, source-code and profile links), a Person node in the structured data, FAQ 10, and a second contact door with a mail template for assignments |
+| *Anyone who writes:* "What do I put in the mail?" | A blank mail | Both doors open a mail with a subject and a short guided body (what takes your time, your business, how you heard about GrowDev); the project builder prepares a fuller brief; the project door also offers WhatsApp with a ready first message |
+| *Arabic reader:* "Is this written for me?" | Already native right-to-left | Same structure and the same new components in right-to-left (arrows, rows, equation order, chips); the Arabic copy still needs a native read |
+| *Keyboard or screen-reader user* | Already supported | New rows and chips follow the same rules: names on every link, hidden decoration, no skipped heading level, logo names kept for screen readers |
+
+**Three lenses**
+
+- *Non-technical usability.* The first screen no longer needs a technology word to be understood; the jargon guard in the checker fails if ERP, API, CRM, workflow, framework and similar words come back in the hero, the situation guide or the contact text. Six situations is the most the guide shows (the choice is kept small on purpose). Two buttons in the hero, two doors in the contact section.
+- *Clarity.* One main action per section; the simulator reads in the order a person would say it; the formula is checkable by the visitor and by the checker (the page, the script and the text must agree).
+- *Colour in context.* No new colour. The logos sit on a white plate in both themes so that dark marks stay visible; like the client logos, they read as "other companies' marks" on the page.
+
+**Measured (author's own review, headless Chromium against the built site, local server)**
+
+| Check | Result |
+|---|---|
+| Browser suite | **323 assertions pass, 0 fail**, run on the final build: 24 page states (3 languages × dark and light × 320, 390, 768 and 1440 px) × 10 assertions each (no sideways scrolling, nothing sticking out of the screen, every image loaded, 48 logos per page, no request to another host, no failed request, no console message, layout shift under 0.1, one `h1`, right `lang` and `dir`); 12 axe-core scans; phone tap targets; the simulator; the six situation rows in three languages; the theme button; reduced motion |
+| Accessibility scan | axe-core 4.10.2 with the WCAG 2.0, 2.1 and 2.2 A and AA tags plus best practices, 12 runs (3 languages × 2 themes × 390 and 1440 px): **0 violations** after the fix below; nothing left "to review" |
+| Simulator | 10 people × 8 h × 50% gives 173 h a month, 2 078 h a year, 108% of a full-time job and 31 176 DT a year at 15 DT an hour; changing the currency to EUR gives the euro format and its own default (20 €); typing 20 as the hourly cost gives 41 568; the sentence for screen readers appears about 0.8 s after the last change and not on load |
+| Situation guide | In the three languages, each of the six rows changes the address to its card, scrolls it below the header, and highlights it |
+| Speed and layout shift | 36 to 39 requests on a 390 px load, all to the same host; layout shift 0.0003 in the three languages; gzipped sizes: HTML 17.0 to 19.0 KB, CSS 15.0 KB, JavaScript 21.4 KB plus one dictionary of 1.5 to 1.9 KB (budgets 45, 22 and 30 KB). LCP was not re-measured |
+| Reduced motion | The marquee stops and its duplicate list is hidden |
+| Look | Screenshots of the hero, situations, services, simulator, technical profile and contact in French and English on desktop, in Arabic on desktop and phone, and in the light theme, were read one by one |
+| Checker | 4,089 checks pass with the WhatsApp number and the LinkedIn profile set (4,071 without; 1,774 before the rework). The new rules were tested by breaking them 34 ways, each caught: a missing help line or equation sign, a live region on an animated number, a formula that differs from the script, a stretched or captioned logo, a stale logo version, a marquee copy that is not hidden, jargon in the hero or in a situation, a WhatsApp button without a number, an unknown external link or one without `noopener`, a mail without a body or without the "how did you hear" line, a single contact door, missing steps, sections out of order, a missing licence credit, a logo with a script or over 6 KB, and a footer link removed |
+
+**Found and fixed in the browser run**
+
+1. *Contrast of the Method steps on phones* (the "found, not changed" of 18 Nov): the whole step was dimmed to 50% until the timeline reached it, so its text failed the contrast rule. Now only the marker and the title colour change; the text is always at full contrast. The same scan passes with 0 violations.
+2. *Plain chips without a logo* ("API", "SEO") sat at the top of their row; they are now centred like the others.
+
+Other flags of the first run were test timing (lazy images, smooth scrolling, a bar still growing when measured) and not defects.
+
+**Not measured, not decided:** Safari and iOS, real phones, how screen readers speak the new rows and the simulator sentence, the live address, whether the repository is public (the source-code button depends on it, see `docs/HANDOVER.md`). The Arabic copy added on 21 to 24 Nov needs a native read. Scores were not redone. Wording that makes a promise ("A clear quote before we start", the "yes" to freelance work) needs Aziz's confirmation.
 
 ---
 

@@ -72,6 +72,31 @@ const clientDims = CLIENTS.map((c, i) => {
   return dim;
 });
 
+// Technology logos. The template writes <li data-logo="odoo">Odoo</li> (an <li> or a <span>); the build turns it into a small white plate that holds the logo
+// followed by the name. The pictures live in site/assets/img/tech/ (docs/LOGOS.md: where they come from, their licences, how to add one). The logo is
+// decoration (alt=""): the name next to it is the accessible text. A wide mark that already spells the name (the Odoo wordmark) shows it once and keeps
+// the text for screen readers only. Each file is requested as "file?v=<hash>" like every other asset, and its width and height come from the file itself.
+const TECH_DIR = "assets/img/tech";
+const techSize = {};
+function techDims(id, where) {
+  if (!(id in techSize)) {
+    const f = path.join(OUT, TECH_DIR, id + ".svg");
+    techSize[id] = fs.existsSync(f) ? imageSize(f) : null;
+    if (!techSize[id]) fail(`${where}: data-logo="${id}" has no readable site/${TECH_DIR}/${id}.svg`);
+  }
+  return techSize[id];
+}
+
+// Optional links and contact switches (all in src/site.json). Nothing is shown for a setting that is empty or missing.
+const HTTPS = /^https:\/\/[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s"'<>]*)?$/i;
+const PROFILES = cfg.profiles && typeof cfg.profiles === "object" ? cfg.profiles : {};
+if (cfg.repo !== undefined && cfg.repo !== "" && !HTTPS.test(cfg.repo)) fail(`"repo" in src/site.json must be an https:// address (got ${JSON.stringify(cfg.repo)})`);
+for (const [k, v] of Object.entries(PROFILES)) {
+  if (!["github", "linkedin"].includes(k)) fail(`"profiles.${k}" in src/site.json is not supported; use "github" or "linkedin"`);
+  else if (v !== "" && !HTTPS.test(v)) fail(`"profiles.${k}" in src/site.json must be an https:// address (got ${JSON.stringify(v)})`);
+}
+if (cfg.whatsapp !== undefined && cfg.whatsapp !== "" && !/^\d{8,15}$/.test(String(cfg.whatsapp))) fail(`"whatsapp" in src/site.json must be the number in international format, digits only, for example 21620123456 (got ${JSON.stringify(cfg.whatsapp)})`);
+
 function lastmod() {
   try {
     const d = execSync("git log -1 --format=%cs -- src site/assets", { cwd: ROOT, stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
@@ -120,6 +145,29 @@ function render(L) {
     return out;
   });
 
+  // data-logo -> plate + name (see "Technology logos" above)
+  html = html.replace(/<(li|span)\b([^>]*?)\sdata-logo="([a-z0-9-]+)"([^>]*)>([^<]*)<\/\1>/g, (m, el, before, id, after, name) => {
+    const d = techDims(id, L.code);
+    if (!d) return m;
+    const wide = d.w / d.h >= 2;
+    const src = `${base}${TECH_DIR}/${id}.svg?v=${assetVersion(`${TECH_DIR}/${id}.svg`, L.code)}`;
+    const plate = `<span class="tech__plate"><img src="${src}" width="${d.w}" height="${d.h}" alt="" decoding="async"></span>`;
+    const label = `<span class="${wide ? "sr-only" : "tech__name"}"${L.code === "ar" ? ' lang="en"' : ""}>${name}</span>`;
+    return `<${el} class="tech${wide ? " is-wide" : ""}"${before}${after}>${plate}${label}</${el}>`;
+  });
+
+  // links to the developer's public pages; each one appears only when it is set in src/site.json
+  // rel="me" marks a link to the person's own profile (it lets search engines tie the profile to this page); the repository is a project, not a profile
+  const ext = (href, key, rel) => `<li><a class="btn btn-ghost" href="${esc(href)}" rel="${rel}">${esc(tr(key))}</a></li>`;
+  const devLinks = [
+    cfg.repo ? ext(cfg.repo, "dev.link.repo", "noopener") : (tr("dev.link.repo"), ""),
+    PROFILES.github ? ext(PROFILES.github, "dev.link.github", "me noopener") : (tr("dev.link.github"), ""),
+    PROFILES.linkedin ? ext(PROFILES.linkedin, "dev.link.linkedin", "me noopener") : (tr("dev.link.linkedin"), "")
+  ].filter(Boolean).join("\n          ");
+  const waButton = cfg.whatsapp
+    ? `<a class="btn btn-ghost btn-lg" href="https://wa.me/${cfg.whatsapp}?text=${encodeURIComponent(tr("contact.wa.text"))}" rel="noopener">${esc(tr("contact.wa"))}</a>`
+    : (tr("contact.wa"), tr("contact.wa.text"), "");
+
   const ogFile = `og-${L.code}.jpg`;
   if (!fs.existsSync(path.join(OUT, "assets/img", ogFile))) fail(`${L.code}: missing assets/img/${ogFile} (run: node tools/make-og.cjs)`);
   const ogImage = `${cfg.url}/assets/img/${ogFile}`;
@@ -142,6 +190,11 @@ function render(L) {
       `<li class="client"><img src="${base}assets/img/clients/${esc(c.logo)}?v=${assetVersion("assets/img/clients/" + c.logo, L.code)}" width="${clientDims[i].w}" height="${clientDims[i].h}" alt="${esc(c.name)}"${c.lang && c.lang !== L.code ? ` lang="${c.lang}"` : ""} loading="lazy" decoding="async"></li>`
     ).join("\n      "),
     mailSubject: encodeURIComponent(tr("contact.mailsubject")),
+    mailBody: encodeURIComponent(tr("contact.mailbody")),
+    mailSubject2: encodeURIComponent(tr("contact.mailsubject2")),
+    mailBody2: encodeURIComponent(tr("contact.mailbody2")),
+    devLinks, waButton,
+    footGithub: PROFILES.github ? `<li><a href="${esc(PROFILES.github)}" rel="me noopener" dir="ltr">GitHub</a></li>` : "",
     jsonld: JSON.stringify(jsonLd(cfg, D, L.code, { ogImage, lastmod: LASTMOD })).replace(/</g, "\\u003c")
   };
   html = html.replace(/\{\{(\w+)\}\}/g, (m, k) => { if (!(k in vals)) { fail(`${L.code}: unknown placeholder ${m}`); return m; } return vals[k]; });

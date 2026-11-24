@@ -10,7 +10,7 @@ URL: https://growdev.tn/en/
 
 GrowDev is a software company in Tunisia: Odoo ERP, websites, online shops and mobile apps for businesses in Tunisia, Africa and worldwide.
 
-GrowDev is a software company in Tunisia. We digitalise your business with Odoo ERP, websites, online shops, mobile apps and automation, from the first conversation to going live.
+Retyping the same data, chasing your numbers? GrowDev, a software company in Tunisia, builds the custom tools that do that work for you: business management (Odoo), websites, online shops, mobile apps.
 
 ## Everything to digitalise your business, jargon-free.
 
@@ -20,11 +20,11 @@ Seven ways to save time, sell more and run your business better. Pick the one th
 
 Run your whole business in a single tool: sales, purchasing, stock, invoicing, production.
 
-- Odoo implementation and configuration around your processes
-- Custom Odoo module development (Python, XML)
-- Data import and migration
-- Connections with your other tools (API, email)
-- Hosting, backups and updates
+- Odoo set up around the way you work
+- Custom features when Odoo does not do it all
+- Bringing in your existing data (Excel, old software)
+- Links with your other tools (email, website…)
+- Hosting, backups and updates: we take care of them
 - Team training in French, Arabic or English
 - Multiple currencies, local taxes and an interface in French, Arabic or English
 - Build my Odoo
@@ -33,7 +33,7 @@ Run your whole business in a single tool: sales, purchasing, stock, invoicing, p
 
 We spot what wastes your time, then simplify it, step by step.
 
-- Audit of your tools and processes
+- A review of your tools and working habits
 - A clear, step-by-step roadmap
 - The right tools, not gadgets
 - Support for your team
@@ -43,10 +43,10 @@ We spot what wastes your time, then simplify it, step by step.
 
 Custom websites and web applications, fast and secure.
 
-- Showcase sites and customer portals
-- Business applications (Python, Django)
-- Speed, search visibility and accessibility
-- Multilingual sites (French, Arabic, English), including right-to-left
+- A showcase website and a private area for your customers
+- Custom tools for your business, usable from a browser
+- Fast, built to be found on Google and accessible to everyone
+- Your site in French, Arabic and English (right-to-left writing included)
 
 ### WordPress websites
 
@@ -54,31 +54,31 @@ A site you can edit yourself, without depending on anyone.
 
 - Custom design that fits your brand
 - Pages that are easy to update
-- Security, backups, speed
+- Protected, backed up and fast
 
 ### PrestaShop store
 
 Sell online with a clear shop, from catalogue to payment.
 
-- Catalogue, design and modules
+- Product catalogue and a design that fits your brand
 - Online payment and delivery
-- Can be connected to your ERP
+- Can be connected to your management tool (ERP)
 
 ### Mobile apps
 
 An Android and iOS app connected to your data.
 
-- One codebase for Android and iOS (Flutter)
-- Connected to your ERP or API
-- Publishing on the app stores
+- One app for Android phones and iPhones
+- Connected to your data (management tool, website…)
+- Published on Google Play and the App Store
 
 ### Automation
 
 No more copy-paste: your repetitive tasks run on their own.
 
-- Sync between your tools
-- Scheduled tasks, emails, automatic reports
-- Custom scripts and integrations
+- Your tools exchange data with each other, no copy-paste
+- Emails, reminders and reports sent automatically
+- Small custom programs for your repetitive tasks
 
 ## They trust us.
 
@@ -115,6 +115,42 @@ Founded by Aziz Chaibi, a full-stack developer specialised in Odoo.
 - Quotes: In DT for Tunisia, in € or $ internationally
 - Contact: contact@growdev.tn
 
+## Which of these sounds like you?
+
+Pick the sentence that sounds like you. We show the solution that answers it, in plain language.
+
+- I retype the same information in several files and programs. → One management tool (Odoo): Sales, purchasing, stock and invoicing in one place. Type it once and everything is up to date.
+- I spend my days copy-pasting, sending the same emails and rebuilding the same reports. → Automation: Your tools talk to each other and repetitive tasks run on their own.
+- I want to sell my products online. → An online shop (PrestaShop): Catalogue, cart, online payment and delivery in one clear shop.
+- I want a website that looks like me and that I can edit myself. → A WordPress website: A polished site where you change texts and photos without calling anyone.
+- No off-the-shelf software fits my line of work: I need an app of my own. → A custom web or mobile app: A tool built around the way you work, on computer and phone, connected to your data.
+- I feel I am losing time, but I don’t know where to start. → Taking stock together: We review your tools and habits, then suggest a simple step-by-step plan.
+
+## Who writes the code?
+
+At GrowDev you talk to the person who writes the code: Aziz Chaibi, a full-stack developer specialised in Odoo. Here are our tools and the way we work, for recruiters and technical teams.
+
+### How we work
+
+- Remote, in French, Arabic or English.
+- A written scope before any code: goals, schedule, deliverables.
+- Short deliveries that you approve step by step.
+- Clean, documented code, versioned with Git.
+- Backups and security in place before go-live.
+
+### Technologies, by area
+
+- Odoo and business management: Custom modules, links with other tools, data migration, hosting and updates.
+- Web and e-commerce: Websites, shops and web apps in three languages, with right-to-left Arabic.
+- Mobile: Android and iOS apps from a single codebase, connected to your API or your ERP.
+- Servers and deployment: Deployment, backups, security and version-controlled code.
+
+### The proof: this website
+
+This website is our technical business card: three languages including right-to-left Arabic, no cookies or trackers, and automatic checks (search visibility, basic accessibility, performance) before every release.
+
+See this website’s source code: https://github.com/growdev-tn/growdev-tn.github.io
+
 ## Frequently asked questions
 
 ### What is Odoo and what does it do for my business?
@@ -149,6 +185,14 @@ WordPress suits showcase sites and blogs that you edit yourself. PrestaShop is b
 
 We train your team, set up backups and security, then keep following up: fixes, updates and new features, at the pace of your business. You keep the same point of contact from start to finish.
 
+### I know nothing about IT: can I still trust you with my project?
+
+Yes. Simply describe what takes up your time or what you want to sell: we turn it into a solution, in clear language without jargon, then suggest a first split into steps. On this page, the “Which of these sounds like you?” section, the project builder and the simulator help you prepare that first conversation.
+
+### Do you take on freelance development work for recruiters, agencies or technical teams?
+
+Yes. You can hire us for a development assignment on Odoo, Python and Django, WordPress, PrestaShop or Flutter. Email us the context, the technology and the expected duration, and we will tell you frankly whether we can help. The technical profile is in the “Who writes the code?” section.
+
 # GrowDev en français (fr)
 
 URL: https://growdev.tn/
@@ -157,7 +201,7 @@ URL: https://growdev.tn/
 
 GrowDev, société de développement en Tunisie : ERP Odoo, sites web, boutiques en ligne, applications mobiles. Pour la Tunisie, l’Afrique et le monde.
 
-GrowDev est une société de développement en Tunisie. Nous digitalisons votre entreprise : ERP Odoo, sites web, boutiques en ligne, applications mobiles et automatisation, du premier échange jusqu’à la mise en ligne.
+Vous ressaisissez les mêmes données, vous courez après vos chiffres ? GrowDev, société de développement en Tunisie, crée les outils sur mesure qui font ce travail à votre place : gestion d’entreprise (Odoo), site web, boutique en ligne, application mobile.
 
 ## Tout pour digitaliser votre entreprise, sans jargon.
 
@@ -167,11 +211,11 @@ Sept façons de gagner du temps, de vendre plus et de mieux piloter votre activi
 
 Pilotez toute votre entreprise dans un seul outil : ventes, achats, stock, facturation, production.
 
-- Implémentation et paramétrage d’Odoo selon vos processus
-- Développement de modules Odoo sur mesure (Python, XML)
-- Reprise et migration de vos données
-- Connexions avec vos autres outils (API, e-mail)
-- Hébergement, sauvegardes et mises à jour
+- Mise en place d’Odoo adaptée à votre façon de travailler
+- Fonctions sur mesure quand Odoo ne fait pas tout
+- Récupération de vos données existantes (Excel, anciens logiciels)
+- Liaison avec vos autres outils (e-mail, site web…)
+- Hébergement, sauvegardes et mises à jour : nous nous en occupons
 - Formation de vos équipes en français, en arabe ou en anglais
 - Plusieurs devises, taxes locales et interface en français, arabe ou anglais
 - Composer mon Odoo
@@ -180,7 +224,7 @@ Pilotez toute votre entreprise dans un seul outil : ventes, achats, stock, factu
 
 On repère ce qui vous fait perdre du temps, puis on le simplifie, étape par étape.
 
-- Audit de vos outils et de vos processus
+- Un état des lieux de vos outils et de vos habitudes de travail
 - Feuille de route claire, par étapes
 - Les bons outils, pas des gadgets
 - Accompagnement des équipes
@@ -190,10 +234,10 @@ On repère ce qui vous fait perdre du temps, puis on le simplifie, étape par é
 
 Sites et applications web sur mesure, rapides et sécurisés.
 
-- Sites vitrines et espaces clients
-- Applications métier (Python, Django)
-- Vitesse, référencement et accessibilité
-- Sites multilingues (français, arabe, anglais), y compris de droite à gauche
+- Un site de présentation et un espace réservé à vos clients
+- Des outils sur mesure pour votre métier, utilisables depuis un navigateur
+- Rapide, pensé pour être trouvé sur Google et accessible à tous
+- Votre site en français, en arabe et en anglais (écriture de droite à gauche comprise)
 
 ### Sites WordPress
 
@@ -201,31 +245,31 @@ Un site que vous pouvez modifier vous-même, sans dépendre de personne.
 
 - Design sur mesure à votre image
 - Pages simples à mettre à jour
-- Sécurité, sauvegardes, rapidité
+- Protégé, sauvegardé et rapide
 
 ### Boutique PrestaShop
 
 Vendez en ligne avec une boutique claire, du catalogue jusqu’au paiement.
 
-- Catalogue, design et modules
+- Catalogue de produits et design à votre image
 - Paiement en ligne et livraison
-- Connexion possible avec votre ERP
+- Peut être relié à votre outil de gestion (ERP)
 
 ### Applications mobiles
 
 Une application Android et iOS, connectée à vos données.
 
-- Un seul code pour Android et iOS (Flutter)
-- Connexion à votre ERP ou à votre API
-- Publication sur les stores
+- Une seule application pour les téléphones Android et iPhone
+- Reliée à vos données (outil de gestion, site web…)
+- Mise en ligne sur Google Play et l’App Store
 
 ### Automatisation
 
 Fini les copier-coller : vos tâches répétitives se font toutes seules.
 
-- Synchronisation entre vos outils
-- Tâches planifiées, e-mails, rapports automatiques
-- Scripts et intégrations sur mesure
+- Vos outils échangent entre eux, sans copier-coller
+- E-mails, rappels et rapports envoyés automatiquement
+- Petits programmes sur mesure pour vos tâches répétitives
 
 ## Ils nous font confiance.
 
@@ -262,6 +306,42 @@ Fondée par Aziz Chaibi, développeur full-stack spécialisé Odoo.
 - Devis: En DT pour la Tunisie, en € ou en $ à l’international
 - Contact: contact@growdev.tn
 
+## Quelle est votre situation ?
+
+Choisissez la phrase qui vous ressemble. Nous vous montrons la solution qui y répond, en langage simple.
+
+- Je ressaisis les mêmes informations dans plusieurs fichiers et logiciels. → Un seul outil de gestion (Odoo): Ventes, achats, stock et facturation au même endroit. Vous saisissez une fois, tout est à jour partout.
+- Je passe mes journées à copier-coller, à envoyer les mêmes e-mails et à refaire les mêmes rapports. → Automatisation: Vos outils échangent entre eux et les tâches répétitives se font toutes seules.
+- Je veux vendre mes produits en ligne. → Une boutique en ligne (PrestaShop): Catalogue, panier, paiement en ligne et livraison, dans une boutique claire.
+- Je veux un site à mon image, que je peux modifier moi-même. → Un site WordPress: Un site soigné dont vous changez les textes et les photos sans appeler personne.
+- Aucun logiciel du marché ne correspond à mon métier : il me faut une application à moi. → Une application web ou mobile sur mesure: Un outil construit autour de votre façon de travailler, sur ordinateur et sur téléphone, relié à vos données.
+- Je sens que je perds du temps, mais je ne sais pas par où commencer. → Faire le point ensemble: On passe vos outils et vos habitudes en revue, puis on vous propose un plan simple, étape par étape.
+
+## Qui écrit le code ?
+
+Chez GrowDev, vous parlez à la personne qui écrit le code : Aziz Chaibi, développeur full-stack spécialisé Odoo. Voici nos outils et notre façon de travailler, pour les recruteurs et les équipes techniques.
+
+### Comment nous travaillons
+
+- À distance, en français, en arabe ou en anglais.
+- Un cadrage écrit avant de coder : objectifs, planning, livrables.
+- Des livraisons courtes que vous validez étape par étape.
+- Du code propre, documenté et versionné avec Git.
+- Sauvegardes et sécurité en place avant la mise en ligne.
+
+### Technologies, par domaine
+
+- Odoo et gestion d’entreprise: Modules sur mesure, liaisons avec d’autres outils, reprise de données, hébergement et mises à jour.
+- Web et e-commerce: Sites, boutiques et applications web en trois langues, avec l’arabe de droite à gauche.
+- Mobile: Applications Android et iOS à partir d’un seul code, reliées à votre API ou à votre ERP.
+- Serveurs et déploiement: Déploiement, sauvegardes, sécurité et code versionné.
+
+### La preuve : ce site
+
+Ce site est notre carte de visite technique : trois langues dont l’arabe de droite à gauche, aucun cookie ni traceur, et des contrôles automatiques (référencement, accessibilité de base, performance) avant chaque mise en ligne.
+
+Voir le code source de ce site: https://github.com/growdev-tn/growdev-tn.github.io
+
 ## Questions fréquentes
 
 ### Qu’est-ce qu’Odoo et à quoi sert-il dans mon entreprise ?
@@ -296,6 +376,14 @@ WordPress convient aux sites vitrines et aux blogs que vous modifiez vous-même.
 
 Nous formons vos équipes, mettons en place les sauvegardes et la sécurité, puis assurons le suivi : corrections, mises à jour et nouvelles fonctionnalités, au rythme de votre activité. Vous gardez le même interlocuteur du début à la fin.
 
+### Je ne connais rien à l’informatique : puis-je quand même vous confier mon projet ?
+
+Oui. Décrivez simplement ce qui vous prend du temps ou ce que vous voulez vendre : nous le traduisons en solution, en langage clair et sans jargon, puis nous proposons un premier découpage par étapes. Sur cette page, la rubrique « Quelle est votre situation ? », le composeur de projet et le simulateur vous aident à préparer ce premier échange.
+
+### Acceptez-vous des missions de développement en freelance pour un recruteur, une agence ou une équipe technique ?
+
+Oui. Vous pouvez nous confier une mission de développement sur Odoo, Python et Django, WordPress, PrestaShop ou Flutter. Écrivez-nous le contexte, la technologie et la durée prévue : nous vous disons franchement si nous pouvons vous aider. Le profil technique se trouve dans la rubrique « Qui écrit le code ? ».
+
 # GrowDev بالعربية (ar)
 
 URL: https://growdev.tn/ar/
@@ -304,7 +392,7 @@ URL: https://growdev.tn/ar/
 
 GrowDev شركة تطوير برمجيات في تونس: نظام Odoo ERP ومواقع الويب والمتاجر الإلكترونية وتطبيقات الجوال للمؤسسات في تونس وإفريقيا والعالم.
 
-GrowDev شركة تطوير برمجيات في تونس. نرقمن مؤسستك بنظام Odoo ERP ومواقع الويب والمتاجر الإلكترونية وتطبيقات الجوال والأتمتة، من أول لقاء حتى الإطلاق.
+هل تعيد إدخال البيانات نفسها وتلاحق أرقامك؟ GrowDev شركة تطوير برمجيات في تونس، تبني لك أدوات على المقاس تقوم بهذا العمل بدلًا منك: تسيير المؤسسة (Odoo)، مواقع الويب، المتاجر الإلكترونية وتطبيقات الجوال.
 
 ## كل ما تحتاجه لرقمنة مؤسستك، دون مصطلحات معقّدة.
 
@@ -314,11 +402,11 @@ GrowDev شركة تطوير برمجيات في تونس. نرقمن مؤسست�
 
 سيّر مؤسستك بأكملها من أداة واحدة: المبيعات، المشتريات، المخزون، الفوترة، الإنتاج.
 
-- تنفيذ Odoo وإعداده وفق إجراءات عملك
-- تطوير وحدات Odoo مخصصة (Python، XML)
-- استرجاع بياناتك وترحيلها
-- الربط مع أدواتك الأخرى (API، البريد الإلكتروني)
-- الاستضافة والنسخ الاحتياطي والتحديثات
+- إعداد Odoo على قياس طريقة عملك
+- وظائف على المقاس عندما لا يغطي Odoo كل شيء
+- استيراد بياناتك الحالية (Excel، البرامج القديمة)
+- ربط مع أدواتك الأخرى (البريد الإلكتروني، الموقع…)
+- الاستضافة والنسخ الاحتياطي والتحديثات: نتكفّل بها
 - تكوين فرقك بالعربية أو الفرنسية أو الإنجليزية
 - عدة عملات وضرائب محلية وواجهة بالعربية أو الفرنسية أو الإنجليزية
 - صمّم نظام Odoo الخاص بك
@@ -327,7 +415,7 @@ GrowDev شركة تطوير برمجيات في تونس. نرقمن مؤسست�
 
 نرصد ما يُضيّع وقتك، ثم نبسّطه خطوة بخطوة.
 
-- تدقيق أدواتك وإجراءاتك
+- مراجعة لأدواتك وعاداتك في العمل
 - خارطة طريق واضحة على مراحل
 - الأدوات المناسبة، لا الكماليات
 - مرافقة فرقك
@@ -337,10 +425,10 @@ GrowDev شركة تطوير برمجيات في تونس. نرقمن مؤسست�
 
 مواقع وتطبيقات ويب مخصصة، سريعة وآمنة.
 
-- مواقع تعريفية وفضاءات للعملاء
-- تطبيقات خاصة بنشاطك (Python، Django)
-- السرعة، والظهور في محركات البحث، وإمكانية الوصول
-- مواقع متعددة اللغات (العربية والفرنسية والإنجليزية) مع دعم الكتابة من اليمين إلى اليسار
+- موقع تعريفي وفضاء خاص بزبائنك
+- أدوات على المقاس لمهنتك، تعمل من أي متصفح
+- سريع، ومصمم ليسهل العثور عليه في Google، ومتاح للجميع
+- موقعك بالعربية والفرنسية والإنجليزية (مع الكتابة من اليمين إلى اليسار)
 
 ### مواقع WordPress
 
@@ -348,31 +436,31 @@ GrowDev شركة تطوير برمجيات في تونس. نرقمن مؤسست�
 
 - تصميم مخصص يعكس هويتك
 - صفحات يسهل تحديثها
-- الأمان والنسخ الاحتياطي والسرعة
+- محمي ومحفوظ بنسخ احتياطية وسريع
 
 ### متجر PrestaShop
 
 بِع عبر الإنترنت بمتجر واضح، من الكتالوج إلى الدفع.
 
-- الكتالوج والتصميم والوحدات
+- كتالوج المنتجات وتصميم يعكس هويتك
 - الدفع عبر الإنترنت والتوصيل
-- إمكانية الربط مع نظام ERP الخاص بك
+- يمكن ربطه بأداة التسيير (ERP) لديك
 
 ### تطبيقات الجوال
 
 تطبيق Android و iOS مرتبط ببياناتك.
 
-- برمجة واحدة تعمل على Android و iOS (Flutter)
-- الربط مع نظام ERP أو واجهة API الخاصة بك
-- النشر على متاجر التطبيقات
+- تطبيق واحد لهواتف Android و iPhone
+- مرتبط ببياناتك (أداة التسيير، الموقع…)
+- النشر على Google Play و App Store
 
 ### الأتمتة
 
 وداعًا للنسخ واللصق: مهامك المتكررة تُنجز من تلقاء نفسها.
 
-- مزامنة أدواتك فيما بينها
-- مهام مجدولة ورسائل بريد وتقارير تلقائية
-- سكربتات وتكاملات مخصصة
+- أدواتك تتبادل البيانات فيما بينها دون نسخ ولصق
+- رسائل وتذكيرات وتقارير تُرسل تلقائيًا
+- برامج صغيرة على المقاس لمهامك المتكررة
 
 ## يثقون بنا.
 
@@ -409,6 +497,42 @@ GrowDev شركة تطوير برمجيات مقرّها تونس. نرافق ا�
 - عروض الأسعار: بالدينار التونسي (د.ت) لتونس، وباليورو أو الدولار دوليًا
 - التواصل: contact@growdev.tn
 
+## أيٌّ من هذه الجمل تشبهك؟
+
+اختر الجملة التي تشبهك، ونُريك الحلّ المناسب بلغة بسيطة.
+
+- أعيد إدخال المعلومات نفسها في عدة ملفات وبرامج. → أداة تسيير واحدة (Odoo): المبيعات والمشتريات والمخزون والفوترة في مكان واحد. تُدخل المعلومة مرة واحدة فيتحدّث كل شيء.
+- أقضي أيامي في النسخ واللصق، وإرسال الرسائل نفسها، وإعداد التقارير نفسها. → الأتمتة: تتواصل أدواتك فيما بينها وتُنجز المهام المتكررة من تلقاء نفسها.
+- أريد بيع منتجاتي عبر الإنترنت. → متجر إلكتروني (PrestaShop): كتالوج وسلة ودفع إلكتروني وتوصيل، في متجر واضح.
+- أريد موقعًا يشبهني ويمكنني تعديله بنفسي. → موقع WordPress: موقع أنيق تغيّر نصوصه وصوره دون أن تطلب مساعدة أحد.
+- لا يوجد برنامج جاهز يناسب مهنتي: أحتاج إلى تطبيق خاص بي. → تطبيق ويب أو جوال على المقاس: أداة مبنية على طريقة عملك، تعمل على الحاسوب والهاتف، ومرتبطة ببياناتك.
+- أشعر أنني أضيّع وقتي، لكنني لا أعرف من أين أبدأ. → لنقف على وضعك معًا: نراجع أدواتك وعاداتك، ثم نقترح عليك خطة بسيطة على مراحل.
+
+## من يكتب الشفرة؟
+
+في GrowDev تتحدّث مع الشخص الذي يكتب الشفرة: عزيز الشايبي، مطوّر Full-stack متخصص في Odoo. إليك أدواتنا وطريقة عملنا، لمسؤولي التوظيف والفرق التقنية.
+
+### كيف نعمل
+
+- عن بُعد، بالعربية أو الفرنسية أو الإنجليزية.
+- نطاق مكتوب قبل كتابة أي شفرة: الأهداف والجدول الزمني والمخرجات.
+- تسليمات قصيرة تصادق عليها خطوة بخطوة.
+- شفرة نظيفة وموثّقة، مُدارة بإصدارات Git.
+- نسخ احتياطي وأمان جاهزان قبل الإطلاق.
+
+### التقنيات حسب المجال
+
+- Odoo وتسيير المؤسسة: وحدات على المقاس، ربط مع أدوات أخرى، استيراد البيانات، الاستضافة والتحديثات.
+- الويب والتجارة الإلكترونية: مواقع ومتاجر وتطبيقات ويب بثلاث لغات، مع العربية من اليمين إلى اليسار.
+- الجوال: تطبيقات Android و iOS من شفرة واحدة، مرتبطة بواجهة API أو بنظام ERP الخاص بك.
+- الخوادم والنشر: النشر والنسخ الاحتياطي والأمان، وشفرة مُدارة بالإصدارات.
+
+### الدليل: هذا الموقع
+
+هذا الموقع بطاقتنا التقنية: ثلاث لغات منها العربية من اليمين إلى اليسار، دون ملفات تعريف ارتباط أو أدوات تتبّع، وفحوصات آلية (محركات البحث، إمكانية الوصول الأساسية، الأداء) قبل كل نشر.
+
+اطّلع على الشفرة المصدرية لهذا الموقع: https://github.com/growdev-tn/growdev-tn.github.io
+
 ## الأسئلة الشائعة
 
 ### ما هو Odoo وما فائدته لمؤسستي؟
@@ -442,3 +566,11 @@ Odoo برنامج لتسيير المؤسسات (ERP) مبني على وحدات
 ### ماذا يحدث بعد الإطلاق؟
 
 نكوّن فريقك، ونعدّ النسخ الاحتياطي والأمان، ثم نواصل المتابعة: إصلاحات وتحديثات وميزات جديدة بإيقاع نشاطك. يبقى محاورك هو نفسه من البداية إلى النهاية.
+
+### لا أفهم شيئًا في المعلوماتية: هل يمكنني مع ذلك أن أعهد إليكم بمشروعي؟
+
+نعم. صِف لنا ببساطة ما يستهلك وقتك أو ما تريد بيعه، فنحوّله إلى حل بلغة واضحة ودون مصطلحات معقّدة، ثم نقترح تقسيمًا أوليًا على مراحل. في هذه الصفحة تساعدك فقرة «أيٌّ من هذه الجمل تشبهك؟» ومُركّب المشروع والمحاكي على تحضير هذا اللقاء الأول.
+
+### هل تقبلون مهام تطوير مستقلة (فريلانس) لفائدة مسؤولي التوظيف أو الوكالات أو الفرق التقنية؟
+
+نعم. يمكنك أن تكلّفنا بمهمة تطوير على Odoo أو Python وDjango أو WordPress أو PrestaShop أو Flutter. راسلنا مبيّنًا السياق والتقنية والمدة المتوقعة، ونخبرك بصراحة إن كان بإمكاننا المساعدة. الملف التقني موجود في فقرة «من يكتب الشفرة؟».

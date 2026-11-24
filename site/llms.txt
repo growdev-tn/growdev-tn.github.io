@@ -29,6 +29,25 @@
 - [Mobile apps](https://growdev.tn/en/#svc-mobile): An Android and iOS app connected to your data.
 - [Automation](https://growdev.tn/en/#svc-auto): No more copy-paste: your repetitive tasks run on their own.
 
+## Which of these sounds like you?
+
+- [One management tool (Odoo)](https://growdev.tn/en/#svc-odoo): I retype the same information in several files and programs. Sales, purchasing, stock and invoicing in one place. Type it once and everything is up to date.
+- [Automation](https://growdev.tn/en/#svc-auto): I spend my days copy-pasting, sending the same emails and rebuilding the same reports. Your tools talk to each other and repetitive tasks run on their own.
+- [An online shop (PrestaShop)](https://growdev.tn/en/#svc-shop): I want to sell my products online. Catalogue, cart, online payment and delivery in one clear shop.
+- [A WordPress website](https://growdev.tn/en/#svc-wp): I want a website that looks like me and that I can edit myself. A polished site where you change texts and photos without calling anyone.
+- [A custom web or mobile app](https://growdev.tn/en/#svc-web): No off-the-shelf software fits my line of work: I need an app of my own. A tool built around the way you work, on computer and phone, connected to your data.
+- [Taking stock together](https://growdev.tn/en/#svc-digital): I feel I am losing time, but I don’t know where to start. We review your tools and habits, then suggest a simple step-by-step plan.
+
+## Developer profile
+
+- At GrowDev you talk to the person who writes the code: Aziz Chaibi, a full-stack developer specialised in Odoo. Here are our tools and the way we work, for recruiters and technical teams.
+- How we work: Remote, in French, Arabic or English. A written scope before any code: goals, schedule, deliverables. Short deliveries that you approve step by step. Clean, documented code, versioned with Git. Backups and security in place before go-live.
+- Odoo and business management: Custom modules, links with other tools, data migration, hosting and updates.
+- Web and e-commerce: Websites, shops and web apps in three languages, with right-to-left Arabic.
+- Mobile: Android and iOS apps from a single codebase, connected to your API or your ERP.
+- Servers and deployment: Deployment, backups, security and version-controlled code.
+- See this website’s source code: https://github.com/growdev-tn/growdev-tn.github.io
+
 ## Clients
 
 Businesses and brands that entrust us with their digital projects.
@@ -49,6 +68,8 @@ Businesses and brands that entrust us with their digital projects.
 - [Can my website or app be in Arabic, French and English?](https://growdev.tn/en/#faq): Yes.
 - [WordPress, PrestaShop or a custom app: which one should I choose?](https://growdev.tn/en/#faq): WordPress suits showcase sites and blogs that you edit yourself.
 - [What happens after the launch?](https://growdev.tn/en/#faq): We train your team, set up backups and security, then keep following up: fixes, updates and new features, at the pace of your business.
+- [I know nothing about IT: can I still trust you with my project?](https://growdev.tn/en/#faq): Yes.
+- [Do you take on freelance development work for recruiters, agencies or technical teams?](https://growdev.tn/en/#faq): Yes.
 
 ## Optional
 

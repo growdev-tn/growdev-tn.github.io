@@ -14,9 +14,9 @@ Tunisia first, then Africa, then the world. Three languages, one URL each: `/` (
 | Layer | What the site does | Where |
 |---|---|---|
 | **SEO** | One prerendered HTML page per language: the content is readable without JavaScript. Unique `<title>` and meta description per language, canonical URL, `hreflang` fr / ar / en plus `x-default` (English), Open Graph and Twitter cards with a share image per language. `sitemap.xml` with the alternates, `robots.txt`, one `<h1>` and a clean heading outline. | `tools/build.mjs`, `tools/seo.mjs`, `src/i18n/*.json` |
-| **GEO — generative** | `llms.txt` (short summary and links) and `llms-full.txt` (whole site text in three languages). Explicit rules in `robots.txt` for the AI search and user agents and for the training crawlers. One JSON-LD `@graph` per page with stable `@id`s: Organization + ProfessionalService, founder (Person), WebSite, WebPage, 7 Services, FAQPage. A visible "GrowDev en bref" fact list says the same facts in every language. | `tools/seo.mjs`, `src/index.template.html` |
+| **GEO — generative** | `llms.txt` (short summary and links) and `llms-full.txt` (whole site text in three languages). Explicit rules in `robots.txt` for the AI search and user agents and for the training crawlers. One JSON-LD `@graph` per page with stable `@id`s: Organization + ProfessionalService, founder (Person, with `url` pointing at `#developpeur`, `knowsAbout` listing the twelve technologies and, when set in `src/site.json`, `sameAs` with Aziz's own GitHub and LinkedIn profiles), WebSite, WebPage, 7 Services, FAQPage. `llms.txt` and `llms-full.txt` also carry the situation guide ("Which of these sounds like you?") and the developer profile, so an assistant asked "who builds this?" or "what does GrowDev do for a business that works in Excel?" finds a plain answer. A visible "GrowDev en bref" fact list says the same facts in every language. | `tools/seo.mjs`, `src/index.template.html` |
 | **GEO — geographic** | `areaServed` lists Tunisia, Africa and Worldwide. `geo.region=TN`. Tunisia-first copy (SMEs in Tunisia, quotes in DT first, € or $ abroad). `og:locale` and `inLanguage` per page. Language targeting through `hreflang`, not through a country setting. | `src/site.json`, `tools/seo.mjs` |
-| **AEO** | A visible FAQ of 8 questions, each answered in the first sentence, then detailed. The same text is published as `FAQPage` JSON-LD. The checker fails the build if the two ever differ. | `src/i18n/*.json` (`faq.*`), `tools/check.mjs` |
+| **AEO** | A visible FAQ of 10 questions, each answered in the first sentence, then detailed. Questions 9 ("I know nothing about IT: can I still trust you?") and 10 (freelance work for recruiters, agencies and technical teams) were added on 24 Nov for the two kinds of visitor. The same text is published as `FAQPage` JSON-LD. The checker fails the build if the two ever differ. | `src/i18n/*.json` (`faq.*`), `tools/check.mjs` |
 
 **Honest notes**
 
@@ -47,6 +47,19 @@ Rules for editing the copy:
 - Mention Tunisia in the title or description of every language.
 - **Do not claim "official Odoo partner" or "certified"** unless GrowDev is listed as such by Odoo. Nothing in the current copy says so.
 
+### Long-tail and recruiter queries (24 Nov 2026, hypotheses to test)
+
+Not measured: no volume or ranking is known. They tell the copy which words to use in plain language and give Search Console something to compare against after a month.
+
+| Visitor | Words they probably use (to be confirmed by Search Console) | Where the page answers |
+|---|---|---|
+| Owner, French | remplacer Excel par un logiciel de gestion · gestion de stock et factures PME Tunisie · automatiser la facturation · créer une boutique en ligne en Tunisie | `#situations` (six first-person rows), the service cards, the FAQ |
+| Owner, English | replace spreadsheets with business software Tunisia · small business inventory and invoicing software Tunisia · online store Tunisia | same, written natively in `en.json` |
+| Owner, Arabic | برنامج لتسيير المخزون والفواتير تونس · متجر إلكتروني تونس · تقليص العمل اليدوي في الشركة | same, written natively in `ar.json` |
+| Recruiter or technical team | développeur Odoo freelance Tunisie · Odoo developer freelance Tunisia · full-stack developer Odoo Python Django · مبرمج Odoo تونس | `#developpeur`, FAQ 10, the Person node (`knowsAbout`, `sameAs`), the source-code and profile links |
+
+The plain-language headlines of the situation guide are deliberate: visitors search with their problem, not with a product name. The jargon guard in the checker keeps ERP, API and similar words out of the hero, the guide and the contact text; the product names stay in the service cards, the FAQ and the technical profile, where the keyword map above applies.
+
 ## 3. Launch checklist (in this order)
 
 1. **Deploy and check HTTPS** (see `docs/DEPLOY.md`). Open `/`, `/ar/`, `/en/`, `/sitemap.xml`, `/robots.txt`, `/llms.txt`.
@@ -54,7 +67,7 @@ Rules for editing the copy:
 3. **Bing Webmaster Tools.** Import the site from Search Console, then submit the same sitemap. Bing's index also feeds Microsoft Copilot and some other assistants.
 4. **Validate the markup.** Run the three URLs through the Google Rich Results Test and validator.schema.org. Run PageSpeed Insights on mobile.
 5. **Google Business Profile.** Create a *Software company* profile (service-area business if there is no public address). Use the same name, email and website everywhere.
-6. **Entity links (`sameAs`).** `sameAs` already lists `https://github.com/aziz-art`. Create the LinkedIn company page, and consider adding the GitHub organisation `https://github.com/growdev-tn` (it already exists), then add their URLs to `sameAs` in `src/site.json` (and a `sameAs` for the founder if he wants one). Rebuild. These links are the strongest signal that tells engines and AI tools "this is the same entity".
+6. **Entity links (`sameAs`).** The company's `sameAs` lists the GitHub organisation `https://github.com/growdev-tn`; Aziz's own GitHub profile is `profiles.github` and feeds the Person node. Aziz's LinkedIn URL is set in `profiles.linkedin` (24 Nov) and is in the Person node. Still to do: create the LinkedIn company page and add its URL to `sameAs` in `src/site.json`. Rebuild. These links are the strongest signal that tells engines and AI tools "this is the same entity".
 7. **Backlinks.** Link to the site from `werchti.tn`, from the founder's LinkedIn and GitHub profiles, and from directories where GrowDev qualifies (Sortlist, Clutch, GoAfricaOnline). Odoo.com's partner directory only if GrowDev is an official partner.
 8. **Share test.** Paste each URL into WhatsApp, LinkedIn and Facebook to see the language-specific share image.
 
@@ -62,6 +75,7 @@ Rules for editing the copy:
 
 - Edit text in `src/i18n/*.json` only, then run `npm run build && npm run check`. Never edit `site/*.html` by hand: the build overwrites it.
 - The sitemap `lastmod` comes from the last git commit that touched `src/` or `site/assets/`.
+- The six situation rows and their targets are listed in `SITUATIONS` in `tools/seo.mjs` (n and anchor); `llms.txt` and the checker read the same list. Changing the order or the target of a row means editing that list and the template together.
 - To add a FAQ item: add `faq.qN` and `faq.aN` to the three JSON files, add the `<details>` block to `src/index.template.html`, and raise `FAQ_COUNT` in `tools/seo.mjs`. The build and the checker tell you if something is missing.
 - Each month: look at Search Console (Performance → by country and by language), turn real queries into new FAQ entries, and refresh the facts block when something changes (services, prices policy, languages).
 - Next content step: one short case study per project in the three languages, once clients agree to be named. The Clients section (17 Nov 2026) shows names and logos only; a case study per client is the natural next step. Real case studies are the best source of citations for both search and AI answers.
@@ -79,6 +93,8 @@ To allow training instead, set `"allowAiTraining": true` in `src/site.json` and 
 ## 6. What the checker enforces (`npm run check`)
 
 Per page: `lang`/`dir`, title and description length and uniqueness, canonical, reciprocal `hreflang`, Open Graph and Twitter tags, 1200×630 share image, one `h1` and no skipped heading level, valid JSON-LD with no dangling `@id`, FAQ text identical on the page and in JSON-LD, working internal links and anchors, `alt` on images, labels on form fields, accessible names on links and buttons, CSP present, no inline scripts, no resource from another host, Arabic fonts only on the Arabic page, DT first in the currency list, size budgets.
+
+Since 24 Nov also: the six situation rows lead to existing service anchors and have text in every language, the technical profile links to exactly the addresses set in `src/site.json` (`repo`, `profiles.github`, `profiles.linkedin`), the Person node follows `profiles`, `llms.txt` and `llms-full.txt` carry the situation guide and the developer profile in step with the page, the hero, the guide and the contact text contain no IT jargon, and both mail links in the contact section have a subject and a guided body.
 
 Site-wide: sitemap and alternates, `robots.txt`, `llms.txt` links, `CNAME`, `.nojekyll`, `404.html`, web manifest, files referenced by the CSS.
 

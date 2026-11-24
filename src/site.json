@@ -8,7 +8,10 @@
   "email": "contact@growdev.tn",
   "founder": "Aziz Chaibi",
   "xDefault": "en",
-  "sameAs": ["https://github.com/aziz-art"],
+  "sameAs": ["https://github.com/growdev-tn"],
+  "repo": "https://github.com/growdev-tn/growdev-tn.github.io",
+  "profiles": { "github": "https://github.com/aziz-art", "linkedin": "https://www.linkedin.com/in/chaibi-mohamed-aziz/" },
+  "whatsapp": "21625135166",
   "clients": [
     { "name": "Bonayaty", "logo": "bonayaty.webp" },
     { "name": "Hijabella", "logo": "hijabella.webp" },
@@ -28,6 +31,6 @@
   },
   "runtimeKeys": {
     "prefixes": ["mod.", "hint.", "sum.", "phase.", "brief.", "curfmt.", "theme."],
-    "exact": ["comp.hint", "sim.pct", "sim.h", "sim.list"]
+    "exact": ["comp.hint", "sim.pct", "sim.h", "sim.list", "sim.say", "sim.cap", "sim.res.rate"]
   }
 }
