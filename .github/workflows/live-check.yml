@@ -1,0 +1,45 @@
+# Checks the LIVE site (https://growdev.tn) with tools/verify-launch.sh: HTTPS and redirects, the three pages, the search and AI files,
+# the share images, the 404 page, and that the stylesheet and scripts the visitors receive are exactly the ones built from this commit.
+# It runs after every deploy, and every Monday, so a lapsed certificate, a changed DNS record or a broken redirect is noticed within a week.
+# A failed run makes GitHub email the repository owner. To run it by hand: Actions tab > "Live check" > Run workflow.
+# GitHub pauses scheduled workflows after 60 days without any activity in the repository; a push or "Run workflow" wakes it again.
+name: Live check
+
+on:
+  workflow_run:
+    workflows: ["Build, check and deploy"]
+    types: [completed]
+  schedule:
+    - cron: "17 6 * * 1" # Mondays, 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-check
+  cancel-in-progress: true # two pushes in a row: only the newest one is worth checking
+
+jobs:
+  verify:
+    # After a deploy: only when the deploy workflow succeeded on a push to main (pull requests build and check, but never deploy).
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Rebuild the site from this commit (the same output the deploy published)
+        run: node tools/build.mjs
+
+      - name: Verify the live site (retries while a new version is still reaching visitors)
+        run: |
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            echo "Attempt $attempt of 10"
+            if bash tools/verify-launch.sh; then exit 0; fi
+            sleep 30
+          done
+          echo "::error::The live site still does not match this commit after 10 attempts. Run it on your computer for the details: bash tools/verify-launch.sh"
+          exit 1

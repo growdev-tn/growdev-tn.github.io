@@ -38,7 +38,7 @@ A fast, accessible, animated showcase that tells a non-technical owner what Grow
 | Languages | French (`/`), Arabic (`/ar/`, `dir="rtl"`), English (`/en/`) |
 | Hosting | GitHub Pages: static files only, no custom response headers, no server logic |
 | Address | `https://growdev.tn/`, set once as `url` in `src/site.json`, next to `email` and `legacyHosts` (the earlier hosts, forbidden anywhere in the built site). For a custom domain the build writes `site/CNAME` itself; GitHub ignores that file for Actions deployments (the domain is set in Settings → Pages) and the checker keeps it equal to the host |
-| Currency | DT first and default; MAD, DZD, EGP, XOF, EUR, USD selectable |
+| Price | None published (25 Nov 2026): the price depends on the client and on the complexity of the project. The site names currencies ("quote in DT, in € or $") but never an amount; the checker enforces it |
 | Data | No cookies, no personal data stored or sent. Only two `localStorage` keys, each written when the visitor clicks the matching control: `gd-lang` (language link) and `gd-theme` (light/dark button). The checker fails the build if any other key, a cookie or a network call appears in the scripts |
 | Browsers | Current evergreen browsers (2022 onward). The FAQ's one-at-a-time behaviour (`<details name>`) needs Chrome 120, Safari 17.2 or Firefox 130; older browsers simply allow several answers open |
 | Must not | Load anything from another host; add a cookie banner; claim unverifiable facts |
@@ -95,11 +95,11 @@ A fast, accessible, animated showcase that tells a non-technical owner what Grow
 | Dictionaries | `src/i18n/{fr,ar,en}.json`, flat keys | Same keys in all three; same `{vars}` and tags; Arabic adds plural forms |
 | Site facts | `src/site.json` | URL, e-mail, founder, languages, `sameAs`, font preloads, runtime keys; since 24 Nov also `repo` (the source-code link), `profiles.github` and `profiles.linkedin` (Aziz's own pages) and `whatsapp` (digits with the country code). Empty means "leave it out"; the build validates their shape and the checker verifies the pages (§5.7) |
 | Clients | `src/site.json` → `clients`, logos in `site/assets/img/clients/` | One `{ "name", "logo", "lang"? }` per client, in display order. The build writes the plates (each logo's real `width` and `height`, and a `?v=` version on its URL); the names also go into `llms.txt` and `llms-full.txt` (§5.6) |
-| Runtime slice | `site/assets/js/dict-<lang>.js` (generated) | Only keys that scripts need (`mod.`, `hint.`, `sum.`, `phase.`, `brief.`, `curfmt.`…) |
+| Runtime slice | `site/assets/js/dict-<lang>.js` (generated) | Only keys that scripts need (`mod.`, `hint.`, `sum.`, `phase.`, `brief.`, `theme.`, plus a handful of single keys such as `comp.hint` and `sim.say`: `runtimeKeys` in `src/site.json`) |
 | Technology logos | `site/assets/img/tech/*.svg`, used with `data-logo="id"` in the template | The build writes the chip, the real size and the version (`docs/LOGOS.md`) |
 | Structured data | `tools/seo.mjs` | One JSON-LD `@graph` per page, stable `@id`s. `SITUATIONS` and `DEV_AREAS` in the same file list the situation rows and the technical-profile areas for `llms.txt` and the checker |
 
-Key namespaces: `meta`, `ld`, `nav`, `hero`, `sit`, `svc`, `clients`, `comp`, `method`, `sim`, `about`, `dev`, `facts`, `faq`, `contact`, `foot`, `mod`, `hint`, `sum`, `phase`, `brief`, `cur`, `curfmt`.
+Key namespaces: `meta`, `ld`, `nav`, `hero`, `sit`, `svc`, `clients`, `comp`, `method`, `sim`, `about`, `dev`, `facts`, `faq`, `contact`, `foot`, `mod`, `hint`, `sum`, `phase`, `brief`, `theme`. (The `cur` and `curfmt` namespaces of the old simulator no longer exist: there is no price on the site.)
 
 ### 2.4 "API" design
 
@@ -114,15 +114,15 @@ URL rules: `/` French, `/ar/` Arabic, `/en/` English; trailing slashes; reciproc
 | File | Responsibility | Depends on |
 |---|---|---|
 | `boot.js` | Blocking script in `<head>`: adds the `js` class, sets the theme and the browser-bar colour before first paint, remembered-language redirect on `/` | nothing |
-| `config.js` | Business constants: e-mail, default currency, hourly costs | nothing |
+| `config.js` | Business constants: the contact e-mail (no price list, on purpose) | nothing |
 | `dict-<lang>.js` | Generated runtime strings | build |
-| `i18n.js` | `t()`, plural rules, number and currency formats | dict |
+| `i18n.js` | `t()`, plural rules, number formats | dict |
 | `hero.js` | Growth chart: bars as links, computed arrows, coin stack | i18n |
 | `theme.js` | Light/dark toggle, memory, the wave (View Transitions), fallbacks, announcement | i18n |
 | `ui.js` | Header, mobile menu, reveal on scroll, service cards, method timeline, language memory | i18n |
 | `carousel.js` | The Clients carousel: endless belt, drag, arrows, Pause/Play, dots. Enhances markup that already works as a still wall | nothing (the DOM it enhances works without it) |
 | `composer.js` | Chips → live map → phased scope → e-mail brief | i18n, config |
-| `calculator.js` | Savings simulator: computes hours and money, writes the equation and caption, and one debounced sentence for screen readers (§5.7) | i18n, config |
+| `calculator.js` | Time-saving simulator: computes hours, days and the share of a full-time job (never money), writes the equation and caption, and one debounced sentence for screen readers (§5.7) | i18n |
 | `main.js` | Starts the modules in order (`theme` first, so the toggle works before anything else) | all |
 | `404.js` | Chooses the 404 language | nothing |
 
@@ -179,7 +179,7 @@ How the speed numbers were taken: headless Chromium against the built `site/` on
 
 ### 5.1 Principles
 
-Mobile-first. RTL-native. Two themes: dark (the default, and the look the brief asked for) and light, switched by the visitor (§5.5). WCAG 2.2 AA as the target. One accent family (green to sky), gold reserved for money and parallel work.
+Mobile-first. RTL-native. Two themes: dark (the default, and the look the brief asked for) and light, switched by the visitor (§5.5). WCAG 2.2 AA as the target. One accent family (green to sky), gold reserved for the coin in the hero (an illustration, no amount) and parallel work.
 
 Dark theme (`:root`):
 
@@ -227,7 +227,7 @@ Hand-built, no library: sticky header with language switch and the light/dark bu
 - Layout uses logical properties (`inline-start`, `padding-inline`…). Arrows and chevrons flip. Range tracks and radial backgrounds mirror.
 - Pictures stay as drawn (growth chart, marquee, system map, language switch) and are forced `direction: ltr`.
 - The method timeline progresses right to left in Arabic.
-- Numbers use Latin digits with a space as thousands separator (`fr-TN` style) in French and Arabic, `en-GB` style in English. Currency patterns come from the dictionaries (`{n} DT`, `{n} د.ت`, `€{n}`, `${n}`). No Hijri dates are shown.
+- Numbers use Latin digits with a space as thousands separator (`fr-TN` style) in French and Arabic, `en-GB` style in English. The site shows no amount of money, so there are no currency patterns. No Hijri dates are shown.
 
 ### 5.5 Themes (dark and light) and the wave
 
@@ -263,12 +263,12 @@ Why: a visitor with no IT background had to understand the offer from technology
 
 - **Situation guide** (`#situations`, before the services). Six rows `<li><a class="pick" href="#svc-…">`: a first-person sentence (`sit.N.q`), a short title and one line (`sit.N.t`, `sit.N.p`), and an arrow. Each row leads to its service card, which the existing hash handling highlights (`is-hl`). The order and the targets live in `SITUATIONS` (`tools/seo.mjs`); the template, `llms.txt` and the checker read the same list. Six is the ceiling (Hick's law); a seventh row means removing one.
 - **Plain words.** The hero lead, the situation guide and the contact text must not contain IT jargon (ERP, API, CRM, SaaS, workflow, framework, stack, DevOps, cron…). The checker enforces it (`JARGON` in `tools/check.mjs`). Product names stay in the service cards, the FAQ and the technical profile.
-- **Simulator** (`calculator.js`). The formula is *people × hours per week × share that can be automated × 4.33 weeks = hours per month*; × 12 gives the year; × the hourly cost gives the money. `WEEKS` (4.33) and the 160-hour full-time month are constants in the script; the visible equation (`#e-people`, `#e-hours`, `#e-share`, `#e-total`), the `sim.how.*` text and the script must agree, and the checker compares them. Inputs come in the order of the sentence, the hourly cost has a help line and a currency (`#s-rate` keeps `min="1" step="1" value="15"` and `#s-cur` starts with DT: the checker needs them). The big numbers are animated and are **not** live regions; `#sim-say` (`role="status"`, polite, screen-reader only) is written 0.8 s after the visitor stops, and never on load. With reduced motion the numbers jump to their value.
+- **Simulator** (`calculator.js`). The formula is *people × hours per week × share that can be automated × 4.33 weeks = hours per month*; × 12 gives the year. **It never turns hours into money** (25 Nov 2026: the hourly cost, the currency picker and the "value of the time" result were removed, because the price of a project depends on the client and on the complexity of the project; the fine print under the result says so). `WEEKS` (4.33) and the 160-hour full-time month are constants in the script; the visible equation (`#e-people`, `#e-hours`, `#e-share`, `#e-total`), the `sim.how.*` text and the script must agree, and the checker compares them. Inputs come in the order of the sentence, each with a help line. The big numbers are animated and are **not** live regions; `#sim-say` (`role="status"`, polite, screen-reader only) is written 0.8 s after the visitor stops, and never on load. With reduced motion the numbers jump to their value.
 - **Technical profile** (`#developpeur`, between `#about` and `#faq`). How Aziz works (`dev.how.*`), the proof (this website: three languages, no cookies, automatic checks), four technology areas (`dev.s1…s4`, `DEV_AREAS`) with logo chips, and the links, which come from the settings in `src/site.json` and appear only when set: source code (`repo`), GitHub and LinkedIn profiles (`profiles`), and a `mailto:` link to propose an assignment with a subject and a body to fill in. Profile links carry `rel="me noopener"`, the repository link `rel="noopener"`. The build refuses a `repo` that is not an `https://` address, any unknown `profiles` key, and a `whatsapp` value that is not 8 to 15 digits.
 - **Technology logos.** Twelve SVG files and the `data-logo` mechanism: `docs/LOGOS.md`. They appear in the marquee, on the service cards and in the technical profile. A white plate in both themes (same reason as §5.6), the picture is decoration, the name is the text. The footer credits the sources (`foot.logos`).
 - **Contact: two doors.** "You have a project" (a mail with a short guided body, the project builder, WhatsApp when a number is set) and "You are looking for a developer" (the assignment mail and a link to the technical profile), then "What happens next?" in three steps (a real sequence, so a numbered list). Both mail bodies end by asking how the sender heard about GrowDev, which is the only channel measurement the site has (`docs/MARKETING-PLAN.md` §6).
 - **Method steps stay readable.** The timeline used to dim a whole step to 50% until it was reached; that failed the text contrast on phones. Now only the marker and the title colour change.
-- **What `tools/check.mjs` enforces:** the section order; the six rows, their anchors and texts in three languages; the hero's two links; the jargon guard; the simulator's help line, signs, polite sentence, absence of live regions on animated numbers, and the agreement between formula and script; every logo (size read from the file, version, decoration, licence comment, credit, size budget, plain drawing); the marquee's two lists; the technical profile's links against `src/site.json`, `rel` values and mail bodies; the contact doors, steps and mail links; WhatsApp only with a number; the footer links; `llms.txt` sections. 4,089 checks in all (with WhatsApp and LinkedIn set); each new rule was tested by breaking it (34 ways, all caught).
+- **What `tools/check.mjs` enforces:** the section order; the six rows, their anchors and texts in three languages; the hero's two links; the jargon guard; the simulator's help line, signs, polite sentence, absence of live regions on animated numbers, and the agreement between formula and script; every logo (size read from the file, version, decoration, licence comment, credit, size budget, plain drawing); the marquee's two lists; the technical profile's links against `src/site.json`, `rel` values and mail bodies; the contact doors, steps and mail links; WhatsApp only with a number; the footer links; `llms.txt` sections. 4,089 checks in all on 24 Nov (with WhatsApp and LinkedIn set); each new rule was tested by breaking it (34 ways, all caught). On 25 Nov: no price anywhere (see "No price" in `docs/SEO-GEO-AEO.md`), answer-first FAQ openers, product-name capitals and the pricing sentence in `llms.txt`, the live-check workflow's name: 4,125 checks, 12 deliberate breakages, all caught.
 - **What it cannot see** (checked by hand in Chromium on 24 Nov, see the addendum): whether the sentences make sense to a real visitor, the Arabic wording, Safari and real phones, how screen readers speak the rows and the simulator sentence, and whether the repository is public.
 
 ---
@@ -292,7 +292,7 @@ Why: a visitor with no IT background had to understand the offer from technology
 | Deploy delay on GitHub Pages | Low | Low | Follow `DEPLOY.md`; a first deploy can take a few minutes |
 | Arabic copy reads stiff to native readers | Medium | Medium | Have a native reader review `ar.json` before launch; wording changes need no code |
 | Visitors without a mail client cannot send the brief | Medium | Medium | Copy button and visible address now; add WhatsApp or a form endpoint if data shows friction |
-| Placeholder claims left in (hourly costs, quote policy) | Medium | Medium | The list in `CREATIVE-BRIEF.md` §8 must be answered before launch |
+| Placeholder claims left in (quote policy wording, the freelance "yes") | Medium | Medium | The list in `CREATIVE-BRIEF.md` §8 must be answered before launch. The simulator's hourly costs no longer exist (25 Nov) |
 | Search visibility is slow on a new site | High | Medium | Search Console and Bing on day one, backlinks from `werchti.tn` and profiles, steady content |
 | A `github.io` address looks less professional than an own domain | Medium | Low | Handled: the domain `growdev.tn` was bought at OVHcloud; change `url`, `email` and `legacyHosts` in `src/site.json`, rebuild, regenerate the share images, push (see `DEPLOY.md`); GitHub redirects the old address. New dependency: the domain's renewal date, because the site and the mailbox both stop if it lapses |
 | Someone edits generated HTML by hand | Medium | Low | README warning; the CI rebuilds and overwrites |
@@ -304,7 +304,6 @@ Acceptable now, to be repaid:
 
 - Inline `style="--i:…"` attributes (see Phase 3).
 - No file hashing for cache busting.
-- Hourly-cost defaults in the simulator are rough placeholders.
 - No automated visual regression tests (the checker covers structure, contrast tokens and the wave's geometry, not looks).
 - The browser-level test scripts (behaviour, axe, real-background contrast, header sweep, speed) were run from a scratch folder and are not in the repo; the results are recorded in `docs/UX-AUDIT.md`.
 

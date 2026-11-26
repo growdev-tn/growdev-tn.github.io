@@ -30,7 +30,7 @@
     "ar": ["sora-latin-wght", "plex-arabic-400", "plex-arabic-700"]
   },
   "runtimeKeys": {
-    "prefixes": ["mod.", "hint.", "sum.", "phase.", "brief.", "curfmt.", "theme."],
-    "exact": ["comp.hint", "sim.pct", "sim.h", "sim.list", "sim.say", "sim.cap", "sim.res.rate"]
+    "prefixes": ["mod.", "hint.", "sum.", "phase.", "brief.", "theme."],
+    "exact": ["comp.hint", "sim.pct", "sim.h", "sim.list", "sim.say", "sim.cap"]
   }
 }

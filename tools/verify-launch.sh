@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # Launch check for the GrowDev site.   Usage: bash tools/verify-launch.sh [domain]
-# Run it from the repository (it reads "email" and "legacyHosts" from src/site.json). Needs curl (Git Bash has it).
+# Run it from the repository: it reads the settings it compares the live site with from src/site.json, and the built scripts and stylesheet from site/.
+# Needs curl (Git Bash has it). Exit code 0 only when every check passed and none was skipped.
 # Each page is downloaded ONCE and every check on it reads that copy, so one failed download is reported once, with curl's own
 # reason, and the checks that depend on it are listed as "not checked" instead of passing or failing for the wrong reason.
 cd "$(dirname "$0")/.." 2>/dev/null || true
 D="${1:-growdev.tn}"
-EMAIL=$(grep -o '"email" *: *"[^"]*"' src/site.json 2>/dev/null | head -1 | sed 's/^[^:]*: *"\(.*\)"$/\1/')
+setting() { grep -o "\"$1\" *: *\"[^\"]*\"" src/site.json 2>/dev/null | head -1 | sed 's/^[^:]*: *"\(.*\)"$/\1/'; }
+EMAIL=$(setting email); REPO=$(setting repo); WHATSAPP=$(setting whatsapp); LINKEDIN=$(setting linkedin)
 LEGACY=$(grep -o '"legacyHosts" *: *\[[^]]*\]' src/site.json 2>/dev/null | grep -o '"[a-z0-9.-]*\.[a-z]*"' | tr -d '"')
 T=$(mktemp -d 2>/dev/null) || { T="${TMPDIR:-/tmp}/gd-verify-$$"; mkdir -p "$T"; }
 trap 'rm -rf "$T"' EXIT
@@ -24,6 +26,14 @@ get() {                                                        # download https:
 status() { get "$1"; cat "$T/$(key "$1").code"; }
 why()    { head -c 160 "$T/$(key "$1").err" 2>/dev/null | tr -d '\r\n'; }
 hop()    { curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --max-time 25 "$1"; }   # one request, not followed: "<status> <Location>"
+sha8()   {                                                     # first 8 hex digits of the SHA-256 of a text file, line endings ignored (a Windows checkout may have CRLF, the deployed build has LF); empty if the computer has no sha tool
+  if command -v sha256sum >/dev/null 2>&1; then tr -d '\r' <"$1" | sha256sum | cut -c1-8
+  elif command -v shasum >/dev/null 2>&1; then tr -d '\r' <"$1" | shasum -a 256 | cut -c1-8; fi
+}
+page_text() {                                                  # a downloaded page, without the link to this site's source code (that link legitimately contains the earlier github.io name)
+  local t; t=$(<"$1")
+  if [ -n "$REPO" ]; then printf '%s' "${t//"$REPO"/}"; else printf '%s' "$t"; fi
+}
 
 expect_code() {
   c=$(status "$1")
@@ -37,11 +47,11 @@ expect_text() {   # $1 = path, $2 = text that must be in the page
   if [ ! -s "$f" ]; then fail "$1 came back empty (status $c), so it cannot contain: $2"; return; fi
   if grep -Fq -- "$2" "$f"; then pass "$1 contains: $2"; else fail "$1 is missing: $2 (status $c, $(wc -c <"$f" | tr -d ' ') bytes received)"; fi
 }
-expect_absent() { # $1 = path, $2 = text that must NOT be in the page
+expect_absent() { # $1 = path, $2 = text that must NOT be in the page, $3 = what it is, for the message (default: the text itself)
   c=$(status "$1"); f="$T/$(key "$1").body"
-  if [ "$c" = "000" ]; then skip "$1 does not mention $2" "the page could not be downloaded"; return; fi
-  if [ ! -s "$f" ]; then fail "$1 came back empty (status $c), so nothing can be said about $2"; return; fi
-  if grep -Fq -- "$2" "$f"; then fail "$1 still mentions the earlier address $2"; else pass "$1 does not mention $2"; fi
+  if [ "$c" = "000" ]; then skip "$1 does not mention ${3:-$2}" "the page could not be downloaded"; return; fi
+  if [ ! -s "$f" ]; then fail "$1 came back empty (status $c), so nothing can be said about ${3:-$2}"; return; fi
+  if page_text "$f" | grep -Fq -- "$2"; then fail "$1 still mentions ${3:-$2}"; else pass "$1 does not mention ${3:-$2}"; fi
 }
 expect_redirect() {   # $1 = address to request, $2 = where it must lead
   r=$(hop "$1"); c=${r%% *}; t=${r#* }
@@ -50,6 +60,24 @@ expect_redirect() {   # $1 = address to request, $2 = where it must lead
     000) fail "$1 gave no answer: DNS is not ready or the HTTPS certificate is not issued yet";;
     *) fail "$1 should redirect to $2 (it answered $c)";;
   esac
+}
+expect_same_as_checkout() {   # every stylesheet and script the live pages load is byte for byte the one in this checkout's site/ folder
+  local what="the live stylesheet and scripts are the ones in this checkout"
+  if [ ! -d site/assets ]; then skip "$what" "there is no site/ folder here: run the build first (node tools/build.mjs)"; return; fi
+  if [ -z "$(sha8 /dev/null)" ]; then skip "$what" "this computer has neither sha256sum nor shasum"; return; fi
+  local refs="" p f ref file live here n=0 stale=""
+  for p in / /ar/ /en/; do
+    f="$T/$(key "$p").body"
+    [ -s "$f" ] && refs="$refs $(grep -Eo 'assets/(css|js)/[A-Za-z0-9_.-]+\?v=[0-9a-f]{8}' "$f")"
+  done
+  if [ -z "${refs// /}" ]; then skip "$what" "the live pages could not be read"; return; fi
+  for ref in $(printf '%s\n' $refs | sort -u); do
+    file=${ref%%\?*}; live=${ref##*=}; n=$((n+1)); here=""
+    [ -f "site/$file" ] && here=$(sha8 "site/$file")
+    [ "$here" = "$live" ] || stale="$stale ${file##*/}"
+  done
+  if [ -z "$stale" ]; then pass "$what ($n files)"
+  else fail "the live site is not this checkout yet (different:$stale). Push, wait for the green run in the Actions tab, then run this script again. If you pushed long ago, run the build here and push again: site/ may be out of date"; fi
 }
 
 echo "Address: $D"
@@ -62,13 +90,18 @@ expect_text /    "rel=\"canonical\" href=\"https://$D/\""
 expect_text /ar/ "rel=\"canonical\" href=\"https://$D/ar/\""
 expect_text /en/ "rel=\"canonical\" href=\"https://$D/en/\""
 expect_text /en/ 'hreflang="x-default"'
-echo "Contact address and earlier addresses"
+for p in / /ar/ /en/; do expect_text "$p" 'application/ld+json'; done
+echo "Contact, profiles and earlier addresses"
 if [ -n "$EMAIL" ]; then for p in / /ar/ /en/; do expect_text "$p" "mailto:$EMAIL"; done
 else fail '"email" could not be read from src/site.json (run the script from the repository)'; fi
-for h in $LEGACY; do expect_absent / "$h"; done
+if [ -n "$WHATSAPP" ]; then for p in / /ar/ /en/; do expect_text "$p" "href=\"https://wa.me/$WHATSAPP"; done; fi
+if [ -n "$REPO" ]; then expect_text / "href=\"$REPO\""; fi
+if [ -n "$LINKEDIN" ]; then expect_text / "href=\"$LINKEDIN\""; fi
+for p in / /ar/ /en/; do for h in $LEGACY; do expect_absent "$p" "$h" "the earlier address $h"; done; done
 echo "Search and AI files"
 for f in /sitemap.xml /robots.txt /llms.txt /llms-full.txt; do expect_code "$f" 200; done
 expect_text /sitemap.xml "https://$D/ar/"
+expect_text /sitemap.xml "https://$D/en/"
 expect_text /robots.txt  "Sitemap: https://$D/sitemap.xml"
 expect_text /robots.txt  "User-agent: GPTBot"
 echo "Share images"
@@ -83,4 +116,6 @@ case "$D" in
 esac
 expect_code /does-not-exist 404
 expect_text /does-not-exist "GrowDev"
+echo "Live site and this checkout"
+expect_same_as_checkout
 echo; echo "$ok passed, $ko failed, $skipped not checked"; [ "$ko" -eq 0 ] && [ "$skipped" -eq 0 ]

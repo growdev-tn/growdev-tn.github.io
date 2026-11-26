@@ -1,5 +1,5 @@
 /* GrowDev — runtime strings. Pages are translated at build time (tools/build.mjs);
-   this only serves the strings that scripts create on the fly (hints, summary, brief, money). */
+   this only serves the strings that scripts create on the fly (hints, summary, brief, simulator). */
 (function () {
   "use strict";
   var GD = window.GD = window.GD || {};

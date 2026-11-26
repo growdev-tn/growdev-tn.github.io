@@ -37,7 +37,7 @@ Nothing below is a claim for the public site. Wording that could go on the site 
 These follow `docs/CREATIVE-BRIEF.md` §3 ("claims to avoid") and the book's own advice that a guarantee must be specific and real and that urgency must be genuine.
 
 1. **No invented proof.** No fake clients, counters, ratings, testimonials or "as seen in". A client is shown only with their agreement, and nothing is said about the work until they approve the wording.
-2. **No invented offers.** No "free", "from X DT", "guaranteed savings", deadline or response time on the public site until Aziz has decided it and can keep it.
+2. **No invented offers.** No "free", "from X DT" (no price at all: it depends on the client and on the complexity of the project), "guaranteed savings", deadline or response time on the public site until Aziz has decided it and can keep it.
 3. **No false urgency or scarcity.** No countdowns, "only 3 spots left" or pop-ups. A real limit (for example, a real cap on new projects per quarter) may be stated once it is true.
 4. **No credential that is not held.** No "official Odoo partner", "certified" or "#1" (open question 7 of the brief).
 5. **No trackers and no cookies.** This is part of the offer ("No cookies, no trackers"). Measure with the e-mails themselves (§6). Anything that collects personal data (newsletter, form, analytics) needs Tunisian data-protection advice first (organic law 2004-63).
@@ -144,7 +144,7 @@ Keep a plain sheet (§6). A CRM is not needed at this volume.
 
 The three levers, applied:
 
-- **Price.** Quote on value and scope; do not discount to win. The site prints no prices on purpose.
+- **Price.** Quote on value and scope; do not discount to win. The site prints no prices on purpose, and since 25 Nov 2026 no figure at all (the simulator no longer turns hours into money): the price depends on the client and on the complexity of the project. FAQ 3 and the "Pricing and quotes" fact say what it depends on and that a clear quote follows a first conversation.
 - **Transaction size.** The seven services already form a ladder: Odoo core → extra modules → a website or shop connected to Odoo → a mobile app → automation. Call each of the five clients about the next logical need.
 - **Frequency.** Odoo hosting, backups and updates are already part of the offer (service card). Turning that into a monthly support plan is a decision: what it covers, what it costs, minimum term.
 
@@ -168,7 +168,7 @@ The three levers, applied:
 | Services, with technology logos | 2, 6 | Recognisable names (Odoo, WordPress, PrestaShop…) build trust |
 | Method and pledges | 2, 6, 7 | Make the process visible; set the expectations the experience must meet |
 | Project builder ("compose your system") | 4, 6 | Turns a vague need into a brief |
-| Simulator | 2, 4 | Gives value first (hours and money from the visitor's own numbers), then "Talk about this result" |
+| Simulator | 2, 4 | Gives value first (the hours won back, from the visitor's own numbers), then "Talk about this result" |
 | Clients carousel | 6 | Social proof, with no invented detail |
 | Technical profile (`#developpeur`) | 1, 6 | Everything a recruiter or technical team needs; public source code as proof |
 | FAQ (10 questions, also in structured data) | 3, 5, 6 | Pre-answers cost, time, trust; feeds search and AI assistants |
@@ -238,7 +238,7 @@ Applied to remove friction, not to push (the long-term test: will the visitor be
 | Hick's law | Two buttons in the hero, six situations, two contact doors, three steps |
 | Reciprocity | The simulator and the situation guide give value before asking for anything; the lead magnet continues this |
 | Commitment and consistency | Small first step: tick a need, then a brief, then a mail with three short prompts |
-| Loss framing | The simulator shows the hours and money the visitor loses today, from their own numbers, with the formula written out so they can check it |
+| Loss framing | The simulator shows the hours the visitor loses today (not money, since 25 Nov 2026: the price of a project depends on the client and on its complexity), from their own numbers, with the formula written out so they can check it |
 | Social proof and authority | Client logos with no invented detail; the public source code of this site |
 | Peak-end | The page ends with "What happens next?", three steps |
 | **Not used** | False scarcity or urgency, fake counters or reviews, pre-ticked consents, invented "was / now" prices |

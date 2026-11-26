@@ -44,7 +44,7 @@
 - *Current behaviour:* ask friends and Facebook groups, call a local agency, hire a freelancer on a marketplace.
 - *Barriers:* "how much will it cost?", "will it take a year?", "I won't understand it", no references to check, a project that fails halfway.
 
-**What resonates:** plain words, a concrete first step, prices talked about in DT, an Arabic version that reads like it was written in Arabic, and seeing what they would get before they write.
+**What resonates:** plain words, a concrete first step, a quote given in DT, an Arabic version that reads like it was written in Arabic, and seeing what they would get before they write.
 
 **Audience insight:** *"I don't know exactly what I need. I only know my files are a mess, and I don't want to be sold software I don't understand."*
 
@@ -61,7 +61,7 @@
 | 3 | Benefit 1 | One tool for sales, purchasing, stock and invoicing (Odoo), instead of scattered files. |
 | 4 | Benefit 2 | Everything under one roof: Odoo, custom web, WordPress, PrestaShop, mobile, automation. |
 | 5 | Benefit 3 | Delivered in phases, in French, Arabic or English, quoted in DT in Tunisia. |
-| 6 | Proof | A visible five-step method; a live tool that draws *your* system; a simulator that shows hours and money saved from your own numbers; no cookies, no trackers. A Clients carousel shows five client logos (a still wall on 17 Nov 2026, a carousel on 18 Nov); client case studies are still **pending** (see §8). |
+| 6 | Proof | A visible five-step method; a live tool that draws *your* system; a simulator that shows the hours saved from your own numbers (no money: the price depends on the client and on the complexity of the project); no cookies, no trackers. A Clients carousel shows five client logos (a still wall on 17 Nov 2026, a carousel on 18 Nov); client case studies are still **pending** (see §8). |
 | 7 | CTA | « Parlons de votre projet » · «ناقش مشروعك معنا» · "Talk about my project" → composes an e-mail brief |
 
 **Claims we can make**
@@ -69,7 +69,7 @@
 - GrowDev is a software company based in Tunisia.
 - Services: Odoo ERP, digital transformation, web development, WordPress, PrestaShop, mobile apps, automation.
 - Work in French, Arabic and English; Tunisia first, then Africa and abroad, remotely.
-- Quotes in DT for Tunisia, in € or $ abroad; no fixed price list, each project is quoted after a first conversation.
+- Quotes in DT for Tunisia, in € or $ abroad; no fixed price list and no figure anywhere on the site, because the price depends on the client and on the complexity of the project (decision of 25 Nov 2026); each project is quoted after a first conversation.
 - No cookies and no trackers on this site.
 - GrowDev has worked for the five businesses in the Clients section (Bonayaty, Hijabella, Nutrichem, متجر المسلم, Galerie des Décors): names and logos supplied by the owner. Say nothing more about any of them (what was built, results) until the owner confirms it and the client agrees.
 
@@ -151,7 +151,7 @@
 **Must-haves**
 
 - [x] Three complete languages (French, Arabic, English), each at its own URL
-- [x] DT is the first and default currency; MAD, DZD, EGP, XOF, EUR and USD available
+- [x] No price or hourly cost anywhere on the site (25 Nov 2026); the simulator shows hours only; currencies are named ("quote in DT, € or $"), never given an amount
 - [x] Works without cookies, analytics, or third-party requests
 - [x] Readable and usable without a mouse, and with animations switched off
 - [x] Fast on mid-range phones and slow connections
@@ -198,6 +198,6 @@
 2. Founder name as it should appear, and its Arabic spelling (currently «عزيز الشايبي»).
 3. Which projects may be shown as case studies, and with what wording (the owner's own products, such as Werchti and IqrarSanté, are natural first candidates).
 4. A WhatsApp or phone number to add as a second contact path.
-5. Is the quote policy in the FAQ right? (no fixed price list; DT in Tunisia; € or $ abroad)
-6. Are the simulator's default hourly costs acceptable? They are rough placeholders (15 DT, 50 MAD, 700 DZD, 250 EGP, 3 000 XOF, 20 €, 22 $) that the visitor can change.
+5. Is the quote policy in the FAQ right? (no price published, because it depends on the client and on the complexity of the project; a clear quote after a first conversation; DT in Tunisia; € or $ abroad)
+6. *(Answered on 25 Nov 2026: the simulator's hourly costs were removed, so there is nothing left to approve.)* Do you want to keep the decorative "DT" coin in the hero?
 7. Is GrowDev an official Odoo partner? If yes, say so (and link the Odoo listing); if not, the copy stays as it is.

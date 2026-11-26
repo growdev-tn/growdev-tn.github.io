@@ -26,6 +26,7 @@ You need Node 18 or newer, or Docker. Nothing else to install.
 node tools/build.mjs      # src/ → site/   (fails if a translation is missing or inconsistent)
 node tools/check.mjs      # SEO, links, accessibility basics, CSP, size budgets (fails the deploy)
 npm run serve             # preview at http://localhost:8080  (needs python3)
+bash tools/verify-launch.sh   # tests the LIVE site (44 checks); after every deploy the "Live check" workflow runs it for you
 ```
 
 Without Node on your PC (Windows, PowerShell), run the same two commands in Docker, from the project folder:
@@ -50,7 +51,7 @@ docker run --rm -v "${PWD}:/app" -w /app node:22-alpine node tools/check.mjs
 | Colours of either theme | The two token blocks at the top of `site/assets/css/styles.css` (`:root` = dark, `:root[data-theme="light"]` = light). Give every colour a value in both; the checker tells you if you forget one or if a text colour is too pale |
 | Structured data, sitemap, robots, llms.txt | `tools/seo.mjs` |
 | Look and animation | `site/assets/css/styles.css`, `site/assets/js/*.js` (the theme button and wave: `theme.js`; the wave's duration and shape: the `wave` object at the top of that file) |
-| Simulator hourly costs, default currency | `site/assets/js/config.js` |
+| The contact e-mail the page scripts use (must equal `email` in `src/site.json`; the checker compares them). **There is no price list anywhere, on purpose:** the price depends on the client and on the complexity of the project, and the checker fails the build if an amount of money appears | `site/assets/js/config.js` |
 | Share images (WhatsApp, LinkedIn…) | `tools/og.html`, then `npm i -D playwright && npx playwright install chromium && npm run og` |
 
 ## Project layout
@@ -60,23 +61,24 @@ src/                  sources: template, translations, site facts
 site/                 what gets published (generated pages + static assets)
 tools/                build.mjs · check.mjs · seo.mjs · make-og.cjs · og.html
 docs/                 documentation (see below)
-.github/workflows/    build → check → deploy to GitHub Pages
+.github/workflows/    pages.yml (build → check → deploy to GitHub Pages) · live-check.yml (tests the live site after each deploy and every Monday)
 branding/             original logo file
 ```
 
 ## Publish
 
-Push to `main`. GitHub Actions builds, runs the checks and deploys in about a minute. Everyday commands (PowerShell, Docker, SSH), the domain and mailbox setup at OVHcloud, Search Console, the AI-crawler policy and a first-time setup: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+Push to `main`. GitHub Actions builds, runs the checks and deploys in about a minute; the **Live check** workflow then tests the live site (red run = a look is needed). Everyday commands (PowerShell, Docker, SSH), the domain and mailbox setup at OVHcloud, Search Console, the AI-crawler policy and a first-time setup: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
 
 ## Documentation
 
 | File | What it is |
 |---|---|
 | [docs/DEPLOY.md](docs/DEPLOY.md) | Publishing on `growdev.tn` (GitHub Pages, OVHcloud DNS and mail): PowerShell, Docker and SSH commands, the order of operations for the domain and the mailbox, Search Console, AI-crawler policy, troubleshooting |
-| [docs/SEO-GEO-AEO.md](docs/SEO-GEO-AEO.md) | What is built in for search engines and AI assistants, keyword map, launch checklist |
+| [docs/SEO-GEO-AEO.md](docs/SEO-GEO-AEO.md) | What is built in for search engines and AI assistants, the no-price principle, keyword map, launch checklist, off-page signals, what the checker enforces |
+| [docs/REAL-WORLD-TESTING.md](docs/REAL-WORLD-TESTING.md) | How to test the live site the way visitors, search engines and AI assistants meet it: phones, screen readers, share previews, mail, Search Console, PageSpeed, AI prompts, five real people. Checklists with pass criteria |
 | [docs/CREATIVE-BRIEF.md](docs/CREATIVE-BRIEF.md) | Audience, messaging, tone, visual direction, open questions |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Principles, stack decisions, security, performance, design system, roadmap |
-| [docs/UX-AUDIT.md](docs/UX-AUDIT.md) | UX/UI audit of 15 Nov 2026: scores, evidence (accessibility scan, contrast, layout, speed), what was fixed, what is left; plus addenda of 17 and 18 Nov on the Clients section and its carousel, of 19 Nov on the contact address and of 24 Nov on the two visitors (a business owner and a technical hirer): user stories, simulator, situation guide, technical profile, browser test results |
+| [docs/UX-AUDIT.md](docs/UX-AUDIT.md) | UX/UI audit of 15 Nov 2026: scores, evidence (accessibility scan, contrast, layout, speed), what was fixed, what is left; plus addenda of 17 and 18 Nov on the Clients section and its carousel, of 19 Nov on the contact address, of 24 Nov on the two visitors (a business owner and a technical hirer): user stories, simulator, situation guide, technical profile, browser test results, and of 25 Nov on the simulator after the price was removed |
 | [docs/MARKETING-PLAN.md](docs/MARKETING-PLAN.md) | One-page marketing plan after Allan Dib's *The 1-Page Marketing Plan*: the nine squares applied to GrowDev with only true claims, which part of the site serves which square, the decisions Aziz still has to make, and how to measure without trackers |
 | [docs/LOGOS.md](docs/LOGOS.md) | The twelve technology logos: sources, licences (CC0, CC BY 3.0, MIT), the `data-logo` mechanism, how to add or remove one |
 | [docs/INFRA-AUDIT.md](docs/INFRA-AUDIT.md) | Infrastructure audit of 19 Nov 2026 (domain, DNS, mail, HTTPS, headers, performance): what was measured, what could not be, what to fix and what to re-run once the domain is live |

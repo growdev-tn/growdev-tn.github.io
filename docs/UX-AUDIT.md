@@ -229,7 +229,7 @@ The site moves to its own domain, `growdev.tn` (OVHcloud), and the contact addre
 |---|---|
 | Browser suite | **323 assertions pass, 0 fail**, run on the final build: 24 page states (3 languages × dark and light × 320, 390, 768 and 1440 px) × 10 assertions each (no sideways scrolling, nothing sticking out of the screen, every image loaded, 48 logos per page, no request to another host, no failed request, no console message, layout shift under 0.1, one `h1`, right `lang` and `dir`); 12 axe-core scans; phone tap targets; the simulator; the six situation rows in three languages; the theme button; reduced motion |
 | Accessibility scan | axe-core 4.10.2 with the WCAG 2.0, 2.1 and 2.2 A and AA tags plus best practices, 12 runs (3 languages × 2 themes × 390 and 1440 px): **0 violations** after the fix below; nothing left "to review" |
-| Simulator | 10 people × 8 h × 50% gives 173 h a month, 2 078 h a year, 108% of a full-time job and 31 176 DT a year at 15 DT an hour; changing the currency to EUR gives the euro format and its own default (20 €); typing 20 as the hourly cost gives 41 568; the sentence for screen readers appears about 0.8 s after the last change and not on load |
+| Simulator | 10 people × 8 h × 50% gives 173 h a month, 2 078 h a year, 108% of a full-time job and 31 176 DT a year at 15 DT an hour; changing the currency to EUR gives the euro format and its own default (20 €); typing 20 as the hourly cost gives 41 568; the sentence for screen readers appears about 0.8 s after the last change and not on load. *(Money, currency and hourly cost were removed on 25 Nov: see the addendum of that date.)* |
 | Situation guide | In the three languages, each of the six rows changes the address to its card, scrolls it below the header, and highlights it |
 | Speed and layout shift | 36 to 39 requests on a 390 px load, all to the same host; layout shift 0.0003 in the three languages; gzipped sizes: HTML 17.0 to 19.0 KB, CSS 15.0 KB, JavaScript 21.4 KB plus one dictionary of 1.5 to 1.9 KB (budgets 45, 22 and 30 KB). LCP was not re-measured |
 | Reduced motion | The marquee stops and its duplicate list is hidden |
@@ -244,6 +244,28 @@ The site moves to its own domain, `growdev.tn` (OVHcloud), and the contact addre
 Other flags of the first run were test timing (lazy images, smooth scrolling, a bar still growing when measured) and not defects.
 
 **Not measured, not decided:** Safari and iOS, real phones, how screen readers speak the new rows and the simulator sentence, the live address, whether the repository is public (the source-code button depends on it, see `docs/HANDOVER.md`). The Arabic copy added on 21 to 24 Nov needs a native read. Scores were not redone. Wording that makes a promise ("A clear quote before we start", the "yes" to freelance work) needs Aziz's confirmation.
+
+## Addendum, 25 Nov 2026: the simulator without a price
+
+**Decision (Aziz):** the price of a project depends on the client and on how complex the project is, so the site shows no price and the simulator no longer turns hours into money.
+
+| Before | After |
+|---|---|
+| Three sliders, then a block "And in money?" with an hourly cost, a currency picker (seven currencies) and a result "worth X a year" | Three sliders, then the result in time only: hours a month, working days a month, the formula written out, twelve months of hours and the share of a full-time job |
+| Nothing said about what the work would cost | The fine print under the result says the price depends on the visitor's situation and on how complex the project is; FAQ 3 and the "Pricing and quotes" fact say the same, and say a clear quote follows a first conversation |
+| The sentence for screen readers ended with a money value | It ends with the hours per month |
+
+**Measured (author's own review, headless Chromium against the built site, local server)**
+
+| Check | Result |
+|---|---|
+| Browser suite | **231 assertions pass, 0 fail**: 3 languages × dark and light × 320, 390, 768 and 1440 px. No field of the old cost block exists, nothing scrolls sideways, there is no console error or failed request. At the start the result equals 5 people × 6 h × 35% × 4.33 weeks (45 h a month, 5.7 days); after moving two sliders (10 people, 8 h) it shows 121 h a month and the caption "1 455 hours in 12 months, 76% of a full-time job" |
+| Screen-reader sentence | Written about 0.8 s after the last change, in the three languages, with no currency or amount: "People: 10. Hours per week: 8. Share that can be automated: 35%. Result: about 121 hours per month." |
+| Look | Screenshots in French, English and Arabic (right-to-left), dark and light, at 320, 390, 768 and 1440 px were read one by one. At 1440 px the three sliders (about 360 px tall) are shorter than the result card (about 650 px): they stay at the top, level with the card's top edge, with empty background below. Left as it is on purpose: centring them would detach them from the heading. From 768 px down the two parts stack |
+| Checker | 4,125 checks pass. The new "no price" rules were tested by breaking them (an amount in the French text, in the English dictionary, in `llms.txt`; `priceRange` and `price`/`priceCurrency` in the JSON-LD; the old `#s-rate` field; `hourlyCost` in `config.js`; a `cur.EUR` key): each caught |
+| Keyboard (26 Nov, while writing `docs/REAL-WORLD-TESTING.md`) | Freshly loaded pages, three languages, at 1440 and 390 px: the first Tab stop is the skip link; it slides in over 0.2 s, shows a ring, and Enter jumps to `#main`. Tab then walks 91 to 96 stops, never stays on one element, reaches the footer, and every stop has an accessible name and a visible ring. **Found and fixed:** in the project builder's four fields (name, company, start date, message) focus was shown only by a change of border colour. In the dark theme that change is large (5.6:1), but in the light theme it goes from a grey to a blue of almost the same lightness (**1.09:1**), so a keyboard user could lose their place. The rule `.field input:focus` no longer removes the outline, so the 2 px sky-coloured ring used by every other control shows there too (re-measured: ring present in both themes, 54 of 54 keyboard checks pass; `tools/check.mjs` now fails the build if the ring is removed again, 4 deliberate breakages, each caught). Only the focus state changed, not the resting look. axe-core (WCAG 2.0 to 2.2 A and AA, plus its best practices) found 0 violations in 12 scans: three languages, dark and light, 390 and 1440 px |
+
+**Not measured, not decided:** Safari and iOS, real phones, how screen readers speak the shortened sentence, the live address. The new clause of the Arabic fine print (the price depends on the situation and the complexity) needs a native read. Whether the decorative "DT" coin in the hero should stay is Aziz's call (`docs/HANDOVER.md`).
 
 ---
 

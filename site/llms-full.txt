@@ -112,7 +112,7 @@ Founded by Aziz Chaibi, a full-stack developer specialised in Odoo.
 - Based in: Tunisia
 - Coverage: Tunisia first, then Africa and worldwide, remotely
 - Languages: French, Arabic, English
-- Quotes: In DT for Tunisia, in € or $ internationally
+- Pricing and quotes: No fixed rate published, as the price depends on the client and the complexity of the project. Clear quote after a first conversation, in DT for Tunisia, in € or $ internationally
 - Contact: contact@growdev.tn
 
 ## Which of these sounds like you?
@@ -149,7 +149,9 @@ At GrowDev you talk to the person who writes the code: Aziz Chaibi, a full-stack
 
 This website is our technical business card: three languages including right-to-left Arabic, no cookies or trackers, and automatic checks (search visibility, basic accessibility, performance) before every release.
 
-See this website’s source code: https://github.com/growdev-tn/growdev-tn.github.io
+- See this website’s source code: https://github.com/growdev-tn/growdev-tn.github.io
+- GitHub profile: https://github.com/aziz-art
+- LinkedIn profile: https://www.linkedin.com/in/chaibi-mohamed-aziz/
 
 ## Frequently asked questions
 
@@ -163,19 +165,19 @@ Yes, as soon as your sales, stock or invoicing are spread across separate files 
 
 ### How much does an Odoo project, a website or an app cost?
 
-The price depends on the scope: number of modules, volume of data to migrate, custom development and training. We do not publish a fixed rate. After a first conversation, we send a clear quote split into phases: in Tunisian dinars (DT) for Tunisia, in euros or dollars internationally.
+The price depends on the client and the complexity of the project: number of modules, volume of data to migrate, custom development and training. That is why we do not publish a fixed rate. After a first conversation, we send a clear quote split into phases: in Tunisian dinars (DT) for Tunisia, in euros or dollars internationally.
 
 ### How long does it take to set up Odoo?
 
-It depends on the number of modules. As a rough guide, a simple scope (for example CRM, sales and invoicing) can be ready in a few weeks, while a full project with data migration and custom development takes several months. We deliver in short steps so you can use the first modules quickly.
+The time it takes depends on the number of modules. As a rough guide, a simple scope (for example CRM, sales and invoicing) can be ready in a few weeks, while a full project with data migration and custom development takes several months. We deliver in short steps so you can use the first modules quickly.
 
 ### Do you work with companies outside Tunisia?
 
-Yes. We support Tunisian businesses first, then companies across Africa and the rest of the world, remotely. We work in French, Arabic and English, and run meetings by video call to suit your time zone.
+Yes, we work with companies outside Tunisia. We support Tunisian businesses first, then companies across Africa and the rest of the world, remotely. We work in French, Arabic and English, and run meetings by video call to suit your time zone.
 
 ### Can my website or app be in Arabic, French and English?
 
-Yes. We build multilingual websites, shops and apps, with right-to-left layout for Arabic, several currencies and content that is easy to translate. Odoo, WordPress and PrestaShop all handle several languages, with dedicated extensions when needed.
+Yes, your website or app can be in Arabic, French and English. We build multilingual websites, shops and apps, with right-to-left layout for Arabic, several currencies and content that is easy to translate. Odoo, WordPress and PrestaShop all handle several languages, with dedicated extensions when needed.
 
 ### WordPress, PrestaShop or a custom app: which one should I choose?
 
@@ -187,11 +189,11 @@ We train your team, set up backups and security, then keep following up: fixes, 
 
 ### I know nothing about IT: can I still trust you with my project?
 
-Yes. Simply describe what takes up your time or what you want to sell: we turn it into a solution, in clear language without jargon, then suggest a first split into steps. On this page, the “Which of these sounds like you?” section, the project builder and the simulator help you prepare that first conversation.
+Yes, you can trust us with your project without knowing anything about IT. Simply describe what takes up your time or what you want to sell: we turn it into a solution, in clear language without jargon, then suggest a first split into steps. On this page, the “Which of these sounds like you?” section, the project builder and the simulator help you prepare that first conversation.
 
 ### Do you take on freelance development work for recruiters, agencies or technical teams?
 
-Yes. You can hire us for a development assignment on Odoo, Python and Django, WordPress, PrestaShop or Flutter. Email us the context, the technology and the expected duration, and we will tell you frankly whether we can help. The technical profile is in the “Who writes the code?” section.
+Yes, we take on freelance development work for recruiters, agencies and technical teams. We work on Odoo, Python and Django, WordPress, PrestaShop or Flutter. Email us the context, the technology and the expected duration, and we will tell you frankly whether we can help. The technical profile is in the “Who writes the code?” section.
 
 # GrowDev en français (fr)
 
@@ -303,7 +305,7 @@ Fondée par Aziz Chaibi, développeur full-stack spécialisé Odoo.
 - Basée en: Tunisie
 - Intervention: Tunisie d’abord, puis Afrique et international, à distance
 - Langues: Français, arabe, anglais
-- Devis: En DT pour la Tunisie, en € ou en $ à l’international
+- Prix et devis: Pas de tarif fixe publié, car le prix dépend du client et de la complexité du projet. Devis clair après un premier échange, en DT pour la Tunisie, en € ou en $ à l’international
 - Contact: contact@growdev.tn
 
 ## Quelle est votre situation ?
@@ -340,7 +342,9 @@ Chez GrowDev, vous parlez à la personne qui écrit le code : Aziz Chaibi, déve
 
 Ce site est notre carte de visite technique : trois langues dont l’arabe de droite à gauche, aucun cookie ni traceur, et des contrôles automatiques (référencement, accessibilité de base, performance) avant chaque mise en ligne.
 
-Voir le code source de ce site: https://github.com/growdev-tn/growdev-tn.github.io
+- Voir le code source de ce site: https://github.com/growdev-tn/growdev-tn.github.io
+- Profil GitHub: https://github.com/aziz-art
+- Profil LinkedIn: https://www.linkedin.com/in/chaibi-mohamed-aziz/
 
 ## Questions fréquentes
 
@@ -354,19 +358,19 @@ Oui, dès que vos ventes, votre stock ou votre facturation sont dispersés entre
 
 ### Combien coûte un projet Odoo, un site web ou une application ?
 
-Le prix dépend du périmètre : nombre de modules, volume de données à reprendre, développements sur mesure et formation. Nous ne publions pas de tarif fixe. Après un premier échange, nous vous remettons un devis clair, découpé en phases : en dinars tunisiens (DT) pour la Tunisie, en euros ou en dollars à l’international.
+Le prix dépend du client et de la complexité du projet : nombre de modules, volume de données à reprendre, développements sur mesure et formation. Nous ne publions donc pas de tarif fixe. Après un premier échange, nous vous remettons un devis clair, découpé en phases : en dinars tunisiens (DT) pour la Tunisie, en euros ou en dollars à l’international.
 
 ### Combien de temps faut-il pour mettre en place Odoo ?
 
-Cela dépend du nombre de modules. À titre indicatif, un périmètre simple (par exemple CRM, ventes et facturation) peut être prêt en quelques semaines, alors qu’un projet complet avec reprise de données et développements spécifiques s’étale sur plusieurs mois. Nous livrons par étapes courtes, pour que vous utilisiez rapidement les premiers modules.
+La durée dépend du nombre de modules. À titre indicatif, un périmètre simple (par exemple CRM, ventes et facturation) peut être prêt en quelques semaines, alors qu’un projet complet avec reprise de données et développements spécifiques s’étale sur plusieurs mois. Nous livrons par étapes courtes, pour que vous utilisiez rapidement les premiers modules.
 
 ### Travaillez-vous avec des entreprises hors de Tunisie ?
 
-Oui. Nous accompagnons d’abord les entreprises tunisiennes, puis celles d’Afrique et du reste du monde, à distance. Nous échangeons en français, en arabe et en anglais, et nous organisons les réunions en visioconférence selon votre fuseau horaire.
+Oui, nous travaillons avec des entreprises hors de Tunisie. Nous accompagnons d’abord les entreprises tunisiennes, puis celles d’Afrique et du reste du monde, à distance. Nous échangeons en français, en arabe et en anglais, et nous organisons les réunions en visioconférence selon votre fuseau horaire.
 
 ### Mon site ou mon application peut-il être en arabe, en français et en anglais ?
 
-Oui. Nous créons des sites, des boutiques et des applications multilingues, avec l’écriture de droite à gauche pour l’arabe, plusieurs devises et des contenus faciles à traduire. Odoo, WordPress et PrestaShop gèrent plusieurs langues, avec des extensions dédiées si besoin.
+Oui, votre site ou votre application peut être en arabe, en français et en anglais. Nous créons des sites, des boutiques et des applications multilingues, avec l’écriture de droite à gauche pour l’arabe, plusieurs devises et des contenus faciles à traduire. Odoo, WordPress et PrestaShop gèrent plusieurs langues, avec des extensions dédiées si besoin.
 
 ### WordPress, PrestaShop ou application sur mesure : lequel choisir ?
 
@@ -378,11 +382,11 @@ Nous formons vos équipes, mettons en place les sauvegardes et la sécurité, pu
 
 ### Je ne connais rien à l’informatique : puis-je quand même vous confier mon projet ?
 
-Oui. Décrivez simplement ce qui vous prend du temps ou ce que vous voulez vendre : nous le traduisons en solution, en langage clair et sans jargon, puis nous proposons un premier découpage par étapes. Sur cette page, la rubrique « Quelle est votre situation ? », le composeur de projet et le simulateur vous aident à préparer ce premier échange.
+Oui, vous pouvez nous confier votre projet sans rien connaître à l’informatique. Décrivez simplement ce qui vous prend du temps ou ce que vous voulez vendre : nous le traduisons en solution, en langage clair et sans jargon, puis nous proposons un premier découpage par étapes. Sur cette page, la rubrique « Quelle est votre situation ? », le composeur de projet et le simulateur vous aident à préparer ce premier échange.
 
 ### Acceptez-vous des missions de développement en freelance pour un recruteur, une agence ou une équipe technique ?
 
-Oui. Vous pouvez nous confier une mission de développement sur Odoo, Python et Django, WordPress, PrestaShop ou Flutter. Écrivez-nous le contexte, la technologie et la durée prévue : nous vous disons franchement si nous pouvons vous aider. Le profil technique se trouve dans la rubrique « Qui écrit le code ? ».
+Oui, nous acceptons des missions de développement en freelance pour un recruteur, une agence ou une équipe technique. Nous intervenons sur Odoo, Python et Django, WordPress, PrestaShop ou Flutter. Écrivez-nous le contexte, la technologie et la durée prévue : nous vous disons franchement si nous pouvons vous aider. Le profil technique se trouve dans la rubrique « Qui écrit le code ? ».
 
 # GrowDev بالعربية (ar)
 
@@ -494,7 +498,7 @@ GrowDev شركة تطوير برمجيات مقرّها تونس. نرافق ا�
 - المقر: تونس
 - مجال التدخل: تونس أولًا، ثم إفريقيا والعالم، عن بُعد
 - اللغات: العربية، الفرنسية، الإنجليزية
-- عروض الأسعار: بالدينار التونسي (د.ت) لتونس، وباليورو أو الدولار دوليًا
+- الأسعار وعروض الأسعار: لا ننشر تعريفة ثابتة لأن السعر يتوقف على العميل ودرجة تعقيد المشروع. عرض سعر واضح بعد أول لقاء، بالدينار التونسي (د.ت) لتونس، وباليورو أو الدولار دوليًا
 - التواصل: contact@growdev.tn
 
 ## أيٌّ من هذه الجمل تشبهك؟
@@ -531,7 +535,9 @@ GrowDev شركة تطوير برمجيات مقرّها تونس. نرافق ا�
 
 هذا الموقع بطاقتنا التقنية: ثلاث لغات منها العربية من اليمين إلى اليسار، دون ملفات تعريف ارتباط أو أدوات تتبّع، وفحوصات آلية (محركات البحث، إمكانية الوصول الأساسية، الأداء) قبل كل نشر.
 
-اطّلع على الشفرة المصدرية لهذا الموقع: https://github.com/growdev-tn/growdev-tn.github.io
+- اطّلع على الشفرة المصدرية لهذا الموقع: https://github.com/growdev-tn/growdev-tn.github.io
+- الملف الشخصي على GitHub: https://github.com/aziz-art
+- الملف الشخصي على LinkedIn: https://www.linkedin.com/in/chaibi-mohamed-aziz/
 
 ## الأسئلة الشائعة
 
@@ -545,19 +551,19 @@ Odoo برنامج لتسيير المؤسسات (ERP) مبني على وحدات
 
 ### كم تبلغ كلفة مشروع Odoo أو موقع ويب أو تطبيق؟
 
-تتوقف الكلفة على نطاق المشروع: عدد الوحدات وحجم البيانات المراد ترحيلها والتطويرات المخصصة والتكوين. لا ننشر تعريفة ثابتة. بعد أول لقاء نرسل لك عرض أسعار واضحًا مقسّمًا إلى مراحل: بالدينار التونسي (د.ت) لتونس، وباليورو أو الدولار دوليًا.
+يتوقف السعر على العميل ودرجة تعقيد المشروع: عدد الوحدات وحجم البيانات المراد ترحيلها والتطويرات المخصصة والتكوين. لذلك لا ننشر تعريفة ثابتة. بعد أول لقاء نرسل لك عرض أسعار واضحًا مقسّمًا إلى مراحل: بالدينار التونسي (د.ت) لتونس، وباليورو أو الدولار دوليًا.
 
 ### كم يستغرق إعداد Odoo؟
 
-يتوقف ذلك على عدد الوحدات. على سبيل التقريب، يمكن أن يكون نطاق بسيط (مثل إدارة العملاء والمبيعات والفوترة) جاهزًا في بضعة أسابيع، أما مشروع كامل مع ترحيل البيانات وتطويرات خاصة فيمتد على عدة أشهر. نسلّم على مراحل قصيرة لتستعمل الوحدات الأولى بسرعة.
+تتوقف مدة الإعداد على عدد الوحدات. على سبيل التقريب، يمكن أن يكون نطاق بسيط (مثل إدارة العملاء والمبيعات والفوترة) جاهزًا في بضعة أسابيع، أما مشروع كامل مع ترحيل البيانات وتطويرات خاصة فيمتد على عدة أشهر. نسلّم على مراحل قصيرة لتستعمل الوحدات الأولى بسرعة.
 
 ### هل تعملون مع مؤسسات خارج تونس؟
 
-نعم. نرافق المؤسسات التونسية أولًا، ثم مؤسسات إفريقيا وبقية العالم عن بُعد. نتواصل بالعربية والفرنسية والإنجليزية، ونعقد الاجتماعات عبر المكالمات المرئية بما يناسب توقيتك.
+نعم، نعمل مع مؤسسات خارج تونس. نرافق المؤسسات التونسية أولًا، ثم مؤسسات إفريقيا وبقية العالم عن بُعد. نتواصل بالعربية والفرنسية والإنجليزية، ونعقد الاجتماعات عبر المكالمات المرئية بما يناسب توقيتك.
 
 ### هل يمكن أن يكون موقعي أو تطبيقي بالعربية والفرنسية والإنجليزية؟
 
-نعم. نصمّم مواقع ومتاجر وتطبيقات متعددة اللغات، مع تخطيط من اليمين إلى اليسار للعربية وعدة عملات ومحتوى سهل الترجمة. يدعم Odoo و WordPress و PrestaShop عدة لغات، مع إضافات مخصصة عند الحاجة.
+نعم، يمكن أن يكون موقعك أو تطبيقك بالعربية والفرنسية والإنجليزية. نصمّم مواقع ومتاجر وتطبيقات متعددة اللغات، مع تخطيط من اليمين إلى اليسار للعربية وعدة عملات ومحتوى سهل الترجمة. يدعم Odoo و WordPress و PrestaShop عدة لغات، مع إضافات مخصصة عند الحاجة.
 
 ### WordPress أم PrestaShop أم تطبيق مخصص: ماذا أختار؟
 
@@ -569,8 +575,8 @@ Odoo برنامج لتسيير المؤسسات (ERP) مبني على وحدات
 
 ### لا أفهم شيئًا في المعلوماتية: هل يمكنني مع ذلك أن أعهد إليكم بمشروعي؟
 
-نعم. صِف لنا ببساطة ما يستهلك وقتك أو ما تريد بيعه، فنحوّله إلى حل بلغة واضحة ودون مصطلحات معقّدة، ثم نقترح تقسيمًا أوليًا على مراحل. في هذه الصفحة تساعدك فقرة «أيٌّ من هذه الجمل تشبهك؟» ومُركّب المشروع والمحاكي على تحضير هذا اللقاء الأول.
+نعم، يمكنك أن تعهد إلينا بمشروعك دون أي معرفة بالمعلوماتية. صِف لنا ببساطة ما يستهلك وقتك أو ما تريد بيعه، فنحوّله إلى حل بلغة واضحة ودون مصطلحات معقّدة، ثم نقترح تقسيمًا أوليًا على مراحل. في هذه الصفحة تساعدك فقرة «أيٌّ من هذه الجمل تشبهك؟» ومُركّب المشروع والمحاكي على تحضير هذا اللقاء الأول.
 
 ### هل تقبلون مهام تطوير مستقلة (فريلانس) لفائدة مسؤولي التوظيف أو الوكالات أو الفرق التقنية؟
 
-نعم. يمكنك أن تكلّفنا بمهمة تطوير على Odoo أو Python وDjango أو WordPress أو PrestaShop أو Flutter. راسلنا مبيّنًا السياق والتقنية والمدة المتوقعة، ونخبرك بصراحة إن كان بإمكاننا المساعدة. الملف التقني موجود في فقرة «من يكتب الشفرة؟».
+نعم، نقبل مهام التطوير المستقلة (فريلانس) لفائدة مسؤولي التوظيف والوكالات والفرق التقنية. نعمل على Odoo أو Python وDjango أو WordPress أو PrestaShop أو Flutter. راسلنا مبيّنًا السياق والتقنية والمدة المتوقعة، ونخبرك بصراحة إن كان بإمكاننا المساعدة. الملف التقني موجود في فقرة «من يكتب الشفرة؟».

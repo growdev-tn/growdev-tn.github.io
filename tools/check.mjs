@@ -20,6 +20,7 @@ const origin = cfg.url;
 const hostname = new URL(origin).hostname;
 const PROFILES = cfg.profiles && typeof cfg.profiles === "object" ? cfg.profiles : {};   // the developer's public profiles (src/site.json); an empty one is left out of the page
 const CLIENTS = Array.isArray(cfg.clients) ? cfg.clients : [];   // the logo wall (src/site.json); the build ignores anything that is not a list, so does the checker
+const DICT = Object.fromEntries(cfg.langs.map((L) => [L.code, JSON.parse(fs.readFileSync(path.join(ROOT, "src/i18n", `${L.code}.json`), "utf8"))]));   // the three source dictionaries: the texts the pages are built from
 
 // Budgets (gzip, per page). Generous on purpose: they exist to catch accidents, not to police every byte.
 const BUDGET = { htmlKB: 45, cssKB: 22, jsKB: 30, ogKB: 200, logoKB: 40, logoMinPx: 200, titleMax: 65, titleMin: 20, descMax: 165, descMin: 70 };
@@ -47,6 +48,14 @@ const parseAttrs = (tag) => {
   return o;
 };
 const idsOf = (html) => new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]));
+// Money. The price of a project depends on the client and on how complex the project is, so the site never states an amount: no hourly cost, no
+// "from 500 DT", no price in the structured data. An amount is a number written next to a currency (30 DT, 1 200 TND, €20, 20 $, 15 د.ت, 10 euros).
+// A currency named without an amount stays fine ("quote in DT, € or $"). The unit must be a whole word, so "5 days" or "10 DAYS" is not "10 DA".
+const CURRENCY = "DT|TND|DH|MAD|DA|DZD|EGP|XOF|EUR|USD|F\\s?CFA|[Dd]inars?|[Dd]irhams?|[Ee]uros?|[Dd]ollars?|[Pp]ounds?|€|\\$|د\\.ت|د\\.م|د\\.ج|ج\\.م|دينار|دينارًا|دولار|يورو|درهم|جنيه";
+const AMOUNT = new RegExp(`(?<![\\p{L}\\p{N}])\\d[\\d\\s.,\\u00a0\\u202f]*\\s?(?:${CURRENCY})(?![\\p{L}\\p{N}])|[€$]\\s?\\d`, "u");
+const amountIn = (s) => (AMOUNT.exec(s) || [])[0];
+const withoutCode = (html) => html.replace(/<(script|style|svg)\b[\s\S]*?<\/\1>/gi, " ");   // what a visitor reads and what attributes say; not scripts, styles or drawings
+const PRICE_KEYS = /^(?:price\w*|lowPrice|highPrice|minPrice|maxPrice)$/;   // schema.org keys that would put a price into the structured data (price, priceRange, priceCurrency, priceSpecification, ...)
 const idCache = new Map();
 const pageIds = (rel) => { if (!idCache.has(rel)) idCache.set(rel, idsOf(read(rel))); return idCache.get(rel); };
 
@@ -221,7 +230,26 @@ function checkPage(L) {
       });
     }
     check(visible.every((v) => /[?؟]$/.test(v.q)), `${tag} every FAQ heading should be phrased as a question (ends with ? or ؟)`, "warn");
+    // answer-first: the first sentence says the answer in full, so a search snippet, a voice assistant or llms.txt can quote it on its own ("Yes." alone says nothing)
+    visible.forEach((v, i) => {
+      const lead = (v.a.match(/^.+?[.!?؟](\s|$)/) || [v.a])[0].trim();
+      check(lead.split(/\s+/).length >= 5, `${tag} FAQ answer ${i + 1} should open with a sentence that answers on its own, not "${lead}": a snippet or an assistant may quote only that sentence`);
+    });
+    // no price in the structured data: the price depends on the client and on the complexity of the project
+    const priced = [], amounts = [];
+    (function walk(v) {
+      if (Array.isArray(v)) return v.forEach(walk);
+      if (v && typeof v === "object") { for (const [k, x] of Object.entries(v)) { if (PRICE_KEYS.test(k)) priced.push(k); walk(x); } return; }
+      if (typeof v === "string" && amountIn(v)) amounts.push(amountIn(v));
+    })(graph);
+    check(priced.length === 0, `${tag} JSON-LD states a price (${[...new Set(priced)].join(", ")}): the price depends on the client and on the complexity of the project, so none is published`);
+    check(amounts.length === 0, `${tag} JSON-LD contains an amount of money ("${amounts[0]}")`);
   }
+
+  // no price anywhere on the page: not in the text, not in an attribute, not in a meta tag
+  const money = amountIn(decode(withoutCode(html)));
+  check(!money, `${tag} the page states an amount ("${money}"): the price of a project depends on the client and on the complexity of the project, so no figure is published`);
+  check(!/\sid="(?:s-rate|s-cur|r-value|r-rate)"|\b(?:sim__cost|res__money|res__value|res__rate)\b/.test(html), `${tag} the simulator still carries its hourly-cost / currency controls (#s-rate, #s-cur, #r-value, #r-rate): it turns hours into hours only`);
 
   // answer-engine structure: facts block + FAQ section
   check(/class="facts"[\s\S]*?<dl\b/.test(body) && (body.match(/<dt\b/g) || []).length >= 5, `${tag} the "GrowDev at a glance" facts block (<dl> with at least 5 <dt>) is missing`);
@@ -370,10 +398,10 @@ function checkPage(L) {
     // the simulator explains itself: help under each control, the formula in words, one calm sentence for screen readers
     const sim = section("simulateur");
     if (check(!!sim, `${tag} the #simulateur section is missing`)) {
-      for (const id of ["sim-form", "s-people", "s-hours", "s-share", "s-rate", "s-cur", "o-people", "o-hours", "o-share", "r-hours", "r-days", "r-value", "r-rate", "e-people", "e-hours", "e-share", "e-total", "sbars", "sim-cap", "sim-fine", "sim-say"])
+      for (const id of ["sim-form", "s-people", "s-hours", "s-share", "o-people", "o-hours", "o-share", "r-hours", "r-days", "e-people", "e-hours", "e-share", "e-total", "sbars", "sim-cap", "sim-fine", "sim-say"])
         check(idsHere.has(id), `${tag} the simulator needs #${id} (assets/js/calculator.js writes into it)`);
-      check(!/<details\b/.test(sim.html), `${tag} the simulator hides something in a <details>: the hourly cost is part of the answer and stays visible`);
-      for (const id of ["s-people", "s-hours", "s-share", "s-rate"]) {
+      check(!/<details\b/.test(sim.html), `${tag} the simulator hides something in a <details>: its controls and its result stay visible`);
+      for (const id of ["s-people", "s-hours", "s-share"]) {
         const field = (sim.html.match(new RegExp(`<input\\b[^>]*\\sid="${id}"[^>]*>`)) || [])[0];
         const d = field && parseAttrs(field)["aria-describedby"];
         const help = d ? textOf((sim.html.match(new RegExp(`\\sid="${d}"[^>]*>([\\s\\S]*?)</p>`)) || [])[1] || "") : "";
@@ -381,7 +409,7 @@ function checkPage(L) {
       }
       const say = (sim.html.match(/<p\b[^>]*\sid="sim-say"[^>]*>/) || [""])[0];
       check(/\srole="status"/.test(say) && /\saria-live="polite"/.test(say) && /\bsr-only\b/.test(say), `${tag} #sim-say must be class="sr-only" role="status" aria-live="polite": it is the one sentence a screen reader gets, a moment after the visitor stops moving a control`);
-      check(!/aria-live/.test((sim.html.match(/<[^>]*\sid="r-(?:value|hours|days)"[^>]*>/g) || []).join("")), `${tag} the animated numbers (#r-value, #r-hours, #r-days) must not be live regions: they change on every frame and a screen reader would read each step`);
+      check(!/aria-live/.test((sim.html.match(/<[^>]*\sid="r-(?:hours|days)"[^>]*>/g) || []).join("")), `${tag} the animated numbers (#r-hours, #r-days) must not be live regions: they change on every frame and a screen reader would read each step`);
       const ops = sim.html.match(/<span class="eq__op"[^>]*>/g) || [];
       check(ops.length === 4 && ops.every((o) => /\saria-hidden="true"/.test(o)), `${tag} the formula needs its four signs (x x x =), each aria-hidden="true"`);
       // the formula written on the page is the formula the script uses
@@ -493,8 +521,7 @@ function checkPage(L) {
   const pre = links.filter((a) => a.rel === "preload" && a.as === "font").map((a) => path.basename(a.href));
   check(L.code === "ar" ? pre.some((f) => f.startsWith("plex-arabic")) : !pre.some((f) => f.startsWith("plex-arabic")), `${tag} Arabic font preload should be on the Arabic page only (found: ${pre.join(", ") || "none"})`);
 
-  // Tunisia-first: DT is the first and selected currency, the default rate matches the config
-  check(/<select id="s-cur"><option value="TND"/.test(body), `${tag} the first currency option should be TND (DT)`);
+  // each page loads its own language dictionary and no other
   check(html.includes(`dict-${L.code}.js`) && !cfg.langs.some((o) => o.code !== L.code && html.includes(`dict-${o.code}.js`)), `${tag} should load dict-${L.code}.js and no other language dictionary`);
 
   // weight
@@ -578,6 +605,15 @@ if (check(has("llms.txt") && has("llms-full.txt"), "llms.txt and llms-full.txt a
     check(l.includes(`\n- ${c.name}\n`), `llms.txt does not list the client "${c.name}"`);
     check(full.split(`\n- ${c.name}\n`).length - 1 === cfg.langs.length, `llms-full.txt should list the client "${c.name}" once per language (${cfg.langs.length} times)`);
   }
+  // an assistant quotes these lines word for word: a product name keeps its capital ("specialised in Odoo", never "specialised in odoo")
+  for (const [name, text] of [["llms.txt", l], ["llms-full.txt", full]]) {
+    const lower = [...new Set(text.replace(/https?:\/\/\S+/g, " ").match(/\b(?:odoo|wordpress|prestashop|flutter|django|python)\b/g) || [])];
+    check(lower.length === 0, `${name} writes a product name in lower case (${lower.join(", ")}); fix it where the line is built (tools/seo.mjs) or in the dictionary`);
+  }
+  // the price principle is a fact an assistant can quote: why no fixed rate is published, and in which currencies the quote comes
+  if (DICT.en) check(l.includes(DICT.en["facts.v5"]) && full.includes(DICT.en["facts.v5"]), "llms.txt and llms-full.txt should carry the pricing sentence (facts.v5): the price depends on the client and on the complexity of the project");
+  // the founder's profiles are written as plain text (never as a markdown link to another host)
+  for (const k of ["github", "linkedin"]) if (PROFILES[k]) check(l.includes(`: ${PROFILES[k]}\n`) && !l.includes(`](${PROFILES[k]}`), `llms.txt should write the founder's ${k} address as plain text (${PROFILES[k]})`);
 }
 // ---------- identity: one address, one contact e-mail ----------
 // "url" and "email" in src/site.json are the only truth. The pages, the dictionaries, the llms files and 404.html are built from them or checked
@@ -633,12 +669,38 @@ if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
   }
   check(!/https?:\/\//.test(css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/xmlns=['"]?http[^'" >)]+/g, "")), "styles.css loads something from another host");
 }
-// Currency defaults (DT first) agree between the page and the script config
+// ---------- the workflows that publish the site and watch it ----------
+// live-check.yml starts after the deploy workflow, found by its NAME: rename one and not the other and the live check silently stops running.
 {
-  const cfgJs = read("assets/js/config.js");
-  const rate = (cfgJs.match(/TND\s*:\s*(\d+)/) || [])[1];
-  check(/defaultCurrency\s*:\s*"TND"/.test(cfgJs), "config.js: defaultCurrency should be TND (DT first)");
-  check(rate && read("index.html").includes(`id="s-rate" min="1" step="1" value="${rate}"`), `the default hourly cost in the page should equal config.js hourlyCost.TND (${rate})`);
+  const wf = (f) => { const p = path.join(ROOT, ".github/workflows", f); return fs.existsSync(p) ? fs.readFileSync(p, "utf8") : null; };
+  const pagesYml = wf("pages.yml"), liveYml = wf("live-check.yml");
+  if (pagesYml && liveYml) {
+    const deployName = ((pagesYml.match(/^name:\s*(.+?)\s*$/m) || [])[1] || "").replace(/^["']|["']$/g, "");
+    const watched = (liveYml.match(/workflows:\s*\[\s*"([^"]+)"\s*\]/) || [])[1];
+    check(deployName !== "" && watched === deployName, `.github/workflows/live-check.yml watches the workflow "${watched}", but pages.yml is named "${deployName}": the live check would never start after a deploy`);
+    check(/bash tools\/verify-launch\.sh/.test(liveYml) && fs.existsSync(path.join(ROOT, "tools/verify-launch.sh")), ".github/workflows/live-check.yml should run tools/verify-launch.sh, and that file should exist");
+  }
+}
+
+// ---------- no price on the site ----------
+// The price of a project depends on the client and on how complex the project is, so the site states no amount and the simulator turns hours into
+// hours only (docs/SEO-GEO-AEO.md, "No price"). The page-level rules (text, attributes, meta tags, JSON-LD) are in checkPage; these cover what a page
+// is built from: the scripts, the styles, the three source dictionaries, the 404 page and the files written for AI assistants.
+{
+  const text = (f) => (has(f) ? read(f) : "");
+  check(!/hourlyCost|defaultCurrency/.test(text("assets/js/config.js")), "site/assets/js/config.js still holds a price list (hourlyCost / defaultCurrency): the site never turns hours into money");
+  check(!/hourlyCost|defaultCurrency|curfmt|s-rate|s-cur|r-value|r-rate/.test(text("assets/js/calculator.js")), "site/assets/js/calculator.js still computes or writes a cost (hourlyCost, curfmt, #s-rate, #s-cur, #r-value, #r-rate)");
+  check(!/sim__cost|res__money|res__value|res__rate/.test(text("assets/css/styles.css")), "site/assets/css/styles.css still styles the removed cost block (sim__cost, res__money, res__value, res__rate)");
+  for (const L of cfg.langs) {
+    const keys = Object.keys(DICT[L.code]).filter((k) => /^(?:cur|curfmt)\./.test(k) || /^sim\.(?:cost|rate|cur)\b/.test(k) || k === "sim.res.value" || k === "sim.res.rate");
+    check(keys.length === 0, `src/i18n/${L.code}.json still has price keys: ${keys.join(", ")}`);
+    const hit = Object.entries(DICT[L.code]).find(([, v]) => typeof v === "string" && amountIn(v));
+    check(!hit, `src/i18n/${L.code}.json: "${hit && hit[0]}" states an amount ("${hit && amountIn(hit[1])}"): the price depends on the client and on the complexity of the project`);
+  }
+  for (const f of ["404.html", "llms.txt", "llms-full.txt", "site.webmanifest"].filter(has)) {
+    const found = amountIn(decode(f.endsWith(".html") ? withoutCode(read(f)) : read(f)));
+    check(!found, `${f} states an amount ("${found}"): the price depends on the client and on the complexity of the project, so no figure is published`);
+  }
 }
 
 // ---------- clients (the logo wall) ----------
@@ -680,6 +742,17 @@ if (check(has("site.webmanifest"), "site.webmanifest is missing")) {
     // a logo nobody shows is weight for nothing
     for (const f of TECH_FILES) check(techUsed.has(f.replace(/\.svg$/, "")), `${dir}/${f} is not used by any data-logo in the template (delete the file, or use it)`, "warn");
   }
+}
+
+// ---------- keyboard focus ----------
+// Every control shows a 2 px ring when it has keyboard focus (the global :focus-visible rule). The project builder's fields once switched it off and relied on a
+// border colour change: in the light theme that goes from a grey to a blue of almost the same lightness (1.09:1, measured on 26 Nov 2026), so a keyboard user could lose their place.
+{
+  const focusCss = has("assets/css/styles.css") ? read("assets/css/styles.css") : "";
+  check(/(?:^|\n):focus-visible\s*\{[^}]*outline\s*:\s*2px\s+solid\s+var\(--sky\)/.test(focusCss), `styles.css: the global :focus-visible rule (2px solid var(--sky)) is missing: controls would show no ring for keyboard users`);
+  const fieldFocus = focusCss.match(/\.field input:focus[^{]*\{([^}]*)\}/);
+  check(!!fieldFocus, `styles.css: the rule for focused form fields (.field input:focus) is missing`);
+  check(!fieldFocus || !/outline\s*:\s*(?:0|none)\b/.test(fieldFocus[1]), `styles.css: .field input:focus removes the outline. Keep the ring (the global :focus-visible rule): in the light theme the border colour alone barely changes, so a keyboard user would lose their place`);
 }
 
 // ---------- theme: light / dark ----------

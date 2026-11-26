@@ -133,6 +133,10 @@ export function robots(cfg) {
 }
 
 const firstSentence = (s) => (s.match(/^.+?[.!?](\s|$)/) || [s])[0].trim();
+// "Full-stack developer specialised in Odoo" -> "full-stack developer specialised in Odoo": only the first letter changes, so a product name keeps its capital
+const lcFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+// The founder's public profiles as plain "label: address" text. Never a markdown link: llms.txt only links to this site (the build check enforces it).
+const profileText = (cfg, T) => ["github", "linkedin"].filter((k) => cfg.profiles && cfg.profiles[k]).map((k) => `${T[`dev.link.${k}`]}: ${cfg.profiles[k]}`);
 
 export function llms(cfg, D) {
   const E = D.en, url = cfg.url;
@@ -147,7 +151,7 @@ export function llms(cfg, D) {
     `- ${E["facts.k3"]}: ${E["facts.v3"]}`,
     `- ${E["facts.k4"]}: ${E["facts.v4"]}`,
     `- ${E["facts.k5"]}: ${E["facts.v5"]}`,
-    `- Founder: ${cfg.founder}, ${E["ld.founder.job"].toLowerCase()}`,
+    `- Founder: ${cfg.founder}, ${lcFirst(E["ld.founder.job"])}`,
     `- ${E["facts.k6"]}: ${cfg.email}`, "",
     "## Pages", "",
     ...cfg.langs.map((l) => `- [${l.nativeName}](${url + l.path}): ${D[l.code]["meta.desc"]}`), "",
@@ -159,7 +163,8 @@ export function llms(cfg, D) {
     `- ${E["dev.lead"]}`,
     `- ${E["dev.how.t"]}: ${[1, 2, 3, 4, 5].map((i) => E[`dev.how.${i}`]).join(" ")}`,
     ...DEV_AREAS.map((i) => `- ${E[`dev.s${i}.t`]}: ${E[`dev.s${i}.p`]}`),
-    ...(cfg.repo ? [`- ${E["dev.link.repo"]}: ${cfg.repo}`] : []), "",
+    ...(cfg.repo ? [`- ${E["dev.link.repo"]}: ${cfg.repo}`] : []),
+    ...profileText(cfg, E).map((l) => `- ${l}`), "",
     ...(cfg.clients && cfg.clients.length ? ["## Clients", "", `${E["clients.lead"]}`, "", ...cfg.clients.map((c) => `- ${c.name}`), ""] : []),
     "## FAQ", "",
     ...Array.from({ length: FAQ_COUNT }, (_, i) => `- [${E[`faq.q${i + 1}`]}](${url + en.path}#faq): ${firstSentence(E[`faq.a${i + 1}`])}`), "",
@@ -195,7 +200,8 @@ export function llmsFull(cfg, D) {
     out.push("", `### ${T["dev.stack.t"]}`, "");
     for (const i of DEV_AREAS) out.push(`- ${T[`dev.s${i}.t`]}: ${T[`dev.s${i}.p`]}`);
     out.push("", `### ${T["dev.proof.t"]}`, "", T["dev.proof.p"], "");
-    if (cfg.repo) out.push(`${T["dev.link.repo"]}: ${cfg.repo}`, "");
+    const links = [cfg.repo && `${T["dev.link.repo"]}: ${cfg.repo}`, ...profileText(cfg, T)].filter(Boolean);
+    if (links.length) out.push(...links.map((l) => `- ${l}`), "");
     out.push(`## ${T["faq.eyebrow"]}`, "");
     for (let i = 1; i <= FAQ_COUNT; i++) out.push(`### ${T[`faq.q${i}`]}`, "", T[`faq.a${i}`], "");
   }
